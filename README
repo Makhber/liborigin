@@ -1,0 +1,19 @@
+liborigin and opj2dat
+---------------------
+
+Author : Stefan Gerlach
+
+compiling :
+	make -f Makefile.orig
+
+DONE :
+	* reads any worksheets with any columns
+	* supports 6.0, 7.0, 7.5 projects
+
+
+TODO :
+	* get all spreadsheet names
+	* read label types
+	* valuesize != 10 for label column type
+	* column types of all spreadsheets
+	* read 6.1 and other versions (12) projects
