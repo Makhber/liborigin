@@ -687,7 +687,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 .NOEXPORT:
 
 #>+ 2
-KDE_DIST=Makefile.in OPJFile.h Makefile.manuell Makefile.am 
+KDE_DIST=liborigin.so OPJFile.h DATABASE Makefile.in opj2dat Makefile.am 
 
 #>+ 2
 docs-am:

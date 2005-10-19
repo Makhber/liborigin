@@ -5,15 +5,30 @@ Author : Stefan Gerlach
 
 compiling :
 	make -f Makefile.orig
+Usage :
+	# export LD_LIBRARY_PATH=.
+	# ./opj2dat <project.opj>
 
-DONE :
+---------------------------------------------------------------------------
+FEATURES :
 	* reads any worksheets with any columns
-	* supports 6.0, 7.0, 7.5 projects
+	* supports 4.1, 5.0, 6.0, 6.1, 7.0, 7.5 projects
 
-
+---------------------------------------------------------------------------
 TODO :
-	* get all spreadsheet names
-	* read label types
-	* valuesize != 10 for label column type
-	* column types of all spreadsheets
-	* read 6.1 and other versions (12) projects
+	* CRASH : handle field length of label type correct (50 bytes not 10 bytes per entry)
+		* valuesize != 10 for label column type
+	* read MATRIX tables
+	* improve 5.0 : 5.0/Ori50TableA4cols.OPJ doesn't work
+	* read graphs : 7.5/graphs
+
+---------------------------------------------------------------------------
+Changelog :
+
+09-23-05	* read 4.1 projects
+09-22-05	* new spreadsheet name finding and corrected column names
+09-21-05	* new version resolving 6.0SR4 vs 6.1 problems
+		* Spreadsheet SECTION for 6.1,6.04,6.0,5.0
+09-20-05	* SPREADSHEET section for all spreadsheets (7.5,7.0)
+09-09-05	* import 5.0 projects
+09-03-05	* STARTED project liborigin from LabPlot import filter

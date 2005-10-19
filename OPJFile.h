@@ -4,14 +4,14 @@
 #define OPJFILE_H
 
 #define MAX_SPREADS 255
-#define MAX_COLS 255
+#define MAX_COLUMNS 255
 
 class OPJFile
 {
 public:
 	OPJFile(char* filename);
 	int Parse();
-	double Version() { return version/10.0; }		//!< get version of project file
+	double Version() { return version/100.0; }		//!< get version of project file
 	int numSpreads() { return nr_spreads; }			//!< get number of spreadsheets
 	char *spreadName(int s) { return spreadname[s]; }	//!< get name of spreadsheet s
 	int numCols(int s) { return nr_cols[s]; }		//!< get number of columns of spreadsheet s
@@ -26,11 +26,11 @@ private:
 	int nr_spreads;				//!< number of spreadsheets
 	char *spreadname[MAX_SPREADS];		//!< spreadsheet names
 	int nr_cols[MAX_SPREADS];		//!< number of cols per spreadsheet
-	int nr_rows[MAX_SPREADS][MAX_COLS];	//!< number of rows per column of spreadsheet
+	int nr_rows[MAX_SPREADS][MAX_COLUMNS];	//!< number of rows per column of spreadsheet
 	int maxrows[MAX_SPREADS];		//!< max number of rows of spreadsheet
-	double *data[MAX_SPREADS][MAX_COLS];	//!< data per column per spreadsheet
-	char *colname[MAX_SPREADS][MAX_COLS];	//!< column names
-	char *coltype[MAX_SPREADS][MAX_COLS];	//!< column types
+	double *data[MAX_SPREADS][MAX_COLUMNS];	//!< data per column per spreadsheet
+	char *colname[MAX_SPREADS][MAX_COLUMNS];	//!< column names
+	char *coltype[MAX_SPREADS][MAX_COLUMNS];	//!< column types
 
 };
 

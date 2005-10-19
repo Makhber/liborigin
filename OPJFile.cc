@@ -2,9 +2,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "OPJFile.h"
+
+#define MAX_LEVEL 20
 
 OPJFile::OPJFile(char *filename) 
 	: filename(filename) 
@@ -16,7 +19,7 @@ OPJFile::OPJFile(char *filename)
 		spreadname[i][0]=0;
 		nr_cols[i]=0;
 		maxrows[i]=0;
-		for(int j=0;j<MAX_COLS;j++) {
+		for(int j=0;j<MAX_COLUMNS;j++) {
 			nr_rows[i][j]=0;
 			colname[i][j] = new char[25];
 			colname[i][j][0]=0x41+j;
@@ -38,7 +41,7 @@ filepre +
 	+ pre + head + data	col B
 */
 
-/* parse file filename completly and save values */
+/* parse file filename complete and save values */
 int OPJFile::Parse() {
 	FILE *f, *debug;
 	if((f=fopen(filename,"r")) == NULL ) {
@@ -56,95 +59,111 @@ int OPJFile::Parse() {
 	header[13]=0;
 	fread(&header,13,1,f);
 	fprintf(debug,"	[header : %s]\n",header);
+	char vers[5];
+	vers[4]=0;
 
-	fseek(f,0x8,SEEK_SET);
-	fread(&version,2,1,f);
+	// get version
+	fseek(f,0x7,SEEK_SET);
+	fread(&vers,4,1,f);
+	version = atoi(vers);
 	fprintf(debug,"	[version = %d]\n",version);
-
-	int FILEPRE=0x3e;		// file header
-	int PRE=0x62;			// pre column 
+	
+	int FILEPRE=0x3e;	// file header
+	int PRE=0x62;		// pre column 
 	int HEAD;		// column header
 	int NEW_COL;		// value for new column
-	int NEW_SPREAD;		// value for new spreadsheet
-	int COL_SIZE;		// value of col size
-	// TODO : valuesize depens also on column type!
+	int COL_SIZE;		// value for col size
+	// TODO : valuesize depends also on column type!
 	int valuesize=10;
-	if(version == 12854) {	// 6.0
-		version=60;
+	if(version == 130) {	// 4.1
+		version=410;
+		FILEPRE=0x1D;
+		HEAD=0x20;
+		NEW_COL=0x72;
+		COL_SIZE=0x1b;
+		valuesize=8;
+	}
+	else if(version == 210) {	// 5.0
+		version=500;
+		FILEPRE=0x25;
+		HEAD=0x22;
+		NEW_COL=0x72;
+		COL_SIZE=0x1b;
+		valuesize=11;
+	}
+	else if(version == 2625) {	// 6.0
+		version=600;
 		FILEPRE=0x2f;
 		HEAD=0x22;
 		NEW_COL=0x72;
-		NEW_SPREAD=0x11;
 		COL_SIZE=0x1b;
 		valuesize=11;
 	} 
-	else if(version == 13110 ) {	// 6.0 SR4
-		fprintf(debug,"Found project version 6.0\n");
+	else if(version == 2630 ) {	// 6.0 SR4
 		version=604;
 		FILEPRE=0x2f;
 		HEAD=0x22;
 		NEW_COL=0x72;
-		NEW_SPREAD=0x11;
 		COL_SIZE=0x1b;
 	}
-	else if(version == 13622) {
-		fprintf(debug,"Found project version 7.0\n");
-		version=70;
+	else if(version == 2635 ) {	// 6.1
+		version=610;
+		FILEPRE=0x3a;
+		HEAD=0x22;
+		NEW_COL=0x72;
+		COL_SIZE=0x1b;
+	}
+	else if(version == 2656) {	// 7.0
+		version=700;
 		HEAD=0x23;
 		NEW_COL=0x73;
-		NEW_SPREAD=0x11;
 		COL_SIZE=0x1c;
 	}
-	else if(version == 13879) {
-		fprintf(debug,"Found project version 7.5\n");
-		version=75;
+	else if(version == 2769) {	// 7.5
+		version=750;
 		HEAD=0x33;
 		NEW_COL=0x83;
-		NEW_SPREAD=0x51;
 		COL_SIZE=0x2c;
 	}
 	else {
 		fprintf(debug,"Found unknown project version %d\n",version);
+		fprintf(debug,"Please contact the author of opj2dat\n");
 		return -2;
 	}
+	fprintf(debug,"Found project version %.2f\n",version/100.0);
 	
 /////////////////// find column ///////////////////////////////////////////////////////////7
 	fseek(f,FILEPRE + 0x05,SEEK_SET);
 	int col_found;
 	fread(&col_found,4,1,f);
 	fprintf(debug,"	[column found = 0x%X (0x%X : YES) @ 0x%X]\n",col_found,NEW_COL,FILEPRE + 0x05);
-	
-	int current_col=0, nr=0, POS=FILEPRE, DATA=0;
+
+	int current_col=1, nr=0, POS=FILEPRE, DATA=0;
 	double a;
 	char name[25];
 	while(col_found == NEW_COL) {
-//////////////////////////////// PRE HEADER //////////////////////////////////////////////////
-		fseek(f,POS + 0x21,SEEK_SET);
-		char new_spread;
-		fread(&new_spread,1,1,f);
-		fprintf(debug,"	[new spreadsheet = 0x%X (0x%X : YES) @ 0x%X]\n",new_spread,NEW_SPREAD,POS + 0x21);
-		fflush(debug);
-		if(new_spread == NEW_SPREAD) {
-			current_col=1;
-			maxrows[nr_spreads]=0;
-			nr_spreads++;
-			fprintf(debug,"	SPREADSHEET %d\n",nr_spreads);
-		}
-		else {
-			current_col++;
-			
-			nr_cols[nr_spreads-1]=current_col;
-		}
-			
 //////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
 		// TODO : data isn't the same for all spreads !
 		fprintf(debug,"	[column header @ 0x%X]\n",POS);
 		fflush(debug);
 		fseek(f,POS + PRE,SEEK_SET);
 		fread(&name,25,1,f);
-		fprintf(debug,"		COLUMN %d (%s) @ 0x%X ",current_col, name,POS+PRE);
-		fflush(debug);
-		sprintf(colname[nr_spreads-1][current_col-1],"%s",name);
+		char* sname = strtok(name,"_");	// spreadsheet name
+		char* cname = strtok(NULL,"_");	// column name
+		if(nr_spreads == 0 || strcmp(sname,spreadname[nr_spreads-1])) {
+			fprintf(debug,"		NEW SPREADSHEET\n");
+			sprintf(spreadname[nr_spreads++],"%s",sname);
+			current_col=1;
+			maxrows[nr_spreads]=0;
+		}
+		else {
+			current_col++;
+			nr_cols[nr_spreads-1]=current_col;
+		}
+		fprintf(debug,"		SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n",
+			sname, cname,current_col,POS+PRE);
+				
+		sprintf(colname[nr_spreads-1][current_col-1],"%s",cname);
 		
 ////////////////////////////// SIZE of column /////////////////////////////////////////////
 		fseek(f,POS+PRE+COL_SIZE,SEEK_SET);
@@ -166,90 +185,148 @@ int OPJFile::Parse() {
 			data[nr_spreads-1][(current_col-1)][i]=a;
 		}
 		fprintf(debug,"\n");
+		fflush(debug);
 
 		DATA = valuesize*nr - 1;
-		fseek(f,POS + PRE + DATA + HEAD + 0x05,SEEK_SET);
+		if(version== 410)
+			POS += 2;
+		int pos = POS + PRE + DATA + HEAD + 0x05;
+		fseek(f,pos,SEEK_SET);
 		fread(&col_found,4,1,f);
-		fprintf(debug,"	[column found = 0x%X (0x%X : YES)]\n",col_found,NEW_COL);
+		fprintf(debug,"	[column found = 0x%X (0x%X : YES) (@ 0x%X)]\n",col_found,NEW_COL,pos);
+		fflush(debug);
 		
 		POS += (DATA + HEAD + PRE);
 	}
 
 	POS-=1;
-	fprintf(debug,"		[position @ 0x%X]\n",POS);
-	
-///////////////////// SPREADSHEET 1 ////////////////////////////////////
-	// HEADER
-	fseek(f,POS + 0x12,SEEK_SET);
-	fread(&name,25,1,f);
-	fprintf(debug,"\n	SPREADSHEET 1 NAME : %s	(@ 0x%X) has %d columns\n",name,POS + 0x12,nr_cols[0]);
-	sprintf(spreadname[0],"%s",name);
+	fprintf(debug,"\n[position @ 0x%X]\n",POS);
+	fprintf(debug,"		nr_spreads = %d\n",nr_spreads);
+	fflush(debug);
 
-	fseek(f,POS + 0x55,SEEK_SET);
-	fread(&name,7,1,f);
-	fprintf(debug,"		%s [ORIGIN]	(@ 0x%X)\n",name,POS + 0x55);
-	
-	/* LAYER A section */
-	int LAYER = POS + 0x4AB;
-	
- 	// seek for "L"ayerInfoStorage to find layer section	: only 7.5 
-	LAYER -= 0x99;
-	char c;
-	int jump=0;
-	do {
-		LAYER += 0x99;
-		fseek(f,LAYER+0x53, SEEK_SET);
-		fread(&c,1,1,f);
-		jump++;
-	} while(c!='L' && jump<10);		// no inf loop
-
-	if(jump==10) {
-		fprintf(debug,"		LAYER section not found !\nGiving up.");
-		return -3;
-	}
-
-	fprintf(debug,"		[LAYER @ 0x%X]\n",LAYER);
-
-////////////////////////// COLUMN Types ///////////////////////////////////////////
-	// TODO : 7.0 : A @ 0x680
-	int ATYPE = 0xCE, COL_JUMP=0x1F2;
-	for (int i=0;i<nr_cols[0];i++) {
-		fseek(f,LAYER+ATYPE+i*COL_JUMP+1, SEEK_SET);
-		fread(&c,1,1,f);
-		if(c==0x41+i) {
-			fseek(f,LAYER+ATYPE+i*COL_JUMP, SEEK_SET);
-			fread(&c,1,1,f);
-			char type[5];
-			switch(c) {
-			case 3: sprintf(type,"X");break;
-			case 0: sprintf(type,"Y");break;
-			case 5: sprintf(type,"Z");break;
-			case 6: sprintf(type,"DX");break;
-			case 2: sprintf(type,"DY");break;
-			case 4: sprintf(type,"LABEL");break;
-			}
-			sprintf(coltype[0][i],"%s",type);
-			fprintf(debug,"		COLUMN %c type = %s (@ 0x%X)\n",0x41+i,type,LAYER+ATYPE+i*COL_JUMP);
+///////////////////// SPREADSHEET INFOS ////////////////////////////////////
+	int LAYER;
+	int COL_JUMP = 0x1ED;
+	for(int i=0; i < nr_spreads; i++) {
+		if(i > 0) {
+			if(version == 750)
+				POS = LAYER+0x2759;
+			else if (version == 700 ) 
+				POS += 0x2530 + nr_cols[i-1]*COL_JUMP;
+			else if (version == 610 ) 
+				POS += 0x25A4 + nr_cols[i-1]*COL_JUMP;
+			else if (version == 604 ) 
+				POS += 0x25A0 + nr_cols[i-1]*COL_JUMP;
+			else if (version == 600 ) 
+				POS += 0x2560 + nr_cols[i-1]*COL_JUMP;
+			else if (version == 500 ) 
+				POS += 0x92C + nr_cols[i-1]*COL_JUMP;
+			else if (version == 410 ) 
+				POS += 0x7FB + nr_cols[i-1]*COL_JUMP;
 		}
+		fprintf(debug,"\n");
+		
+		// HEADER
+		// check header
+		int ORIGIN = 0x55;
+		if(version == 500)
+			ORIGIN = 0x58;
+		fseek(f,POS + ORIGIN,SEEK_SET);	// check for 'O'RIGIN
+		char c;
+		fread(&c,1,1,f);
+		int jump=0;
+		while( c != 'O' && jump < MAX_LEVEL) {	// no inf loop
+			fprintf(debug,"	TRY %d	\"O\"RIGIN not found ! : %c (@ 0x%X)",jump+1,c,POS+ORIGIN);
+			fprintf(debug,"		POS=0x%X | ORIGIN = 0x%X\n",POS,ORIGIN);
+			POS+=0x1F2;
+			fseek(f,POS + ORIGIN,SEEK_SET);
+			fread(&c,1,1,f);
+			jump++;
+		}
+		
+		if(jump == MAX_LEVEL){
+			fprintf(debug,"	Spreadsheet %d SECTION not found ! 	(@ 0x%X)\n",i+1,POS-10*0x1F2+0x55);
+			return -5;
+		}
+		
+		fprintf(debug,"	OK. Spreadsheet %d SECTION found	(@ 0x%X)\n",i+1,POS);
+		fflush(debug);
+	
+		// check spreadsheet name
+		fseek(f,POS + 0x12,SEEK_SET);
+		fread(&name,25,1,f);
+		fprintf(debug,"		SPREADSHEET %d NAME : %s	(@ 0x%X) has %d columns\n",
+			i+1,name,POS + 0x12,nr_cols[i]);
+	
+		int ATYPE;
+		LAYER = POS;
+		if(version == 750) {
+			// LAYER section
+			LAYER += 0x4AB;
+		 	ATYPE = 0xCF;
+			COL_JUMP = 0x1F2;
+			// seek for "L"ayerInfoStorage to find layer section
+			fseek(f,LAYER+0x53, SEEK_SET);
+			fread(&c,1,1,f);
+			while( c != 'L' && jump < MAX_LEVEL) {	// no inf loop; number of "set column value"
+				LAYER += 0x99;
+				fseek(f,LAYER+0x53, SEEK_SET);
+				fread(&c,1,1,f);
+				jump++;
+			} 
+	
+			if(jump == MAX_LEVEL) {
+				fprintf(debug,"		LAYER %d SECTION not found !\nGiving up.",i+1);
+				return -3;
+			}
+	
+			fprintf(debug,"		[LAYER %d @ 0x%X]\n",i+1,LAYER);
+		}
+		else if (version == 700)
+			ATYPE = 0x2E4;
+		else if (version == 610)
+			ATYPE = 0x358;
+		else if (version == 604)
+			ATYPE = 0x354;
+		else if (version == 600)
+			ATYPE = 0x314;
+		else if (version == 500) {
+			COL_JUMP=0x5D;
+			ATYPE = 0x300;
+		}
+		else if (version == 410) {
+			COL_JUMP = 0x58;
+			ATYPE = 0x229;
+		}
+		fflush(debug);
+
+		/////////////// COLUMN Types ///////////////////////////////////////////
+		for (int j=0;j<nr_cols[i];j++) {
+			fseek(f,LAYER+ATYPE+j*COL_JUMP, SEEK_SET);
+			fread(&c,1,1,f);
+			if(c==0x41+j) {
+				fseek(f,LAYER+ATYPE+j*COL_JUMP-1, SEEK_SET);
+				fread(&c,1,1,f);
+				char type[5];
+				switch(c) {
+				case 3: sprintf(type,"X");break;
+				case 0: sprintf(type,"Y");break;
+				case 5: sprintf(type,"Z");break;
+				case 6: sprintf(type,"DX");break;
+				case 2: sprintf(type,"DY");break;
+				case 4: sprintf(type,"LABEL");break;
+				}
+				sprintf(coltype[i][j],"%s",type);
+				fprintf(debug,"		COLUMN %c type = %s (@ 0x%X)\n",0x41+j,type,LAYER+ATYPE+j*COL_JUMP);
+			}
+			else {
+				fprintf(debug,"		COLUMN %d (%c) ? (@ 0x%X)\n",j+1,c,LAYER+ATYPE+j*COL_JUMP);
+			}
+		}
+		fflush(debug);
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	// SPREADSHEET 2,3,...
-	// TODO
-	
-	if(nr_spreads>=2) {
-		POS=0x3474;
-		if(version==70)
-			POS=0x3008;
-		// HEADER
-			
-		fseek(f,POS+0x11,SEEK_SET);
-		fread(&name,25,1,f);
-		fprintf(debug,"	SPREADSHEET 2 NAME : %s	(@ 0x%X)\n",name,POS + 0x11);
-	}
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	// TODO : GRAPHS
 /*	int graph = 0x2fc1;

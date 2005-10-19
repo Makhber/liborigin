@@ -23,9 +23,9 @@ SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
 srcdir = .
 top_srcdir = ..
 
-pkgdatadir = $(datadir)/LabPlot-1.5.1.pre1
-pkglibdir = $(libdir)/LabPlot-1.5.1.pre1
-pkgincludedir = $(includedir)/LabPlot-1.5.1.pre1
+pkgdatadir = $(datadir)/LabPlot-1.5.1.pre2
+pkglibdir = $(libdir)/LabPlot-1.5.1.pre2
+pkgincludedir = $(includedir)/LabPlot-1.5.1.pre2
 top_builddir = ..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = /usr/bin/install -c -p
@@ -100,10 +100,10 @@ CTAGS = ctags
 #>- DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 #>+ 1
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST) $(KDE_DIST)
-ACLOCAL = ${SHELL} /sw/LabPlot-1.5.1.pre1/admin/missing --run aclocal-1.8
+ACLOCAL = ${SHELL} /DATA/LabPlot-1.5.1.pre2/admin/missing --run aclocal-1.8
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /sw/LabPlot-1.5.1.pre1/admin/missing --run tar
+AMTAR = ${SHELL} /DATA/LabPlot-1.5.1.pre2/admin/missing --run tar
 AR = ar
 ARTSCCONFIG = /opt/kde3/bin/artsc-config
 AUDIOFILE_DIR = 
@@ -111,8 +111,8 @@ AUDIOFILE_INCFLAGS =
 AUDIOFILE_LDFLAGS = -laudiofile
 AUTOCONF = $(SHELL) $(top_srcdir)/admin/cvs.sh configure || touch configure
 AUTODIRS = 
-AUTOHEADER = ${SHELL} /sw/LabPlot-1.5.1.pre1/admin/missing --run autoheader
-AUTOMAKE = ${SHELL} /sw/LabPlot-1.5.1.pre1/admin/missing --run automake-1.8
+AUTOHEADER = ${SHELL} /DATA/LabPlot-1.5.1.pre2/admin/missing --run autoheader
+AUTOMAKE = ${SHELL} /DATA/LabPlot-1.5.1.pre2/admin/missing --run automake-1.8
 AWK = gawk
 CC = ccache gcc
 CCDEPMODE = depmode=gcc3
@@ -131,7 +131,7 @@ DCOPIDL = /opt/kde3/bin/dcopidl
 DCOPIDL2CPP = /opt/kde3/bin/dcopidl2cpp
 DCOPIDLNG = 
 DCOP_DEPENDENCIES = $(DCOPIDL)
-DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLVERSION=\"1.5.1.pre1\" -DLVERSION_DATE=1 -DHAVE_STRTOD=1 -DHAVE_LOG2=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_TIFF=1 -DHAVE_GSL=1 -DHAVE_GSL14=1 -DHAVE_FFTW_CONFIG=1 -DHAVE_FFTW3=1 -DHAVE_FFTW3_THREADS=1 -DHAVE_JASPER=1 -DHAVE_PS2EPS=1 -DHAVE_MAGICK=1 -DHAVE_QSA=1 -DHAVE_QSA_IDE=1 -DHAVE_QSA_FAC=1 -DHAVE_KEXIDB=1 -DHAVE_GL=1 -DKDELIBSUFF=\"\" -DHAVE_DLFCN_H=1 -DHAVE_SGI_STL=1 -DHAVE_CRYPT=1 -Dkde_socklen_t=socklen_t -Dksize_t=socklen_t -DHAVE_SYS_TYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_SYS_BITYPES_H=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT_PROTO=1 -DSIZEOF_INT=4 -DSIZEOF_SHORT=2 -DSIZEOF_LONG=4 -DSIZEOF_CHAR_P=4 -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DHAVE_VSNPRINTF=1 -DHAVE_SNPRINTF=1 -DHAVE_LIBZ=1 -DHAVE_LIBPNG=1 -DHAVE_LIBJPEG=1 -DHAVE_LIBPTHREAD=1 -DSTDC_HEADERS=1 
+DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLVERSION=\"1.5.1.pre2\" -DLVERSION_DATE=1 -DHAVE_STRTOD=1 -DHAVE_LOG2=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_TIFF=1 -DHAVE_GSL=1 -DHAVE_GSL14=1 -DHAVE_FFTW_CONFIG=1 -DHAVE_FFTW3=1 -DHAVE_FFTW3_THREADS=1 -DHAVE_JASPER=1 -DHAVE_PS2EPS=1 -DHAVE_MAGICK=1 -DHAVE_GL=1 -DKDELIBSUFF=\"\" -DHAVE_DLFCN_H=1 -DHAVE_SGI_STL=1 -DHAVE_CRYPT=1 -Dkde_socklen_t=socklen_t -Dksize_t=socklen_t -DHAVE_SYS_TYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_SYS_BITYPES_H=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT_PROTO=1 -DSIZEOF_INT=4 -DSIZEOF_SHORT=2 -DSIZEOF_LONG=4 -DSIZEOF_CHAR_P=4 -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DHAVE_VSNPRINTF=1 -DHAVE_SNPRINTF=1 -DHAVE_LIBZ=1 -DHAVE_LIBPNG=1 -DHAVE_LIBJPEG=1 -DHAVE_LIBPTHREAD=1 -DSTDC_HEADERS=1 
 DEPDIR = .deps
 ECHO = echo
 ECHO_C = 
@@ -171,8 +171,8 @@ KDE_USE_FINAL_TRUE = #
 KDE_USE_NMCHECK_FALSE = 
 KDE_USE_NMCHECK_TRUE = #
 KDE_XSL_STYLESHEET = /opt/kde3/share/apps/ksgmltools2/customization/kde-chunk.xsl
-KEXIDB_INCFLAGS = -I/sw/kexi-0.9/kexi -I/sw/kexi-0.9/kexi/include
-KEXIDB_LDFLAGS = -L/sw/kexi-0.9/kexi/lib -lkexidb -lkexidbparser
+KEXIDB_INCFLAGS = 
+KEXIDB_LDFLAGS = 
 LDFLAGS = 
 LIBCOMPAT = 
 LIBCRYPT = -lcrypt
@@ -215,7 +215,7 @@ LTLIBOBJS =
 MAGICK = yes
 MAGICK_INCFLAGS = `Magick++-config --cppflags`
 MAGICK_LDFLAGS = `Magick++-config --ldflags --libs`
-MAKEINFO = ${SHELL} /sw/LabPlot-1.5.1.pre1/admin/missing --run makeinfo
+MAKEINFO = ${SHELL} /DATA/LabPlot-1.5.1.pre2/admin/missing --run makeinfo
 MCOPIDL = /opt/kde3/bin/mcopidl
 MEINPROC = /opt/kde3/bin/meinproc
 MOC = /usr/lib/qt3/bin/moc
@@ -227,7 +227,7 @@ NOOPT_CFLAGS = -O0
 NOOPT_CXXFLAGS = -O0
 OBJEXT = o
 OCAML = -
-PACKAGE = LabPlot-1.5.1.pre1
+PACKAGE = LabPlot-1.5.1.pre2
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = 
 PACKAGE_STRING = 
@@ -236,7 +236,7 @@ PACKAGE_VERSION =
 PATH_SEPARATOR = :
 PERL = /usr/bin/perl
 PS2EPS = yes
-QSA_LDFLAGS = -lqsa
+QSA_LDFLAGS = 
 QTE_NORTTI = 
 QT_INCLUDES = -I/usr/lib/qt3/include
 QT_LDFLAGS = -L/usr/lib/qt3/lib
@@ -249,7 +249,7 @@ SHELL = /bin/sh
 STRIP = strip
 TEXVC = yes
 TEXVC_DIR = 
-TOPSUBDIRS =  autom4te.cache cephes doc examples src
+TOPSUBDIRS =  cephes doc examples src
 UIC = /usr/lib/qt3/bin/uic -L $(kde_widgetdir) -nounload
 UIC_TR = tr2i18n
 USER_INCLUDES = 
@@ -299,7 +299,7 @@ include_ARTS_FALSE = #
 include_ARTS_TRUE = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /sw/LabPlot-1.5.1.pre1/admin/install-sh
+install_sh = /DATA/LabPlot-1.5.1.pre2/admin/install-sh
 kde_appsdir = ${datadir}/applnk
 kde_bindir = ${exec_prefix}/bin
 kde_confdir = ${datadir}/config
@@ -687,7 +687,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 .NOEXPORT:
 
 #>+ 2
-KDE_DIST=Makefile.in OPJFile.h Makefile.manuell Makefile.am 
+KDE_DIST=liborigin.so OPJFile.h DATABASE Makefile.in opj2dat Makefile.am 
 
 #>+ 2
 docs-am:

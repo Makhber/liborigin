@@ -2,7 +2,7 @@
 #include <libgen.h>
 #include "OPJFile.h"
 
-char version[]="0.1.0";
+char version[]="0.2.0";
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 
 	OPJFile opj(argv[1]);
 	opj.Parse();
-	printf("OPJ PROJECT \"%s\" VERSION = %.1f\n",argv[1],opj.Version());
+	printf("OPJ PROJECT \"%s\" VERSION = %.2f\n",argv[1],opj.Version());
 	
 	printf("NUMBER OF SPREADSHEETS = %d\n",opj.numSpreads());
 	for (int s=0;s<opj.numSpreads();s++) {
