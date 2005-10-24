@@ -25,6 +25,8 @@ TODO :
 ---------------------------------------------------------------------------
 Changelog :
 
+10-25-05	* fixed problems reading column types
+		* general column names and spreadsheet sections
 09-23-05	* read 4.1 projects
 09-22-05	* new spreadsheet name finding and corrected column names
 09-21-05	* new version resolving 6.0SR4 vs 6.1 problems

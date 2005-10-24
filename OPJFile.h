@@ -3,7 +3,12 @@
 #ifndef OPJFILE_H
 #define OPJFILE_H
 
+#if defined(_MSC_VER) //MSVC Compiler
+#define MAX_SPREADS 123
+#else
 #define MAX_SPREADS 255
+#endif
+
 #define MAX_COLUMNS 255
 
 class OPJFile

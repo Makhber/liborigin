@@ -245,18 +245,25 @@ int OPJFile::Parse() {
 		}
 		
 		if(jump == MAX_LEVEL){
-			fprintf(debug,"	Spreadsheet %d SECTION not found ! 	(@ 0x%X)\n",i+1,POS-10*0x1F2+0x55);
+			fprintf(debug,"	Spreadsheet SECTION not found ! 	(@ 0x%X)\n",POS-10*0x1F2+0x55);
 			return -5;
 		}
 		
-		fprintf(debug,"	OK. Spreadsheet %d SECTION found	(@ 0x%X)\n",i+1,POS);
+		fprintf(debug,"	OK. Spreadsheet SECTION found	(@ 0x%X)\n",POS);
 		fflush(debug);
 	
 		// check spreadsheet name
 		fseek(f,POS + 0x12,SEEK_SET);
 		fread(&name,25,1,f);
+
+		int spread=i;
+		for(int j=0;j<nr_spreads;j++) {	// get index of spreadsheet
+			if(strncmp(name,spreadname[j],strlen(spreadname[j])) == 0)
+				spread=j;
+		}
+		
 		fprintf(debug,"		SPREADSHEET %d NAME : %s	(@ 0x%X) has %d columns\n",
-			i+1,name,POS + 0x12,nr_cols[i]);
+			spread+1,name,POS + 0x12,nr_cols[spread]);
 	
 		int ATYPE;
 		LAYER = POS;
@@ -301,13 +308,13 @@ int OPJFile::Parse() {
 		fflush(debug);
 
 		/////////////// COLUMN Types ///////////////////////////////////////////
-		for (int j=0;j<nr_cols[i];j++) {
+		for (int j=0;j<nr_cols[spread];j++) {
 			fseek(f,LAYER+ATYPE+j*COL_JUMP, SEEK_SET);
-			fread(&c,1,1,f);
-			if(c==0x41+j) {
+			fread(&name,25,1,f);
+			if(strncmp(name,colname[spread][j],strlen(colname[spread][j])) == 0) {
 				fseek(f,LAYER+ATYPE+j*COL_JUMP-1, SEEK_SET);
 				fread(&c,1,1,f);
-				char type[5];
+				char type[7];
 				switch(c) {
 				case 3: sprintf(type,"X");break;
 				case 0: sprintf(type,"Y");break;
@@ -315,9 +322,10 @@ int OPJFile::Parse() {
 				case 6: sprintf(type,"DX");break;
 				case 2: sprintf(type,"DY");break;
 				case 4: sprintf(type,"LABEL");break;
+				default: sprintf(type,"UNKNOWN");break;
 				}
-				sprintf(coltype[i][j],"%s",type);
-				fprintf(debug,"		COLUMN %c type = %s (@ 0x%X)\n",0x41+j,type,LAYER+ATYPE+j*COL_JUMP);
+				sprintf(coltype[spread][j],"%s",type);
+				fprintf(debug,"		COLUMN %s type = %s (@ 0x%X)\n",colname[spread][j],type,LAYER+ATYPE+j*COL_JUMP);
 			}
 			else {
 				fprintf(debug,"		COLUMN %d (%c) ? (@ 0x%X)\n",j+1,c,LAYER+ATYPE+j*COL_JUMP);
