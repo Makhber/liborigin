@@ -15,17 +15,15 @@
 
 
 
-#SOURCES = AUTO
 
-
-SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
+SOURCES = AUTO
 
 srcdir = .
 top_srcdir = ..
 
-pkgdatadir = $(datadir)/LabPlot-1.5.1.pre3
-pkglibdir = $(libdir)/LabPlot-1.5.1.pre3
-pkgincludedir = $(includedir)/LabPlot-1.5.1.pre3
+pkgdatadir = $(datadir)/LabPlot-1.5.1.pre4
+pkglibdir = $(libdir)/LabPlot-1.5.1.pre4
+pkgincludedir = $(includedir)/LabPlot-1.5.1.pre4
 top_builddir = ..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = /usr/bin/install -c -p
@@ -64,17 +62,24 @@ am_liborigin_la_OBJECTS = OPJFile.lo
 liborigin_la_OBJECTS = OPJFile.lo
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_opj2dat_OBJECTS = opj2dat.$(OBJEXT)
+am_opj2dat_OBJECTS = opj2dat.$(OBJEXT) OPJFile.$(OBJEXT)
 #>- opj2dat_OBJECTS = $(am_opj2dat_OBJECTS)
-#>+ 1
-opj2dat_OBJECTS = opj2dat.$(OBJEXT)
+#>+ 4
+opj2dat_final_OBJECTS = opj2dat.all_cc.o 
+opj2dat_nofinal_OBJECTS = opj2dat.$(OBJEXT) OPJFile.$(OBJEXT)
+opj2dat_OBJECTS = $(opj2dat_nofinal_OBJECTS)
+#opj2dat_OBJECTS = $(opj2dat_final_OBJECTS)
 opj2dat_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/admin/depcomp
 am__depfiles_maybe = depfiles
-#>- DEP_FILES = ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/opj2dat.Po
-#>+ 1
-DEP_FILES =  ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/opj2dat.Po
+#>- DEP_FILES = ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+#>- 	./$(DEPDIR)/opj2dat.Po
+#>+ 4
+#DEP_FILES =   $(DEPDIR)/opj2dat.all_cc.P ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+#		./$(DEPDIR)/opj2dat.Po
+DEP_FILES =  ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+		./$(DEPDIR)/opj2dat.Po
 #>- CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 #>- 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 #>+ 2
@@ -93,17 +98,16 @@ CXXLD = $(CXX)
 #>+ 2
 CXXLINK = $(LIBTOOL) --mode=link --tag=CXX $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(KDE_CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
 DIST_SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 #>- DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 #>+ 1
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST) $(KDE_DIST)
-ACLOCAL = ${SHELL} /sw/LabPlot-1.5.1.pre3/admin/missing --run aclocal-1.8
+ACLOCAL = ${SHELL} /sw/LabPlot-1.5.1.pre4/admin/missing --run aclocal-1.8
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /sw/LabPlot-1.5.1.pre3/admin/missing --run tar
+AMTAR = ${SHELL} /sw/LabPlot-1.5.1.pre4/admin/missing --run tar
 AR = ar
 ARTSCCONFIG = /opt/kde3/bin/artsc-config
 AUDIOFILE_DIR = 
@@ -111,16 +115,16 @@ AUDIOFILE_INCFLAGS =
 AUDIOFILE_LDFLAGS = -laudiofile
 AUTOCONF = $(SHELL) $(top_srcdir)/admin/cvs.sh configure || touch configure
 AUTODIRS = 
-AUTOHEADER = ${SHELL} /sw/LabPlot-1.5.1.pre3/admin/missing --run autoheader
-AUTOMAKE = ${SHELL} /sw/LabPlot-1.5.1.pre3/admin/missing --run automake-1.8
+AUTOHEADER = ${SHELL} /sw/LabPlot-1.5.1.pre4/admin/missing --run autoheader
+AUTOMAKE = ${SHELL} /sw/LabPlot-1.5.1.pre4/admin/missing --run automake-1.8
 AWK = gawk
-CC = ccache gcc
+CC = gcc
 CCDEPMODE = depmode=gcc3
-CDF_INCFLAGS = -I/sw/cdf27-dist/src/include
-CDF_LDFLAGS = -L/sw/cdf27-dist/src/lib -lcdf
+CDF_INCFLAGS = 
+CDF_LDFLAGS = 
 CFLAGS = -W -Wall -Wchar-subscripts -Wshadow -Wpointer-arith -Wmissing-prototypes -Wwrite-strings   -Wall  -Wformat-security -Wmissing-format-attribute
 CONF_FILES = 
-CPP = ccache gcc -E
+CPP = gcc -E
 CPPFLAGS =  -DQT_THREAD_SUPPORT  -D_REENTRANT
 CXX = ccache g++
 CXXCPP = ccache g++ -E
@@ -131,7 +135,7 @@ DCOPIDL = /opt/kde3/bin/dcopidl
 DCOPIDL2CPP = /opt/kde3/bin/dcopidl2cpp
 DCOPIDLNG = 
 DCOP_DEPENDENCIES = $(DCOPIDL)
-DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLVERSION=\"1.5.1.pre3\" -DLVERSION_DATE=1 -DHAVE_STRTOD=1 -DHAVE_LOG2=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_TIFF=1 -DHAVE_GSL=1 -DHAVE_GSL14=1 -DHAVE_FFTW_CONFIG=1 -DHAVE_FFTW3=1 -DHAVE_FFTW3_THREADS=1 -DHAVE_JASPER=1 -DHAVE_MAGICK=1 -DHAVE_QSA=1 -DHAVE_QSA_IDE=1 -DHAVE_QSA_FAC=1 -DHAVE_CDF_CONFIG=1 -DHAVE_CDF=1 -DHAVE_KEXIDB=1 -DHAVE_GL=1 -DKDELIBSUFF=\"\" -DHAVE_DLFCN_H=1 -DHAVE_SGI_STL=1 -DHAVE_CRYPT=1 -Dkde_socklen_t=socklen_t -Dksize_t=socklen_t -DHAVE_SYS_TYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_SYS_BITYPES_H=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT_PROTO=1 -DSIZEOF_INT=4 -DSIZEOF_SHORT=2 -DSIZEOF_LONG=4 -DSIZEOF_CHAR_P=4 -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DHAVE_VSNPRINTF=1 -DHAVE_SNPRINTF=1 -DHAVE_LIBZ=1 -DHAVE_LIBPNG=1 -DHAVE_LIBJPEG=1 -DHAVE_LIBPTHREAD=1 -DSTDC_HEADERS=1 
+DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DLVERSION=\"1.5.1.pre4\" -DLVERSION_DATE=1 -DHAVE_STRTOD=1 -DHAVE_LOG2=1 -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_TIFF=1 -DHAVE_GSL=1 -DHAVE_GSL14=1 -DHAVE_FFTW_CONFIG=1 -DHAVE_FFTW3=1 -DHAVE_FFTW3_THREADS=1 -DHAVE_JASPER=1 -DHAVE_MAGICK=1 -DHAVE_QSA=1 -DHAVE_QSA_IDE=1 -DHAVE_QSA_FAC=1 -DHAVE_KEXIDB=1 -DHAVE_GL=1 -DKDELIBSUFF=\"\" -DHAVE_DLFCN_H=1 -DHAVE_SGI_STL=1 -DHAVE_CRYPT=1 -Dkde_socklen_t=socklen_t -Dksize_t=socklen_t -DHAVE_SYS_TYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_SYS_BITYPES_H=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT=1 -DHAVE_RES_INIT_PROTO=1 -DSIZEOF_INT=4 -DSIZEOF_SHORT=2 -DSIZEOF_LONG=4 -DSIZEOF_CHAR_P=4 -DSIZEOF_SIZE_T=4 -DSIZEOF_UNSIGNED_LONG=4 -DHAVE_VSNPRINTF=1 -DHAVE_SNPRINTF=1 -DHAVE_LIBZ=1 -DHAVE_LIBPNG=1 -DHAVE_LIBJPEG=1 -DHAVE_LIBPTHREAD=1 -DSTDC_HEADERS=1 
 DEPDIR = .deps
 ECHO = echo
 ECHO_C = 
@@ -141,7 +145,7 @@ EGREP = grep -E
 ENABLE_PERMISSIVE_FLAG = -fpermissive
 EXEEXT = 
 F77 = g77
-FFLAGS = -O2
+FFLAGS = -g -O2
 FFTW3_LDFLAGS = -lfftw3 -lfftw3_threads -lpthread
 FFTW_LDFLAGS = 
 FRAMEWORK_COREAUDIO = 
@@ -215,7 +219,7 @@ LTLIBOBJS =
 MAGICK = yes
 MAGICK_INCFLAGS = `Magick++-config --cppflags`
 MAGICK_LDFLAGS = `Magick++-config --ldflags --libs`
-MAKEINFO = ${SHELL} /sw/LabPlot-1.5.1.pre3/admin/missing --run makeinfo
+MAKEINFO = ${SHELL} /sw/LabPlot-1.5.1.pre4/admin/missing --run makeinfo
 MCOPIDL = /opt/kde3/bin/mcopidl
 MEINPROC = /opt/kde3/bin/meinproc
 MOC = /usr/lib/qt3/bin/moc
@@ -226,8 +230,8 @@ NETCDF_LDFLAGS = -lnetcdf
 NOOPT_CFLAGS = -O0
 NOOPT_CXXFLAGS = -O0
 OBJEXT = o
-OCAML = -
-PACKAGE = LabPlot-1.5.1.pre3
+OCAML = yes
+PACKAGE = LabPlot-1.5.1.pre4
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = 
 PACKAGE_STRING = 
@@ -244,13 +248,13 @@ QT_INCLUDES = -I/usr/lib/qt3/include
 QT_LDFLAGS = -L/usr/lib/qt3/lib
 QWT3D_DIR = qwtplot3d
 QWT3D_INCFLAGS = -I../qwtplot3d/
-QWT3D_LDFLAGS = -L../qwtplot3d/ -lLabPlotqwtplot3d
+QWT3D_LDFLAGS = ../qwtplot3d/libLabPlotqwtplot3d.la
 RANLIB = ranlib
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
-TEXVC = yes
-TEXVC_DIR = 
+TEXVC = using included version.
+TEXVC_DIR = texvc
 TOPSUBDIRS =  autom4te.cache cephes doc examples src
 UIC = /usr/lib/qt3/bin/uic -L $(kde_widgetdir) -nounload
 UIC_TR = tr2i18n
@@ -270,7 +274,7 @@ X_PRE_LIBS =
 X_RPATH = -R $(x_libraries)
 YACC = bison -y
 ac_ct_AR = ar
-ac_ct_CC = ccache gcc
+ac_ct_CC = gcc
 ac_ct_CXX = 
 ac_ct_F77 = g77
 ac_ct_RANLIB = ranlib
@@ -301,7 +305,7 @@ include_ARTS_FALSE = #
 include_ARTS_TRUE = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /sw/LabPlot-1.5.1.pre3/admin/install-sh
+install_sh = /sw/LabPlot-1.5.1.pre4/admin/install-sh
 kde_appsdir = ${datadir}/applnk
 kde_bindir = ${exec_prefix}/bin
 kde_confdir = ${datadir}/config
@@ -348,11 +352,11 @@ x_libraries = /usr/X11R6/lib
 xdg_appsdir = ${datadir}/applications/kde
 xdg_directorydir = ${datadir}/desktop-directories
 xdg_menudir = ${sysconfdir}/xdg/menus
+SOURCES = AUTO
 lib_LTLIBRARIES = liborigin.la
 liborigin_la_SOURCES = OPJFile.cc
 liborigin_la_LDFLAGS = -version-info 0:1:0
-opj2dat_SOURCES = opj2dat.cc
-opj2dat_LDFLAGS = -lorigin
+opj2dat_SOURCES = opj2dat.cc OPJFile.cc
 CLEANFILES = opjfile.log *.dat ORIGIN *~
 #>- all: all-am
 #>+ 1
@@ -470,6 +474,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/OPJFile.Plo
+include ./$(DEPDIR)/OPJFile.Po
 include ./$(DEPDIR)/opj2dat.Po
 
 .cc.o:
@@ -620,7 +625,7 @@ clean: kde-rpo-clean  clean-am
 #>- clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 #>- 	clean-libtool mostlyclean-am
 #>+ 2
-clean-am: clean-bcheck  clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+clean-am: clean-bcheck clean-final  clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
@@ -689,7 +694,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 .NOEXPORT:
 
 #>+ 2
-KDE_DIST=liborigin.so OPJFile.h DATABASE Makefile.in opj2dat Makefile.am 
+KDE_DIST=DATABASE Makefile.in OPJFile.h Makefile.am 
 
 #>+ 2
 docs-am:
@@ -732,21 +737,37 @@ bcheck-am:
 	done
 
 
+#>+ 11
+opj2dat.all_cc.cc: $(srcdir)/Makefile.in $(srcdir)/opj2dat.cc $(srcdir)/OPJFile.cc 
+	@echo 'creating opj2dat.all_cc.cc ...'; \
+	rm -f opj2dat.all_cc.files opj2dat.all_cc.final; \
+	echo "#define KDE_USE_FINAL 1" >> opj2dat.all_cc.final; \
+	for file in opj2dat.cc OPJFile.cc ; do \
+	  echo "#include \"$$file\"" >> opj2dat.all_cc.files; \
+	  test ! -f $(srcdir)/$$file || egrep '^#pragma +implementation' $(srcdir)/$$file >> opj2dat.all_cc.final; \
+	done; \
+	cat opj2dat.all_cc.final opj2dat.all_cc.files > opj2dat.all_cc.cc; \
+	rm -f opj2dat.all_cc.final opj2dat.all_cc.files
+
+#>+ 3
+clean-final:
+	-rm -f opj2dat.all_cc.cc
+
 #>+ 3
 final:
-	$(MAKE) all-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_final_OBJECTS)" all-am
 
 #>+ 3
 final-install:
-	$(MAKE) install-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_final_OBJECTS)" install-am
 
 #>+ 3
 no-final:
-	$(MAKE) all-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_nofinal_OBJECTS)" all-am
 
 #>+ 3
 no-final-install:
-	$(MAKE) install-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_nofinal_OBJECTS)" install-am
 
 #>+ 3
 cvs-clean:

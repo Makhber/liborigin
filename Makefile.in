@@ -15,10 +15,8 @@
 
 @SET_MAKE@
 
-#SOURCES = AUTO
 
-
-SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
+SOURCES = AUTO
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -64,17 +62,24 @@ am_liborigin_la_OBJECTS = OPJFile.lo
 liborigin_la_OBJECTS = OPJFile.lo
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_opj2dat_OBJECTS = opj2dat.$(OBJEXT)
+am_opj2dat_OBJECTS = opj2dat.$(OBJEXT) OPJFile.$(OBJEXT)
 #>- opj2dat_OBJECTS = $(am_opj2dat_OBJECTS)
-#>+ 1
-opj2dat_OBJECTS = opj2dat.$(OBJEXT)
+#>+ 4
+opj2dat_final_OBJECTS = opj2dat.all_cc.o 
+opj2dat_nofinal_OBJECTS = opj2dat.$(OBJEXT) OPJFile.$(OBJEXT)
+@KDE_USE_FINAL_FALSE@opj2dat_OBJECTS = $(opj2dat_nofinal_OBJECTS)
+@KDE_USE_FINAL_TRUE@opj2dat_OBJECTS = $(opj2dat_final_OBJECTS)
 opj2dat_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir)
 depcomp = $(SHELL) $(top_srcdir)/admin/depcomp
 am__depfiles_maybe = depfiles
-#>- @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/opj2dat.Po
-#>+ 1
-@AMDEP_TRUE@DEP_FILES =  ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/opj2dat.Po
+#>- @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+#>- @AMDEP_TRUE@	./$(DEPDIR)/opj2dat.Po
+#>+ 4
+@AMDEP_TRUE@@KDE_USE_FINAL_TRUE@DEP_FILES =   $(DEPDIR)/opj2dat.all_cc.P ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+@AMDEP_TRUE@@KDE_USE_FINAL_TRUE@	@AMDEP_TRUE@	./$(DEPDIR)/opj2dat.Po
+@AMDEP_TRUE@@KDE_USE_FINAL_FALSE@DEP_FILES =  ./$(DEPDIR)/OPJFile.Plo ./$(DEPDIR)/OPJFile.Po \
+@AMDEP_TRUE@@KDE_USE_FINAL_FALSE@	@AMDEP_TRUE@	./$(DEPDIR)/opj2dat.Po
 #>- CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 #>- 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 #>+ 2
@@ -93,7 +98,6 @@ CXXLD = $(CXX)
 #>+ 2
 CXXLINK = $(LIBTOOL) --mode=link --tag=CXX $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(KDE_CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
 DIST_SOURCES = $(liborigin_la_SOURCES) $(opj2dat_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -348,11 +352,11 @@ x_libraries = @x_libraries@
 xdg_appsdir = @xdg_appsdir@
 xdg_directorydir = @xdg_directorydir@
 xdg_menudir = @xdg_menudir@
+SOURCES = AUTO
 lib_LTLIBRARIES = liborigin.la
 liborigin_la_SOURCES = OPJFile.cc
 liborigin_la_LDFLAGS = -version-info 0:1:0
-opj2dat_SOURCES = opj2dat.cc
-opj2dat_LDFLAGS = -lorigin
+opj2dat_SOURCES = opj2dat.cc OPJFile.cc
 CLEANFILES = opjfile.log *.dat ORIGIN *~
 #>- all: all-am
 #>+ 1
@@ -470,6 +474,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OPJFile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OPJFile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/opj2dat.Po@am__quote@
 
 .cc.o:
@@ -620,7 +625,7 @@ clean: kde-rpo-clean  clean-am
 #>- clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 #>- 	clean-libtool mostlyclean-am
 #>+ 2
-clean-am: clean-bcheck  clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+clean-am: clean-bcheck clean-final  clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
@@ -689,7 +694,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 .NOEXPORT:
 
 #>+ 2
-KDE_DIST=liborigin.so OPJFile.h DATABASE Makefile.in opj2dat Makefile.am 
+KDE_DIST=DATABASE Makefile.in OPJFile.h Makefile.am 
 
 #>+ 2
 docs-am:
@@ -732,21 +737,37 @@ bcheck-am:
 	done
 
 
+#>+ 11
+opj2dat.all_cc.cc: $(srcdir)/Makefile.in $(srcdir)/opj2dat.cc $(srcdir)/OPJFile.cc 
+	@echo 'creating opj2dat.all_cc.cc ...'; \
+	rm -f opj2dat.all_cc.files opj2dat.all_cc.final; \
+	echo "#define KDE_USE_FINAL 1" >> opj2dat.all_cc.final; \
+	for file in opj2dat.cc OPJFile.cc ; do \
+	  echo "#include \"$$file\"" >> opj2dat.all_cc.files; \
+	  test ! -f $(srcdir)/$$file || egrep '^#pragma +implementation' $(srcdir)/$$file >> opj2dat.all_cc.final; \
+	done; \
+	cat opj2dat.all_cc.final opj2dat.all_cc.files > opj2dat.all_cc.cc; \
+	rm -f opj2dat.all_cc.final opj2dat.all_cc.files
+
+#>+ 3
+clean-final:
+	-rm -f opj2dat.all_cc.cc
+
 #>+ 3
 final:
-	$(MAKE) all-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_final_OBJECTS)" all-am
 
 #>+ 3
 final-install:
-	$(MAKE) install-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_final_OBJECTS)" install-am
 
 #>+ 3
 no-final:
-	$(MAKE) all-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_nofinal_OBJECTS)" all-am
 
 #>+ 3
 no-final-install:
-	$(MAKE) install-am
+	$(MAKE) opj2dat_OBJECTS="$(opj2dat_nofinal_OBJECTS)" install-am
 
 #>+ 3
 cvs-clean:

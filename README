@@ -16,15 +16,20 @@ FEATURES :
 
 ---------------------------------------------------------------------------
 TODO :
+	* read label columns
+	* read MATRIX tables
+	* read spreadsheet infos (LAYER section) with new method
 	* CRASH : handle field length of label type correct (50 bytes not 10 bytes per entry)
 		* valuesize != 10 for label column type
-	* read MATRIX tables
-	* improve 5.0 : 5.0/Ori50TableA4cols.OPJ doesn't work
 	* read graphs : 7.5/graphs
 
 ---------------------------------------------------------------------------
 Changelog :
 
+12-10-05	* read valuesize from file
+		* get names with multiple '_' correct
+11-10-05	* 4.1 projects : data reading
+11-09-05	* completely redesigned (using '\n')
 10-25-05	* fixed problems reading column types
 		* general column names and spreadsheet sections
 09-23-05	* read 4.1 projects
