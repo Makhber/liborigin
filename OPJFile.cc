@@ -30,6 +30,10 @@ OPJFile::OPJFile(char *filename)
 			else
 				coltype[i][j][0]='Y';
 			coltype[i][j][1]=0;
+			// for(int k=0;k<MAX_ROWS;k++) {
+				//sdata[i][j][k] = new char[25];
+				//sdata[i][j][k][0] = 0;
+			// }
 		}
 	}
 	
@@ -107,12 +111,16 @@ int OPJFile::Parse() {
 	int current_col=1, nr=0, nbytes=0;
 	double a;
 	char name[25], valuesize;
-	while(col_found > 0) {
+	while(col_found > 0 && col_found < 132) {	// should be 0x72, 0x73 or 0x83
 //////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
-		for(int i=0;i<0x3D;i++)	// skip to valuesize
+		for(int i=0;i<0x3D;i++)	// skip to value size
 			fread(&c,1,1,f);
 		fread(&valuesize,1,1,f);
 		fprintf(debug,"	[valuesize = %d @ 0x%X]\n",valuesize,ftell(f)-1);
+		if(valuesize <= 0) {
+			fprintf(debug,"	WARNING : found strange valuesize of %d\n",valuesize);
+			valuesize=10;
+		}	
 
 		for(int i=0;i<0x1A;i++)	// skip to name
 			fread(&c,1,1,f);
@@ -150,31 +158,33 @@ int OPJFile::Parse() {
 		} while (c != '\n');
 
 		fread(&nbytes,4,1,f);
+		if(fmod(nbytes,valuesize)>0)
+			fprintf(debug,"WARNING: data section could not be read correct\n");
 		nr = nbytes / valuesize;
 		fprintf(debug,"	[number of rows = %d (%d Bytes) @ 0x%X]\n",nr,nbytes,ftell(f));
-		fflush(debug);
 		nr_rows[nr_spreads-1][current_col-1]=nr;
 		maxrows[nr_spreads-1]<nr?maxrows[nr_spreads-1]=nr:0;
 
 ////////////////////////////////////// DATA ////////////////////////////////////////////////
 		fread(&c,1,1,f);	// skip '\n'
-		if(valuesize != 8 ) {	// skip 0 0
+		if(valuesize != 8 && valuesize <= 16) {	// skip 0 0
 			fread(&c,1,1,f);
 			fread(&c,1,1,f);
 		}
 		fprintf(debug,"	[data @ 0x%X]\n",ftell(f));
 		data[nr_spreads-1][current_col-1] = (double *) malloc(nr*sizeof(double));
 		for (int i=0;i<nr;i++) {
-			if(valuesize<=16)	// value
+			if(valuesize <= 16) {	// value
 				fread(&a,valuesize,1,f);
-			else {			// label
-				char *tmpstr = new char[valuesize];
-				fread(tmpstr,valuesize,1,f);
-				fprintf(debug,"%s ",tmpstr);
+				fprintf(debug,"%g ",a);
+				data[nr_spreads-1][(current_col-1)][i]=a;
 			}
-			if(fabs(a)<1.0e-100) a=0;
-			fprintf(debug,"%g ",a);
-			data[nr_spreads-1][(current_col-1)][i]=a;
+			else {			// label
+				char *stmp = new char[valuesize+1];
+				fread(stmp,valuesize,1,f);
+				fprintf(debug,"%s ",stmp);
+				sdata[nr_spreads-1][(current_col-1)][i] = stmp;
+			}
 		}
 //		fprintf(debug,"	[now @ 0x%X]\n",ftell(f));
 		fprintf(debug,"\n");
@@ -182,7 +192,7 @@ int OPJFile::Parse() {
 
 		for(int i=0;i<4;i++)	// skip "0"
 			fread(&c,1,1,f);
-		if(valuesize == 8 ) {	// skip 0 0
+		if(valuesize == 8 || valuesize > 16) {	// skip 0 0
 			fread(&c,1,1,f);
 			fread(&c,1,1,f);
 		}

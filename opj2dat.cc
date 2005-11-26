@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <libgen.h>
+#include <string.h>
+#include <math.h>
 #include "OPJFile.h"
 
-char version[]="0.2.0";
+char version[]="20051120";
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
@@ -42,10 +44,16 @@ int main(int argc, char *argv[]) {
 		// data
 		for (int i=0;i<opj.maxRows(s);i++) {
 			for (int j=0;j<nr_cols;j++) {
-				double v=0;
-				if(i<opj.numRows(s,j))
-					v=opj.Data(s,j)[i];
-				fprintf(out,"%g ",v);
+				if(!strcmp(opj.colType(s,j),"LABEL")) {
+					fprintf(out,"%s ",opj.SData(s,j,i));
+				}
+				else {
+					double v=0;
+					if(i<opj.numRows(s,j))
+						v = opj.Data(s,j)[i];
+					if(fabs(v)>2.0e-300)
+						fprintf(out,"%g ",v);
+				}		
 			}
 			fprintf(out,"\n");
 		}

@@ -16,16 +16,16 @@ FEATURES :
 
 ---------------------------------------------------------------------------
 TODO :
-	* read label columns
 	* read MATRIX tables
 	* read spreadsheet infos (LAYER section) with new method
-	* CRASH : handle field length of label type correct (50 bytes not 10 bytes per entry)
-		* valuesize != 10 for label column type
-	* read graphs : 7.5/graphs
+	* fix various problems (check ORIGIN/README)
+	* read graphs
 
 ---------------------------------------------------------------------------
 Changelog :
 
+15-10-05	* read empty entries
+		* read label columns
 12-10-05	* read valuesize from file
 		* get names with multiple '_' correct
 11-10-05	* 4.1 projects : data reading

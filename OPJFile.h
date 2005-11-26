@@ -10,6 +10,7 @@
 #endif
 
 #define MAX_COLUMNS 255
+#define MAX_ROWS 1024
 
 class OPJFile
 {
@@ -25,6 +26,7 @@ public:
 	char *colName(int s, int c) { return colname[s][c]; }	//!< get name of column c of spreadsheet s
 	char *colType(int s, int c) { return coltype[s][c]; }	//!< get type of column c of spreadsheet s
 	double* Data(int s,int c) { return data[s][c]; }	//!< get data of column c of spreadsheet s
+	char* SData(int s,int c, int r) { return sdata[s][c][r]; }	//!< get data strings of column c/row r of spreadsheet s
 private:
 	char* filename;				//!< project file name
 	int version;				//!< project version
@@ -34,6 +36,7 @@ private:
 	int nr_rows[MAX_SPREADS][MAX_COLUMNS];	//!< number of rows per column of spreadsheet
 	int maxrows[MAX_SPREADS];		//!< max number of rows of spreadsheet
 	double *data[MAX_SPREADS][MAX_COLUMNS];	//!< data per column per spreadsheet
+	char *sdata[MAX_SPREADS][MAX_COLUMNS][MAX_ROWS];	//!< data string per row/column per spreadsheet
 	char *colname[MAX_SPREADS][MAX_COLUMNS];	//!< column names
 	char *coltype[MAX_SPREADS][MAX_COLUMNS];	//!< column types
 
