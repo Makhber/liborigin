@@ -4,7 +4,7 @@
 #include <math.h>
 #include "OPJFile.h"
 
-char version[]="20051120";
+#define VERSION 20060517
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	printf("opj2dat %s, Copyright (C) 2005 Stefan Gerlach\n",version);
+	printf("opj2dat %d, Copyright (C) 2006 Stefan Gerlach\n",VERSION);
 
 	OPJFile opj(argv[1]);
 	opj.Parse();
