@@ -7,5 +7,4 @@ opj2dat: opj2dat.cc OPJFile.cc
 	g++ -o opj2dat opj2dat.cc OPJFile.cc
 
 clean :
-	rm -f *~ *.o *.lo opj2dat liborigin.so
-	rm -rf .deps .libs
+	rm -f *~ *.o opj2dat liborigin.so
