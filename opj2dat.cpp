@@ -1,10 +1,11 @@
+// opj2dat.cpp
 #include <stdio.h>
 #include <libgen.h>
 #include <string.h>
 #include <math.h>
 #include "OPJFile.h"
 
-#define VERSION 20060529
+#define VERSION 20060616
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
