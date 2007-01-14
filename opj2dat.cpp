@@ -5,7 +5,7 @@
 #include <math.h>
 #include "OPJFile.h"
 
-#define VERSION 20060616
+#define VERSION 20070115
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
@@ -13,10 +13,11 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	printf("opj2dat %d, Copyright (C) 2006 Stefan Gerlach\n",VERSION);
+	printf("opj2dat %d, Copyright (C) 2007 Stefan Gerlach\n",VERSION);
 
 	OPJFile opj(argv[1]);
-	opj.Parse();
+	int status = opj.Parse();
+	printf("Parsing status = %d\n",status);
 	printf("OPJ PROJECT \"%s\" VERSION = %.2f\n",argv[1],opj.Version());
 	
 	printf("NUMBER OF SPREADSHEETS = %d\n",opj.numSpreads());
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]) {
 		printf("SPREADSHEET %d : %s\n",s+1,opj.spreadName(s));
 		printf("	COLUMNS = %d\n",nr_cols);
 		for (int j=0;j<nr_cols;j++) {
+			printf("	column %d\n",j+1);
 			printf("	COLUMN %d : %s / TYPE = %s,ROWS = %d\n",
 				j+1,opj.colName(s,j),opj.colType(s,j),opj.numRows(s,j));
 			
