@@ -56,14 +56,14 @@ int main(int argc, char *argv[]) {
 		for (int i=0;i<opj.maxRows(s);i++) {
 			for (int j=0;j<nr_cols;j++) {
 				if(!strcmp(opj.colType(s,j),"LABEL")) {
-					fprintf(out,"%s ",opj.SData(s,j,i));
+					fprintf(out,"%s ",(char *)opj.oData(s,j,i));
 				}
 				else {
-					double v=0;
+					double *v;
 					if(i<opj.numRows(s,j))
-						v = opj.Data(s,j)[i];
-					if(fabs(v)>2.0e-300)
-						fprintf(out,"%g ",v);
+						v = (double *) opj.oData(s,j,i);
+					if(fabs(*v)>2.0e-300)
+						fprintf(out,"%g ",*v);
 				}		
 			}
 			fprintf(out,"\n");
