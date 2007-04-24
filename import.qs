@@ -1,1 +1,1 @@
-importOPJ("/ORIGIN/7.0/fano.opj");
+importOPJ("../liborigin/ws4.opj");

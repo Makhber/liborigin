@@ -1,11 +1,16 @@
 // opj2dat.cpp
 #include <stdio.h>
+
+#ifndef WIN32
+#include <libgen.h>
+#endif
+
 #include <libgen.h>
 #include <string.h>
 #include <math.h>
 #include "OPJFile.h"
 
-#define VERSION 20070115
+#define VERSION 20070421
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
@@ -27,14 +32,17 @@ int main(int argc, char *argv[]) {
 		printf("SPREADSHEET %d : %s\n",s+1,opj.spreadName(s));
 		printf("	COLUMNS = %d\n",nr_cols);
 		for (int j=0;j<nr_cols;j++) {
-			printf("	column %d\n",j+1);
 			printf("	COLUMN %d : %s / TYPE = %s,ROWS = %d\n",
 				j+1,opj.colName(s,j),opj.colType(s,j),opj.numRows(s,j));
 			
 		}
 		FILE *out;
 		char filename[255];
+#ifndef WIN32
+		sprintf(filename,"%s.%d.dat",argv[1],s+1);
+#else
 		sprintf(filename,"%s.%d.dat",basename(argv[1]),s+1);
+#endif
 		printf("saved to %s\n",filename);
 		if((out=fopen(filename,"w")) == NULL ) {
 			printf("Could not open %s",filename);
