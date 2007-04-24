@@ -2,7 +2,7 @@
     File                 : OPJFile.cpp
     --------------------------------------------------------------------
     Copyright            : (C) 2005-2007 Stefan Gerlach
-						   (C) 2007 by Alex Kargovsky, Ion Vasilief
+			   (C) 2007 by Alex Kargovsky, Ion Vasilief
     Email (use @ for *)  : stefan.gerlach*uni-konstanz.de, kargovsky*yumr.phys.msu.su, ion_vasilief*yahoo.fr
     Description          : Origin project import class
 
@@ -54,33 +54,31 @@ OPJFile::OPJFile(const char *filename)
 {
 	version=0;
 	dataIndex=0;
-//	nr_spreads=0;
-//	entry=0;
 }
 
 int OPJFile::compareSpreadnames(char *sname) {
-	for(int i=0;i<SPREADSHEET.size();i++)
+	for(unsigned int i=0;i<SPREADSHEET.size();i++)
 		if (SPREADSHEET[i].name == sname)
 			return i;
 	return -1;
 }
 
 int OPJFile::compareColumnnames(int spread, char *sname) {
-	for(int i=0;i<SPREADSHEET[spread].column.size();i++)
+	for(unsigned int i=0;i<SPREADSHEET[spread].column.size();i++)
 		if (SPREADSHEET[spread].column[i].name == sname)
 			return i;
 	return -1;
 }
 
 int OPJFile::compareMatrixnames(char *sname) {
-	for(int i=0;i<MATRIX.size();i++)
+	for(unsigned int i=0;i<MATRIX.size();i++)
 		if (MATRIX[i].name == sname)
 			return i;
 	return -1;
 }
 
 int OPJFile::compareFunctionnames(const char *sname) {
-	for(int i=0;i<FUNCTION.size();i++)
+	for(unsigned int i=0;i<FUNCTION.size();i++)
 		if (FUNCTION[i].name == sname)
 			return i;
 	return -1;
@@ -89,22 +87,22 @@ int OPJFile::compareFunctionnames(const char *sname) {
 
 vector<string> OPJFile::findDataByIndex(int index) {
 	vector<string> str;
-	for(int spread=0;spread<SPREADSHEET.size();spread++)
-		for(int i=0;i<SPREADSHEET[spread].column.size();i++)
+	for(unsigned int spread=0;spread<SPREADSHEET.size();spread++)
+		for(unsigned int i=0;i<SPREADSHEET[spread].column.size();i++)
 			if (SPREADSHEET[spread].column[i].index == index)
 			{
 				str.push_back(SPREADSHEET[spread].column[i].name);
 				str.push_back("T_" + SPREADSHEET[spread].name);
 				return str;
 			}
-	for(int i=0;i<MATRIX.size();i++)
+	for(unsigned int i=0;i<MATRIX.size();i++)
 		if (MATRIX[i].index == index)
 		{
 			str.push_back(MATRIX[i].name);
 			str.push_back("M_" + MATRIX[i].name);
 			return str;
 		}
-	for(int i=0;i<FUNCTION.size();i++)
+	for(unsigned int i=0;i<FUNCTION.size();i++)
 		if (FUNCTION[i].index == index)
 		{
 			str.push_back(FUNCTION[i].name);
@@ -116,9 +114,9 @@ vector<string> OPJFile::findDataByIndex(int index) {
 
 // set default name for columns starting from spreadsheet spread
 void OPJFile::setColName(int spread) {
-	for(int j=spread;j<SPREADSHEET.size();j++) {
+	for(unsigned int j=spread;j<SPREADSHEET.size();j++) {
 		SPREADSHEET[j].column[0].type="X";
-		for (int k=1;k<SPREADSHEET[j].column.size();k++)
+		for (unsigned int k=1;k<SPREADSHEET[j].column.size();k++)
 			SPREADSHEET[j].column[k].type="Y";
 	}
 }
@@ -131,7 +129,6 @@ filepre +
 
 /* parse file "filename" completely and save values */
 int OPJFile::Parse() {
-	int i,j;
 	FILE *f;
 	if((f=fopen(filename,"rb")) == NULL ) {
 		printf("Could not open %s!\n",filename);
@@ -455,7 +452,7 @@ int OPJFile::ParseFormatOld() {
 ///////////////////// SPREADSHEET INFOS ////////////////////////////////////
 	int LAYER=0;
 	int COL_JUMP = 0x1ED;
-	for(i=0; i < SPREADSHEET.size(); i++) {
+	for(unsigned int i=0; i < SPREADSHEET.size(); i++) {
 	fprintf(debug,"		reading	Spreadsheet %d/%d properties\n",i+1,SPREADSHEET.size());
 	fflush(debug);
 	if(i > 0) {
@@ -542,7 +539,7 @@ int OPJFile::ParseFormatOld() {
 
 	/////////////// COLUMN Types ///////////////////////////////////////////
 	fprintf(debug,"			Spreadsheet has %d columns\n",SPREADSHEET[spread].column.size());
-	for (j=0;j<SPREADSHEET[spread].column.size();j++) {
+	for (unsigned int j=0;j<SPREADSHEET[spread].column.size();j++) {
 		fprintf(debug,"			reading	COLUMN %d/%d type\n",j+1,SPREADSHEET[spread].column.size());
 		fflush(debug);
 		fseek(f,LAYER+ATYPE+j*COL_JUMP, SEEK_SET);
@@ -620,7 +617,7 @@ int OPJFile::ParseFormatOld() {
 
 
 int OPJFile::ParseFormatNew() {
-	int i,j;
+	int i;
 	FILE *f, *debug;
 	if((f=fopen(filename,"rb")) == NULL ) {
 		printf("Could not open %s!\n",filename);
@@ -1795,7 +1792,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 			fseek(f,LAYER+0xCE,SEEK_SET);
 			fread(&w,2,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_width=(double)w/500.0;
+			GRAPH.back().layer.back().curve.back().fillarea_pattern_width=(int) ((double)w/500.0);
 
 			fseek(f,LAYER+0x16A,SEEK_SET);
 			fread(&h,1,1,f);
