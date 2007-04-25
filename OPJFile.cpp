@@ -135,43 +135,16 @@ int OPJFile::Parse() {
 		return -1;
 	}
 
-
-////////////////////////////// check version from header ///////////////////////////////
 	char vers[5];
 	vers[4]=0;
 
 	// get version
 	fseek(f,0x7,SEEK_SET);
 	fread(&vers,4,1,f);
-	version = atoi(vers);
-	//fprintf(debug,"	[version = %d]\n",version);
-
-	// translate version
-	if(version >= 130 && version <= 140) 		// 4.1
-		version=410;
-	else if(version == 210) 	// 5.0
-		version=500;
-	else if(version == 2625) 	// 6.0
-		version=600;
-	else if(version == 2627) 	// 6.0 SR1
-		version=601;
-	else if(version == 2630 ) 	// 6.0 SR4
-		version=604;
-	else if(version == 2635 ) 	// 6.1
-		version=610;
-	else if(version == 2656) 	// 7.0
-		version=700;
-	else if(version == 2672) 	// 7.0 SR3
-		version=703;
-	else if(version >= 2766 && version <= 2769) 	// 7.5
-		version=750;
-	/*else {
-		fprintf(debug,"Found unknown project version %d\n",version);
-		fprintf(debug,"Please contact the author of opj2dat\n");
-	}*/
 	fclose(f);
+	version = atoi(vers);
 
-	if(version==750)
+	if(version >= 2766 && version <= 2769) 	// 7.5
 		return ParseFormatNew();
 	else
 		return ParseFormatOld();
@@ -179,7 +152,7 @@ int OPJFile::Parse() {
 
 
 int OPJFile::ParseFormatOld() {
-	int i,j;
+	int i;
 	FILE *f, *debug;
 	if((f=fopen(filename,"rb")) == NULL ) {
 		printf("Could not open %s!\n",filename);
@@ -587,27 +560,6 @@ int OPJFile::ParseFormatOld() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// TODO : GRAPHS
-/*	int graph = 0x2fc1;
-	int pre_graph = 0x12;
-	fseek(f,graph + pre_graph,SEEK_SET);
-	fread(&name,25,1,f);
-	printf("GRAPH : %s\n",name);
-
-	fseek(f,graph + pre_graph + 0x43, SEEK_SET);
-	fread(&name,25,1,f);
-	printf("TYPE : %s\n",name);
-
-	fseek(f,graph + pre_graph + 0x2b3, SEEK_SET);
-	fread(&name,25,1,f);
-	printf("Y AXIS TITLE : %s\n",name);
-	fseek(f,graph + pre_graph + 0x38d, SEEK_SET);
-	fread(&name,25,1,f);
-	printf("X AXIS TITLE : %s\n",name);
-
-	fseek(f,graph + pre_graph + 0xadb, SEEK_SET);
-	fread(&name,25,1,f);
-	printf("LEGEND : %s\n",name);
-*/
 
 	fprintf(debug,"Done parsing\n");
 	fclose(debug);
@@ -1023,7 +975,6 @@ int OPJFile::ParseFormatNew() {
 	fflush(debug);
 
 ///////////////////// SPREADSHEET INFOS ////////////////////////////////////
-	int LAYER=0;
 	POS+=0xB;
 	fseek(f,POS,SEEK_SET);
 	while(1) {
@@ -1845,7 +1796,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 	fseek(f,POS,SEEK_SET);
 }
 
-void OPJFile::skipObjectInfo(FILE *f, FILE *debug)
+void OPJFile::skipObjectInfo(FILE *f, FILE *)
 {
 	int POS=ftell(f);
 
