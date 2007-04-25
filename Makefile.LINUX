@@ -6,7 +6,7 @@ all : opj2dat $(TARGET).so
 
 $(TARGET).so : OPJFile.cpp OPJFile.h
 	$(CC) -c $(CFLAGS) OPJFile.cpp -o OPJFile.o
-	$(CC) $(LFLAGS) -o $(TARGET).so.0.0.2 OPJFile.o
+	$(CC) $(LFLAGS) -o $(TARGET).so.0.0.3 OPJFile.o
 
 opj2dat: opj2dat.cpp OPJFile.cpp
 	g++ -o opj2dat opj2dat.cpp OPJFile.cpp
@@ -15,13 +15,13 @@ clean :
 	rm -f *~ *.o opj2dat $(TARGET).so*
 
 install:
-	chmod ugo-x $(TARGET).so.0.0.2
+	chmod ugo-x $(TARGET).so.0.0.3
 	mkdir -p $(DESTDIR)/usr/lib
-	cp $(TARGET).so.0.0.2 $(DESTDIR)/usr/lib/
+	cp $(TARGET).so.0.0.3 $(DESTDIR)/usr/lib/
 	(cd $(DESTDIR)/usr/lib/;\
-	ln -s $(TARGET).so.0.0.2 $(TARGET).so;\
-	ln -s $(TARGET).so.0.0.2 $(TARGET).so.0;\
-	ln -s $(TARGET).so.0.0.2 $(TARGET).so.0.0)
+	ln -s $(TARGET).so.0.0.3 $(TARGET).so;\
+	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0;\
+	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0.0)
 	mkdir -p $(DESTDIR)/usr/bin
 	cp opj2dat $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/include/$(TARGET)
