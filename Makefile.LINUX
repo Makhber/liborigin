@@ -2,6 +2,7 @@ TARGET	= liborigin
 CC	= g++
 CFLAGS	= -pipe -Wall -W -O2 -fPIC
 LFLAGS	= -shared -Wl,-soname,liborigin.so.0
+LIBEXT  = `./lib-arch.sh`
 all : opj2dat $(TARGET).so
 
 $(TARGET).so : OPJFile.cpp OPJFile.h
@@ -16,9 +17,9 @@ clean :
 
 install:
 	chmod ugo-x $(TARGET).so.0.0.3
-	mkdir -p $(DESTDIR)/usr/lib
-	cp $(TARGET).so.0.0.3 $(DESTDIR)/usr/lib/
-	(cd $(DESTDIR)/usr/lib/;\
+	mkdir -pv $(DESTDIR)/usr/$(LIBEXT)
+	cp -v $(TARGET).so.0.0.3 $(DESTDIR)/usr/$(LIBEXT)/
+	(cd $(DESTDIR)/usr/$(LIBEXT)/;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0.0)
