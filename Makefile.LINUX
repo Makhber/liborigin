@@ -18,12 +18,14 @@ clean :
 install:
 	chmod ugo-x $(TARGET).so.0.0.3
 	mkdir -pv $(DESTDIR)/usr/$(LIBEXT)
+	chmod go+rx $(TARGET).so.0.0.3
 	cp -v $(TARGET).so.0.0.3 $(DESTDIR)/usr/$(LIBEXT)/
 	(cd $(DESTDIR)/usr/$(LIBEXT)/;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0;\
 	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0.0)
 	mkdir -p $(DESTDIR)/usr/bin
+	chmod go+rx opj2dat
 	cp opj2dat $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/include/$(TARGET)
 	cp OPJFile.h $(DESTDIR)/usr/include/$(TARGET)
