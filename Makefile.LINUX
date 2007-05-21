@@ -27,3 +27,7 @@ install:
 	cp opj2dat $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/include/$(TARGET)
 	cp OPJFile.h $(DESTDIR)/usr/include/$(TARGET)
+	ldconfig
+uninstall:
+	rm -f $(DESTDIR)/usr/$(LIBEXT)/$(TARGET).so* $(DESTDIR)/usr/bin/opj2dat $(DESTDIR)/usr/include/$(TARGET)/OPJFile.h
+	ldconfig
