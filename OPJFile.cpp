@@ -2,7 +2,7 @@
     File                 : OPJFile.cpp
     --------------------------------------------------------------------
     Copyright            : (C) 2005-2007 Stefan Gerlach
-						   (C) 2007 by Alex Kargovsky, Ion Vasilief
+                           (C) 2007 by Alex Kargovsky, Ion Vasilief
     Email (use @ for *)  : kargovsky*yumr.phys.msu.su, ion_vasilief*yahoo.fr
     Description          : Origin project import class
 
