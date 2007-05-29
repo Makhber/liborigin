@@ -10,7 +10,7 @@
 #include <math.h>
 #include "OPJFile.h"
 
-#define VERSION 20070421
+#define VERSION 20070529
 
 int main(int argc, char *argv[]) {
 	if(argc != 2) {

@@ -1965,7 +1965,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 	fseek(f,POS,SEEK_SET);
 }
 
-void OPJFile::skipObjectInfo(FILE *f, FILE *debug)
+void OPJFile::skipObjectInfo(FILE *f, FILE *)
 {
 	int POS=ftell(f);
 
@@ -2137,9 +2137,9 @@ void OPJFile::readGraphAxisFormatInfo(graphAxisFormat &format, FILE *f, int pos)
 void OPJFile::readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *f, int pos) {
 	unsigned char h;
 	unsigned char h1;
-	unsigned char h2;
+	// unsigned char h2;
 	short w;
-	double p;
+	//double p;
 	fseek(f,pos+0x26,SEEK_SET);
 	fread(&h,1,1,f);
 	tick.hidden=(h==0);

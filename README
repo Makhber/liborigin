@@ -21,7 +21,7 @@ Usage :
 FEATURES :
 	* reads any worksheets with all columns
 	* supports 4.1, 5.0, 6.0, 6.1, 7.0, 7.5 projects
-	* almost full support for 7.5 project files (worksheets,functions,matrix,graphs,notes)
+	* full support for 7.5 project files (worksheets,functions,matrix,graphs,notes)
 		Thanks to Alex Kargovsky
 
 ---------------------------------------------------------------------------
@@ -63,6 +63,7 @@ X	V Crash on Fred2_....OPJ
 ---------------------------------------------------------------------------
 Changelog :
 
+2007-05-29	* full support of 7.5 projects (Alex Kargovsky)
 2007-04-24	* almost full support of 7.5 projects (Thanks to Alex Kargovsky)
 		* liborigin also supports Origins's standdalone file formats: *.ogw (worksheet) and *.ogm (matrix).
 2006-12-01	* fixed crash when matrix size is incorrect
