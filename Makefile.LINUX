@@ -1,35 +1,44 @@
 TARGET	= liborigin
+TARGET0	= $(TARGET).so
+TARGET1	= $(TARGET0).0
+TARGET2	= $(TARGET0).0.0
+TARGET3	= $(TARGET0).0.0.3
+OPJ     = OPJFile
+OPJ2DAT = opj2dat
 CC	= g++
 CFLAGS	= -pipe -Wall -W -O2 -fPIC
-LFLAGS	= -shared -Wl,-soname,liborigin.so.0
+LDFLAGS	= -shared -Wl,-soname,$(TARGET1)
 LIBEXT  = `./lib-arch.sh`
-all : opj2dat $(TARGET).so
+all : $(TARGET0) $(OPJ2DAT)
 
-$(TARGET).so : OPJFile.cpp OPJFile.h
-	$(CC) -c $(CFLAGS) OPJFile.cpp -o OPJFile.o
-	$(CC) $(LFLAGS) -o $(TARGET).so.0.0.3 OPJFile.o
+$(TARGET0) : $(OPJ).cpp $(OPJ).h
+	$(CC) -c $(CFLAGS) $(OPJ).cpp -o $(OPJ).o
+	$(CC) $(LDFLAGS) -o $(TARGET3) $(OPJ).o
+	mkdir -p lib
+	chmod 644 $(TARGET3)
+	mv -f $(TARGET3) lib/
+	(cd lib/;\
+	ln -sf $(TARGET3) $(TARGET0);\
+	ln -sf $(TARGET3) $(TARGET1);\
+	ln -sf $(TARGET3) $(TARGET2))
 
-opj2dat: opj2dat.cpp OPJFile.cpp
-	g++ -o opj2dat opj2dat.cpp OPJFile.cpp
+$(OPJ2DAT): $(OPJ2DAT).cpp $(OPJ).cpp
+	g++ -L lib/ -o $(OPJ2DAT) $(OPJ2DAT).cpp -lorigin
 
 clean :
-	rm -f *~ *.o opj2dat $(TARGET).so*
+	rm -f *~ *.o $(OPJ2DAT) $(TARGET0)*
+	rm -rf lib/
 
 install:
-	chmod ugo-x $(TARGET).so.0.0.3
 	mkdir -pv $(DESTDIR)/usr/$(LIBEXT)
-	chmod go+rx $(TARGET).so.0.0.3
-	cp -v $(TARGET).so.0.0.3 $(DESTDIR)/usr/$(LIBEXT)/
-	(cd $(DESTDIR)/usr/$(LIBEXT)/;\
-	ln -s $(TARGET).so.0.0.3 $(TARGET).so;\
-	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0;\
-	ln -s $(TARGET).so.0.0.3 $(TARGET).so.0.0)
+	cp -a lib/* $(DESTDIR)/usr/$(LIBEXT)/
 	mkdir -p $(DESTDIR)/usr/bin
-	chmod go+rx opj2dat
-	cp opj2dat $(DESTDIR)/usr/bin
+	chmod 755 $(OPJ2DAT)
+	cp $(OPJ2DAT) $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/include/$(TARGET)
-	cp OPJFile.h $(DESTDIR)/usr/include/$(TARGET)
+	chmod 644 $(OPJ).h
+	cp $(OPJ).h $(DESTDIR)/usr/include/$(TARGET)
 	ldconfig
 uninstall:
-	rm -f $(DESTDIR)/usr/$(LIBEXT)/$(TARGET).so* $(DESTDIR)/usr/bin/opj2dat $(DESTDIR)/usr/include/$(TARGET)/OPJFile.h
+	rm -f $(DESTDIR)/usr/$(LIBEXT)/$(TARGET0)* $(DESTDIR)/usr/bin/$(OPJ2DAT) $(DESTDIR)/usr/include/$(TARGET)/$(OPJ).h
 	ldconfig
