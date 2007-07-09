@@ -23,7 +23,7 @@ $(TARGET0) : $(OPJ).cpp $(OPJ).h
 	ln -sf $(TARGET3) $(TARGET2))
 
 $(OPJ2DAT): $(OPJ2DAT).cpp 
-	g++ -L lib/ -o $(OPJ2DAT) -lorigin
+	g++ -L lib/ -o $(OPJ2DAT) -lorigin $(OPJ2DAT).cpp
 
 clean :
 	rm -f *~ *.o $(OPJ2DAT) $(TARGET0)*
