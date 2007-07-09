@@ -63,6 +63,7 @@ X	V Crash on Fred2_....OPJ
 ---------------------------------------------------------------------------
 Changelog :
 
+2007-07-08	* fixed crash in 7.0 projects
 2007-05-29	* full support of 7.5 projects (Alex Kargovsky)
 2007-04-24	* almost full support of 7.5 projects (Thanks to Alex Kargovsky)
 		* liborigin also supports Origins's standdalone file formats: *.ogw (worksheet) and *.ogm (matrix).
