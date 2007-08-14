@@ -34,6 +34,7 @@
 
 #include <string>
 #include <vector>
+#include "tree.hh"
 
 using namespace std;
 
@@ -75,8 +76,6 @@ struct spreadColumn {
 	string comment;
 	int width;
 	int index;
-	//vector <double> data;
-	//vector <string> sdata;
 	vector <originData> odata;
 	spreadColumn(string _name="", int _index=0)
 	:	name(_name)
@@ -95,21 +94,45 @@ struct spreadColumn {
 struct spreadSheet {
 	string name;
 	string label;
+	int objectID;
+	string parentFolder;
 	int maxRows;
 	bool bHidden;
 	bool bLoose;
+	bool bMultisheet;
 	vector <spreadColumn> column;
 	spreadSheet(string _name="")
 	:	name(_name)
 	,	label("")
 	,	bHidden(false)
 	,	bLoose(true)
+	,	bMultisheet(false)
+	{};
+};
+
+struct excel {
+	string name;
+	string label;
+	int objectID;
+	string parentFolder;
+	int maxRows;
+	bool bHidden;
+	bool bLoose;
+	vector <spreadSheet> sheet;
+	excel(string _name="", string _label="", int _maxRows=0, bool _bHidden=false, bool _bLoose=true)
+	:	name(_name)
+	,	label(_label)
+	,	maxRows(_maxRows)
+	,	bHidden(_bHidden)
+	,	bLoose(_bLoose)
 	{};
 };
 
 struct matrix {
 	string name;
 	string label;
+	int objectID;
+	string parentFolder;
 	int nr_rows;
 	int nr_cols;
 	int value_type_specification;
@@ -171,7 +194,6 @@ struct graphCurve {
 	int fillarea_pattern_border_color;
 	double fillarea_pattern_border_width;
 
-
 	int symbol_type;
 	int symbol_color;
 	int symbol_fill_color;
@@ -180,7 +202,7 @@ struct graphCurve {
 	int point_offset;
 };
 
-enum AxisPosition{ Left = 0, Bottom = 1, Right = 2, Top = 3};
+enum AxisPosition {Left = 0, Bottom = 1, Right = 2, Top = 3};
 
 struct graphGrid {
 	bool hidden;
@@ -227,7 +249,56 @@ struct graphAxis {
 	graphAxisTick tickAxis[2]; //bottom-top, left-right
 };
 
+struct rect {
+	short left;
+	short top;
+	short right;
+	short bottom;
+	int height()
+	{
+		return bottom-top;
+	};
+	int width()
+	{
+		return right-left;
+	};
+};
+
+struct text {
+	string txt;
+	rect clientRect;
+	int color;
+	int fontsize;
+	int rotation;
+	int tab;
+	int border_type;
+	text(string _txt="")
+		:	txt(_txt)
+	{};
+};
+
+struct rectangle {
+	rect clientRect;
+};
+
+struct circle {
+	rect clientRect;
+};
+
+struct line {
+	rect clientRect;
+};
+
+struct bitmap {
+	rect clientRect;
+};
+
+struct metafile {
+	rect clientRect;
+};
+
 struct graphLayer {
+	rect clientRect;
 	string legend;
 	graphAxis xAxis;
 	graphAxis yAxis;
@@ -236,12 +307,15 @@ struct graphLayer {
 	double histogram_begin;
 	double histogram_end;
 
+	vector<text> texts;
 	vector<graphCurve> curve;
 };
 
 struct graph {
 	string name;
 	string label;
+	int objectID;
+	string parentFolder;
 	bool bHidden;
 	vector<graphLayer> layer;
 	graph(string _name="")
@@ -254,9 +328,20 @@ struct graph {
 struct note {
 	string name;
 	string label;
+	int objectID;
+	string parentFolder;
 	string text;
 	note(string _name="")
 	:	name(_name)
+	{};
+};
+
+struct projectNode {
+	int type; // 0 - object, 1 - folder
+	string name;
+	projectNode(string _name="", int _type=0)
+	:	name(_name)
+	,	type(_type)
 	{};
 };
 
@@ -267,9 +352,11 @@ public:
 	int Parse();
 	double Version() { return version/100.0; }		//!< get version of project file
 
+	const tree<projectNode>* project() const { return &projectTree; }
 	//spreadsheet properties
 	int numSpreads() { return SPREADSHEET.size(); }			//!< get number of spreadsheets
 	const char *spreadName(int s) { return SPREADSHEET[s].name.c_str(); }	//!< get name of spreadsheet s
+	const char *spreadParentFolder(int s) { return SPREADSHEET[s].parentFolder.c_str(); }	//!< get parent folder of spreadsheet s
 	bool spreadHidden(int s) { return SPREADSHEET[s].bHidden; }	//!< is spreadsheet s hidden
 	bool spreadLoose(int s) { return SPREADSHEET[s].bLoose; }	//!< is spreadsheet s loose
 	const char *spreadLabel(int s) { return SPREADSHEET[s].label.c_str(); }	//!< get label of spreadsheet s
@@ -299,6 +386,7 @@ public:
 	//matrix properties
 	int numMatrices() { return MATRIX.size(); }			//!< get number of matrices
 	const char *matrixName(int s) { return MATRIX[s].name.c_str(); }	//!< get name of matrix s
+	const char *matrixParentFolder(int s) { return MATRIX[s].parentFolder.c_str(); }	//!< get parent folder of matrix s
 	const char *matrixLabel(int s) { return MATRIX[s].label.c_str(); }	//!< get label of matrix s
 	int numMartixCols(int s) { return MATRIX[s].nr_cols; }		//!< get number of columns of matrix s
 	int numMartixRows(int s) { return MATRIX[s].nr_rows; }	//!< get number of rows of matrix s
@@ -337,18 +425,23 @@ public:
 
 	enum LineConnect {NoLine=0, Straight=1, TwoPointSegment=2, ThreePointSegment=3, BSpline=8, Spline=9, StepHorizontal=11, StepVertical=12, StepHCenter=13, StepVCenter=14, Bezier=15};
 
-	enum Scale{Linear=0, Log10=1, Probability=2, Probit=3, Reciprocal=4, OffsetReciprocal=5, Logit=6, Ln=7, Log2=8};
+	enum Scale {Linear=0, Log10=1, Probability=2, Probit=3, Reciprocal=4, OffsetReciprocal=5, Logit=6, Ln=7, Log2=8};
 
 	enum ValueType {Numeric=0, Text=1, Time=2, Date=3,  Month=4, Day=5, ColumnHeading=6, TickIndexedDataset=7, TextNumeric=9, Categorical=10};
+	
+	enum BorderType {BlackLine=0, Shadow=1, DarkMarble=2, WhiteOut=3, BlackOut=4, None=-1};
 
 	int numGraphs() { return GRAPH.size(); }			//!< get number of graphs
 	const char *graphName(int s) { return GRAPH[s].name.c_str(); }	//!< get name of graph s
+	const char *graphParentFolder(int s) { return GRAPH[s].parentFolder.c_str(); }	//!< get parent folder of graph s
 	const char *graphLabel(int s) { return GRAPH[s].label.c_str(); }	//!< get name of graph s
 	bool graphHidden(int s) { return GRAPH[s].bHidden; }	//!< is graph s hidden
 	int numLayers(int s) { return GRAPH[s].layer.size(); }			//!< get number of layers of graph s
+	rect layerRect(int s, int l) { return GRAPH[s].layer[l].clientRect; }		//!< get rectangle of layer l of graph s
 	const char *layerXAxisTitle(int s, int l) { return GRAPH[s].layer[l].xAxis.label.c_str(); }		//!< get label of X-axis of layer l of graph s
 	const char *layerYAxisTitle(int s, int l) { return GRAPH[s].layer[l].yAxis.label.c_str(); }		//!< get label of Y-axis of layer l of graph s
 	const char *layerLegend(int s, int l) { return GRAPH[s].layer[l].legend.c_str(); }		//!< get legend of layer l of graph s
+	vector<text> layerTexts(int s, int l) {	return GRAPH[s].layer[l].texts; } //!< get texts of layer l of graph s
 	vector<double> layerXRange(int s, int l) {
 		vector<double> range;
 		range.push_back(GRAPH[s].layer[l].xAxis.min);
@@ -436,6 +529,7 @@ public:
 	//note
 	int numNotes() { return NOTE.size(); }			//!< get number of notes
 	const char *noteName(int n) { return NOTE[n].name.c_str(); }	//!< get name of note n
+	const char *noteParentFolder(int n) { return NOTE[n].parentFolder.c_str(); }	//!< get parent folder of note n
 	const char *noteLabel(int n) { return NOTE[n].label.c_str(); }	//!< get label of note n
 	const char *noteText(int n) { return NOTE[n].text.c_str(); }	//!< get text of note n
 
@@ -447,27 +541,37 @@ private:
 	int ParseFormatOld();
 	int ParseFormatNew();
 	int  compareSpreadnames(char *sname);				//!< returns matching spread index
+	int  compareExcelnames(char *sname);				//!< returns matching excel index
 	int  compareColumnnames(int spread, char *sname);	//!< returns matching column index
+	int  compareExcelColumnnames(int excel, int sheet, char *sname);  //!< returns matching column index
 	int  compareMatrixnames(char *sname);				//!< returns matching matrix index
 	int  compareFunctionnames(const char *sname);				//!< returns matching function index
 	vector<string> findDataByIndex(int index);
+	string findObjectByIndex(int index, string folder);
 	void readSpreadInfo(FILE *fopj, FILE *fdebug);
+	void readExcelInfo(FILE *f, FILE *debug);
 	void readMatrixInfo(FILE *fopj, FILE *fdebug);
 	void readGraphInfo(FILE *fopj, FILE *fdebug);
 	void readGraphGridInfo(graphGrid &grid, FILE *fopj, int pos);
 	void readGraphAxisFormatInfo(graphAxisFormat &format, FILE *fopj, int pos);
 	void readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *fopj, int pos);
+	void readProjectTree(FILE *f, FILE *debug);
+	void readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent);
 	void skipObjectInfo(FILE *fopj, FILE *fdebug);
 	void setColName(int spread);		//!< set default column name starting from spreadsheet spread
+	void convertSpreadToExcel(int spread);
 	const char* filename;			//!< project file name
 	int version;				//!< project version
 	int dataIndex;
+	int objectIndex;
 	string resultsLog;
 	vector <spreadSheet> SPREADSHEET;
 	vector <matrix> MATRIX;
+	vector <excel> EXCEL;
 	vector <function> FUNCTION;
 	vector <graph> GRAPH;
 	vector <note> NOTE;
+	tree <projectNode> projectTree;
 };
 
 #endif // OPJFILE_H

@@ -2,7 +2,7 @@
     File                 : OPJFile.cpp
     --------------------------------------------------------------------
     Copyright            : (C) 2005-2007 Stefan Gerlach
-                           (C) 2007 by Alex Kargovsky, Ion Vasilief
+						   (C) 2007 by Alex Kargovsky, Ion Vasilief
     Email (use @ for *)  : kargovsky*yumr.phys.msu.su, ion_vasilief*yahoo.fr
     Description          : Origin project import class
 
@@ -28,8 +28,8 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 
 #include <algorithm> //required for std::swap
@@ -62,6 +62,7 @@ OPJFile::OPJFile(const char *filename)
 {
 	version=0;
 	dataIndex=0;
+	objectIndex=0;
 }
 
 int OPJFile::compareSpreadnames(char *sname) {
@@ -71,9 +72,23 @@ int OPJFile::compareSpreadnames(char *sname) {
 	return -1;
 }
 
+int OPJFile::compareExcelnames(char *sname) {
+	for(unsigned int i=0;i<EXCEL.size();i++)
+		if (0==strcmp_i(EXCEL[i].name.c_str(),sname))
+			return i;
+	return -1;
+}
+
+
 int OPJFile::compareColumnnames(int spread, char *sname) {
 	for(unsigned int i=0;i<SPREADSHEET[spread].column.size();i++)
 		if (SPREADSHEET[spread].column[i].name == sname)
+			return i;
+	return -1;
+}
+int OPJFile::compareExcelColumnnames(int iexcel, int isheet, char *sname) {
+	for(unsigned int i=0;i<EXCEL[iexcel].sheet[isheet].column.size();i++)
+		if (EXCEL[iexcel].sheet[isheet].column[i].name == sname)
 			return i;
 	return -1;
 }
@@ -109,6 +124,15 @@ vector<string> OPJFile::findDataByIndex(int index) {
 			str.push_back("M_" + MATRIX[i].name);
 			return str;
 		}
+	for(unsigned int i=0;i<EXCEL.size();i++)
+		for(unsigned int j=0;j<EXCEL[i].sheet.size();j++)
+			for(unsigned int k=0;k<EXCEL[i].sheet[j].column.size();k++)
+				if (EXCEL[i].sheet[j].column[k].index == index)
+				{
+					str.push_back(EXCEL[i].sheet[j].column[k].name);
+					str.push_back("E_" + EXCEL[i].name);
+					return str;
+				}
 	for(unsigned int i=0;i<FUNCTION.size();i++)
 		if (FUNCTION[i].index == index)
 		{
@@ -119,6 +143,61 @@ vector<string> OPJFile::findDataByIndex(int index) {
 	return str;
 }
 
+string OPJFile::findObjectByIndex(int index, string folder) {
+	for(unsigned int i=0;i<SPREADSHEET.size();i++)
+		if (SPREADSHEET[i].objectID == index)
+		{
+			SPREADSHEET[i].parentFolder=folder;
+			return SPREADSHEET[i].name;
+		}
+
+	for(unsigned int i=0;i<MATRIX.size();i++)
+		if (MATRIX[i].objectID == index)
+		{
+			MATRIX[i].parentFolder=folder;
+			return MATRIX[i].name;
+		}
+
+	for(unsigned int i=0;i<EXCEL.size();i++)
+		if (EXCEL[i].objectID == index)
+		{
+			EXCEL[i].parentFolder=folder;
+			return EXCEL[i].name;
+		}
+
+	for(unsigned int i=0;i<GRAPH.size();i++)
+		if (GRAPH[i].objectID == index)
+		{
+			GRAPH[i].parentFolder=folder;
+			return GRAPH[i].name;
+		}
+
+	return "";
+}
+
+void OPJFile::convertSpreadToExcel(int spread)
+{
+	//add new Excel sheet
+	EXCEL.push_back(excel(SPREADSHEET[spread].name, SPREADSHEET[spread].label, SPREADSHEET[spread].maxRows, SPREADSHEET[spread].bHidden, SPREADSHEET[spread].bLoose));
+	for (int i=0; i<SPREADSHEET[spread].column.size(); ++i)
+	{
+		string name=SPREADSHEET[spread].column[i].name;
+		int pos=name.find_last_of("@");
+		string col=name;
+		int index=0;
+		if(pos!=-1)
+		{
+			col=name.substr(0, pos);
+			index=atoi(name.substr(pos+1).c_str())-1;
+		}
+
+		if(EXCEL.back().sheet.size()<=index)
+			EXCEL.back().sheet.resize(index+1);
+		SPREADSHEET[spread].column[i].name=col;
+		EXCEL.back().sheet[index].column.push_back(SPREADSHEET[spread].column[i]);
+	}
+	SPREADSHEET.erase(SPREADSHEET.begin()+spread);
+}
 // set default name for columns starting from spreadsheet spread
 void OPJFile::setColName(int spread) {
 	for(unsigned int j=spread;j<SPREADSHEET.size();j++) {
@@ -901,6 +980,13 @@ int OPJFile::ParseFormatNew() {
 				sname, cname,current_col,(unsigned int) ftell(f));
 			fflush(debug);
 			SPREADSHEET[spread].column.push_back(spreadColumn(cname, dataIndex));
+			int sheetpos=SPREADSHEET[spread].column.back().name.find_last_of("@");
+			if(!SPREADSHEET[spread].bMultisheet && sheetpos!=-1)
+				if(atoi(string(cname).substr(sheetpos+1).c_str())>1)
+				{
+					SPREADSHEET[spread].bMultisheet=true;
+					fprintf(debug,"SPREADSHEET \"%s\" IS MULTISHEET \n", sname);
+				}
 			dataIndex++;
 
 ////////////////////////////// SIZE of column /////////////////////////////////////////////
@@ -991,6 +1077,16 @@ int OPJFile::ParseFormatNew() {
 		fflush(debug);
 	}
 
+////////////////////////////////////////////////////////////////////////////
+	for(int i=0; i<SPREADSHEET.size(); ++i)
+		if(SPREADSHEET[i].bMultisheet)
+		{
+			fprintf(debug,"		CONVERT SPREADSHEET \"%s\" to EXCEL\n", SPREADSHEET[i].name.c_str());
+			fflush(debug);
+			convertSpreadToExcel(i);
+			i--;
+		}
+////////////////////////////////////////////////////////////////////////////
 ////////////////////// HEADER SECTION //////////////////////////////////////
 
 	int POS = ftell(f)-11;
@@ -999,7 +1095,7 @@ int OPJFile::ParseFormatNew() {
 	fprintf(debug,"	[position @ 0x%X]\n",POS);
 	fflush(debug);
 
-///////////////////// SPREADSHEET INFOS ////////////////////////////////////
+//////////////////////// OBJECT INFOS //////////////////////////////////////
 	POS+=0xB;
 	fseek(f,POS,SEEK_SET);
 	while(1) {
@@ -1051,6 +1147,8 @@ int OPJFile::ParseFormatNew() {
 			readSpreadInfo(f, debug);
 		else if(compareMatrixnames(object_name)!=-1)
 			readMatrixInfo(f, debug);
+		else if(compareExcelnames(object_name)!=-1)
+			readExcelInfo(f, debug);
 		else
 			readGraphInfo(f, debug);
 	}
@@ -1110,6 +1208,8 @@ int OPJFile::ParseFormatNew() {
 		else
 		{
 			NOTE.push_back(note(stmp));
+			NOTE.back().objectID=objectIndex;
+			objectIndex++;
 			delete stmp;
 			fseek(f,1,SEEK_CUR);
 			fread(&size,4,1,f);
@@ -1135,6 +1235,12 @@ int OPJFile::ParseFormatNew() {
 		}
 	}
 
+	fseek(f,1+4*5+0x10+1,SEEK_CUR);
+	try{
+		readProjectTree(f, debug);
+	}
+	catch(...)
+	{}
 	fprintf(debug,"Done parsing\n");
 	fclose(debug);
 
@@ -1161,6 +1267,8 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 
 	int spread=compareSpreadnames(name);
 	SPREADSHEET[spread].name=name;
+	SPREADSHEET[spread].objectID=objectIndex;
+	objectIndex++;
 
 	fprintf(debug,"			SPREADSHEET %d NAME : %s	(@ 0x%X) has %d columns\n",
 		spread+1,name,POS + 0x2,SPREADSHEET[spread].column.size());
@@ -1385,6 +1493,266 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 	fseek(f,POS,SEEK_SET);
 }
 
+void OPJFile::readExcelInfo(FILE *f, FILE *debug)
+{
+	int POS=ftell(f);
+	int spreadPOS=POS;
+
+	int headersize;
+	fread(&headersize,4,1,f);
+	if(IsBigEndian()) SwapBytes(headersize);
+
+	POS+=5;
+
+	fprintf(debug,"			[EXCEL SECTION (@ 0x%X)]\n",POS);
+	fflush(debug);
+
+	// check spreadsheet name
+	char name[25];
+	fseek(f,POS + 0x2,SEEK_SET);
+	fread(&name,25,1,f);
+
+	int iexcel=compareExcelnames(name);
+	EXCEL[iexcel].name=name;
+	EXCEL[iexcel].objectID=objectIndex;
+	objectIndex++;
+
+	fprintf(debug,"			EXCEL %d NAME : %s	(@ 0x%X) has %d sheets\n",
+		iexcel+1,name,POS + 0x2,EXCEL[iexcel].sheet.size());
+	fflush(debug);
+
+	char c;
+	fseek(f,POS + 0x69,SEEK_SET);
+	fread(&c,1,1,f);
+	if( (c&0x08) == 0x08)
+	{
+		EXCEL[iexcel].bHidden=true;
+		fprintf(debug,"			EXCEL %d NAME : %s	is hidden\n", iexcel+1,name);
+		fflush(debug);
+	}
+	EXCEL[iexcel].bLoose=false;
+
+	if(headersize>0xC3)
+	{
+		int labellen=0;
+		fseek(f,POS + 0xC3,SEEK_SET);
+		fread(&c,1,1,f);
+		while (c != '@'){
+			fread(&c,1,1,f);
+			labellen++;
+		}
+		if(labellen>0)
+		{
+			char *label=new char[labellen+1];
+			label[labellen]='\0';
+			fseek(f,POS + 0xC3,SEEK_SET);
+			fread(label,labellen,1,f);
+			EXCEL[iexcel].label=label;
+			delete label;
+		}
+		else
+			EXCEL[iexcel].label="";
+		fprintf(debug,"			EXCEL %d LABEL : %s\n",iexcel+1,EXCEL[iexcel].label.c_str());
+		fflush(debug);
+	}
+
+	int LAYER = POS;
+	LAYER += headersize + 0x1;
+	int sec_size;
+	int isheet=0;
+	while(1)// multisheet loop
+	{
+		// LAYER section
+		LAYER += 0x5/* length of block = 0x12D + '\n'*/ + 0x12D + 0x1;
+		//now structure is next : section_header_size=0x6F(4 bytes) + '\n' + section_header(0x6F bytes) + section_body_1_size(4 bytes) + '\n' + section_body_1 + section_body_2_size(maybe=0)(4 bytes) + '\n' + section_body_2 + '\n'
+		//possible sections: column formulas, __WIPR, __WIOTN, __LayerInfoStorage etc
+		//section name(column name in formula case) starts with 0x46 position
+		while(1)
+		{
+		//section_header_size=0x6F(4 bytes) + '\n'
+			LAYER+=0x5;
+
+		//section_header
+			fseek(f,LAYER+0x46,SEEK_SET);
+			char sec_name[42];
+			sec_name[41]='\0';
+			fread(&sec_name,41,1,f);
+
+			fprintf(debug,"				DEBUG SECTION NAME: %s (@ 0x%X)\n", sec_name, LAYER+0x46);
+			fflush(debug);
+
+		//section_body_1_size
+			LAYER+=0x6F+0x1;
+			fseek(f,LAYER,SEEK_SET);
+			fread(&sec_size,4,1,f);
+			if(IsBigEndian()) SwapBytes(sec_size);
+
+		//section_body_1
+			LAYER+=0x5;
+			fseek(f,LAYER,SEEK_SET);
+			//check if it is a formula
+			int col_index=compareExcelColumnnames(iexcel, isheet, sec_name);
+			if(col_index!=-1)
+			{
+				char *stmp=new char[sec_size+1];
+				stmp[sec_size]='\0';
+				fread(stmp,sec_size,1,f);
+				EXCEL[iexcel].sheet[isheet].column[col_index].command=stmp;
+				delete stmp;
+			}
+
+		//section_body_2_size
+			LAYER+=sec_size+0x1;
+			fseek(f,LAYER,SEEK_SET);
+			fread(&sec_size,4,1,f);
+			if(IsBigEndian()) SwapBytes(sec_size);
+
+		//section_body_2
+			LAYER+=0x5;
+
+		//close section 00 00 00 00 0A
+			LAYER+=sec_size+(sec_size>0?0x1:0)+0x5;
+
+			if(0==strcmp(sec_name,"__LayerInfoStorage"))
+				break;
+
+		}
+		LAYER+=0x5;
+
+		fflush(debug);
+
+		/////////////// COLUMN Types ///////////////////////////////////////////
+		fprintf(debug,"			Excel sheet %d has %d columns\n",EXCEL[iexcel].sheet[isheet].column.size());
+
+		while(1)
+		{
+			LAYER+=0x5;
+			fseek(f,LAYER+0x12, SEEK_SET);
+			fread(&name,12,1,f);
+
+			fseek(f,LAYER+0x11, SEEK_SET);
+			fread(&c,1,1,f);
+			short width=0;
+			fseek(f,LAYER+0x4A, SEEK_SET);
+			fread(&width,2,1,f);
+			if(IsBigEndian()) SwapBytes(width);
+			//char col_name[30];
+			//sprintf(col_name, "%s@%d", name, isheet); 
+			int col_index=compareExcelColumnnames(iexcel, isheet, name);
+			if(col_index!=-1)
+			{
+				char type[5];
+				switch(c) {
+					case 3: sprintf(type,"X");break;
+					case 0: sprintf(type,"Y");break;
+					case 5: sprintf(type,"Z");break;
+					case 6: sprintf(type,"DX");break;
+					case 2: sprintf(type,"DY");break;
+					case 4: sprintf(type,"LABEL");break;
+					default: sprintf(type,"NONE");break;
+				}
+				EXCEL[iexcel].sheet[isheet].column[col_index].type=type;
+				width/=0xA;
+				if(width==0)
+					width=8;
+				EXCEL[iexcel].sheet[isheet].column[col_index].width=width;
+				fseek(f,LAYER+0x1E, SEEK_SET);
+				unsigned char c1,c2;
+				fread(&c1,1,1,f);
+				fread(&c2,1,1,f);
+				switch(c1)
+				{
+				case 0x00: // Numeric	   - Dec1000
+				case 0x09: // Text&Numeric - Dec1000
+				case 0x10: // Numeric	   - Scientific
+				case 0x19: // Text&Numeric - Scientific
+				case 0x20: // Numeric	   - Engeneering
+				case 0x29: // Text&Numeric - Engeneering
+				case 0x30: // Numeric	   - Dec1,000
+				case 0x39: // Text&Numeric - Dec1,000
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=(c1%0x10==0x9)?6:0;
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification=c1/0x10;
+					if(c2>=0x80)
+					{
+						EXCEL[iexcel].sheet[isheet].column[col_index].significant_digits=c2-0x80;
+						EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type=2;
+					}
+					else if(c2>0)
+					{
+						EXCEL[iexcel].sheet[isheet].column[col_index].decimal_places=c2-0x03;
+						EXCEL[iexcel].sheet[isheet].column[col_index].numeric_display_type=1;
+					}
+					break;
+				case 0x02: // Time
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=3;
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification=c2-0x80;
+					break;
+				case 0x03: // Date
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=2;
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification=c2-0x80;
+					break;
+				case 0x31: // Text
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=1;
+					break;
+				case 0x4: // Month
+				case 0x34:
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=4;
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification=c2;
+					break;
+				case 0x5: // Day
+				case 0x35:
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=5;
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type_specification=c2;
+					break;
+				default: // Text
+					EXCEL[iexcel].sheet[isheet].column[col_index].value_type=1;
+					break;
+				}
+				fprintf(debug,"				COLUMN \"%s\" type = %s(%d) (@ 0x%X)\n",
+					EXCEL[iexcel].sheet[isheet].column[col_index].name.c_str(),type,c,LAYER+0x11);
+				fflush(debug);
+			}
+			LAYER+=0x1E7+0x1;
+			fseek(f,LAYER,SEEK_SET);
+			int comm_size=0;
+			fread(&comm_size,4,1,f);
+			if(IsBigEndian()) SwapBytes(comm_size);
+			LAYER+=0x5;
+			if(comm_size>0)
+			{
+				char* comment=new char[comm_size+1];
+				comment[comm_size]='\0';
+				fseek(f,LAYER,SEEK_SET);
+				fread(comment,comm_size,1,f);
+				if(col_index!=-1)
+					EXCEL[iexcel].sheet[isheet].column[col_index].comment=comment;
+				LAYER+=comm_size+0x1;
+				delete comment;
+			}
+			fseek(f,LAYER,SEEK_SET);
+			int ntmp;
+			fread(&ntmp,4,1,f);
+			if(IsBigEndian()) SwapBytes(ntmp);
+			if(ntmp!=0x1E7)
+				break;
+		}
+		fprintf(debug,"		Done with excel %d\n", iexcel);
+		fflush(debug);
+
+		//POS = LAYER+0x5*0x6+0x1ED*0x12;
+		LAYER+=0x5*0x5+0x1ED*0x12;
+		fseek(f,LAYER,SEEK_SET);
+		fread(&sec_size,4,1,f);
+		if(IsBigEndian()) SwapBytes(sec_size);
+		if(sec_size==0)
+			break;
+		isheet++;
+	}
+	POS = LAYER+0x5;
+
+	fseek(f,POS,SEEK_SET);
+}
+
 void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 {
 	int POS=ftell(f);
@@ -1404,6 +1772,8 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 
 	int idx=compareMatrixnames(name);
 	MATRIX[idx].name=name;
+	MATRIX[idx].objectID=objectIndex;
+	objectIndex++;
 
 	fprintf(debug,"			MATRIX %d NAME : %s	(@ 0x%X) \n", idx+1,name,POS + 0x2);
 	fflush(debug);
@@ -1571,6 +1941,8 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 	fread(&name,25,1,f);
 
 	GRAPH.push_back(graph(name));
+	GRAPH.back().objectID=objectIndex;
+	objectIndex++;
 
 	fprintf(debug,"			GRAPH %d NAME : %s	(@ 0x%X) \n", GRAPH.size(),name,POS + 0x2);
 	fflush(debug);
@@ -1658,6 +2030,12 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 		fread(&m,1,1,f);
 		GRAPH.back().layer.back().yAxis.scale=m;
 
+		rect r;
+		fseek(f, LAYER+0x71, SEEK_SET);
+		fread(&r,sizeof(rect),1,f);
+		if(IsBigEndian()) SwapBytes(r);
+		GRAPH.back().layer.back().clientRect=r;
+
 		LAYER += 0x12D + 0x1;
 		//now structure is next : section_header_size=0x6F(4 bytes) + '\n' + section_header(0x6F bytes) + section_body_1_size(4 bytes) + '\n' + section_body_1 + section_body_2_size(maybe=0)(4 bytes) + '\n' + section_body_2 + '\n'
 		//possible sections: axes, legend, __BC02, _202, _231, _232, __LayerInfoStorage etc
@@ -1673,6 +2051,17 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 			sec_name[41]='\0';
 			fread(&sec_name,41,1,f);
 
+			fseek(f, LAYER+0x3, SEEK_SET);
+			fread(&r,sizeof(rect),1,f);
+			if(IsBigEndian()) SwapBytes(r);
+
+			unsigned char c,b;
+			fseek(f, LAYER+0x29, SEEK_SET);
+			fread(&b,1,1,f);
+
+			fseek(f, LAYER+0x33, SEEK_SET);
+			fread(&c,1,1,f);
+
 		//section_body_1_size
 			LAYER+=0x6F+0x1;
 			fseek(f,LAYER,SEEK_SET);
@@ -1681,6 +2070,18 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 		//section_body_1
 			LAYER+=0x5;
+			short rotation=0;
+			int size=sec_size;
+			char type=0;
+			fread(&type,1,1,f);
+			fseek(f,LAYER+2,SEEK_SET);
+			if(IsBigEndian()) SwapBytes(rotation);
+			fread(&rotation,2,1,f);
+			unsigned char fontsize=0;
+			fread(&fontsize,1,1,f);
+			unsigned char tab=0;
+			fseek(f,LAYER+0xA,SEEK_SET);
+			fread(&tab,1,1,f);
 
 		//section_body_2_size
 			LAYER+=sec_size+0x1;
@@ -1743,6 +2144,21 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 				if(IsBigEndian()) SwapBytes(d);
 				GRAPH.back().layer.back().histogram_begin=d;
 			}
+			else if(size==0x3E)
+			{
+				stmp[sec_size]='\0';
+				fread(&stmp,sec_size,1,f);
+				GRAPH.back().layer.back().texts.push_back(text(stmp));
+				GRAPH.back().layer.back().texts.back().color=c;
+				GRAPH.back().layer.back().texts.back().clientRect=r;
+				GRAPH.back().layer.back().texts.back().tab=tab;
+				GRAPH.back().layer.back().texts.back().fontsize=fontsize;
+				GRAPH.back().layer.back().texts.back().rotation=rotation/10;
+				if(b>=0x80)
+					GRAPH.back().layer.back().texts.back().border_type=b-0x80;
+				else
+					GRAPH.back().layer.back().texts.back().border_type=None;
+			}
 
 		//close section 00 00 00 00 0A
 			LAYER+=sec_size+(sec_size>0?0x1:0);
@@ -1765,141 +2181,148 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 		LAYER+=0x5;
 		unsigned char h;
 		short w;
-		while(1)//need to add empty layer check!!!
-		{
-			LAYER+=0x5;
-
-			GRAPH.back().layer.back().curve.push_back(graphCurve());
-
-			vector<string> col;
-			fseek(f,LAYER+0x4,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			col=findDataByIndex(w-1);
-			if(col.size()>0)
-			{
-				fprintf(debug,"			GRAPH %d layer %d curve %d Y : %s.%s\n",GRAPH.size(),GRAPH.back().layer.size(),GRAPH.back().layer.back().curve.size(),col[1].c_str(),col[0].c_str());
-				fflush(debug);
-				GRAPH.back().layer.back().curve.back().yColName=col[0];
-				GRAPH.back().layer.back().curve.back().dataName=col[1];
-			}
-
-			fseek(f,LAYER+0x23,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			col=findDataByIndex(w-1);
-			if(col.size()>0)
-			{
-				fprintf(debug,"			GRAPH %d layer %d curve %d X : %s.%s\n",GRAPH.size(),GRAPH.back().layer.size(),GRAPH.back().layer.back().curve.size(),col[1].c_str(),col[0].c_str());
-				fflush(debug);
-				GRAPH.back().layer.back().curve.back().xColName=col[0];
-				if(GRAPH.back().layer.back().curve.back().dataName!=col[1])
-					fprintf(debug,"			GRAPH %d X and Y from different tables\n",GRAPH.size());
-			}
-
-			fseek(f,LAYER+0x4C,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().type=h;
-
-			fseek(f,LAYER+0x11,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().line_connect=h;
-
-			fseek(f,LAYER+0x12,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().line_style=h;
-
-			fseek(f,LAYER+0x15,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			GRAPH.back().layer.back().curve.back().line_width=(double)w/500.0;
-
-			fseek(f,LAYER+0x19,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			GRAPH.back().layer.back().curve.back().symbol_size=(double)w/500.0;
-
-			fseek(f,LAYER+0x1C,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea=(h==2?true:false);
-
-			fseek(f,LAYER+0x1E,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_type=h;
-
-			fseek(f,LAYER+0xC2,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_color=h;
-
-			fseek(f,LAYER+0xCE,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern=h;
-
-			fseek(f,LAYER+0xCA,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_color=h;
-
-			fseek(f,LAYER+0xC6,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_width=(double)w/500.0;
-
-			fseek(f,LAYER+0xCF,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_border_style=h;
-
-			fseek(f,LAYER+0xD2,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_border_color=h;
 			
-			fseek(f,LAYER+0xD0,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			GRAPH.back().layer.back().curve.back().fillarea_pattern_border_width=(double)w/500.0;
-
-			fseek(f,LAYER+0x16A,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().line_color=h;
-
-			fseek(f,LAYER+0x17,SEEK_SET);
-			fread(&w,2,1,f);
-			if(IsBigEndian()) SwapBytes(w);
-			GRAPH.back().layer.back().curve.back().symbol_type=w;
-
-			fseek(f,LAYER+0x12E,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().symbol_fill_color=h;
-
-			fseek(f,LAYER+0x132,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().symbol_color=h;
-
-			fseek(f,LAYER+0x136,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().symbol_thickness=(h==255?1:h);
-
-			fseek(f,LAYER+0x137,SEEK_SET);
-			fread(&h,1,1,f);
-			GRAPH.back().layer.back().curve.back().point_offset=h;
-
-			LAYER+=0x1E7+0x1;
-			fseek(f,LAYER,SEEK_SET);
-			int comm_size=0;
-			fread(&comm_size,4,1,f);
-			if(IsBigEndian()) SwapBytes(comm_size);
-			LAYER+=0x5;
-			if(comm_size>0)
+		fseek(f,LAYER,SEEK_SET);
+		fread(&sec_size,4,1,f);
+		if(IsBigEndian()) SwapBytes(sec_size);
+		if(sec_size==0x1E7)//check layer is not empty
+		{
+			while(1)
 			{
-				LAYER+=comm_size+0x1;
-			}
-			fseek(f,LAYER,SEEK_SET);
-			int ntmp;
-			fread(&ntmp,4,1,f);
-			if(IsBigEndian()) SwapBytes(ntmp);
-			if(ntmp!=0x1E7)
-				break;
-		}
+				LAYER+=0x5;
 
+				GRAPH.back().layer.back().curve.push_back(graphCurve());
+
+				vector<string> col;
+				fseek(f,LAYER+0x4,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				col=findDataByIndex(w-1);
+				if(col.size()>0)
+				{
+					fprintf(debug,"			GRAPH %d layer %d curve %d Y : %s.%s\n",GRAPH.size(),GRAPH.back().layer.size(),GRAPH.back().layer.back().curve.size(),col[1].c_str(),col[0].c_str());
+					fflush(debug);
+					GRAPH.back().layer.back().curve.back().yColName=col[0];
+					GRAPH.back().layer.back().curve.back().dataName=col[1];
+				}
+
+				fseek(f,LAYER+0x23,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				col=findDataByIndex(w-1);
+				if(col.size()>0)
+				{
+					fprintf(debug,"			GRAPH %d layer %d curve %d X : %s.%s\n",GRAPH.size(),GRAPH.back().layer.size(),GRAPH.back().layer.back().curve.size(),col[1].c_str(),col[0].c_str());
+					fflush(debug);
+					GRAPH.back().layer.back().curve.back().xColName=col[0];
+					if(GRAPH.back().layer.back().curve.back().dataName!=col[1])
+						fprintf(debug,"			GRAPH %d X and Y from different tables\n",GRAPH.size());
+				}
+
+				fseek(f,LAYER+0x4C,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().type=h;
+
+				fseek(f,LAYER+0x11,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().line_connect=h;
+
+				fseek(f,LAYER+0x12,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().line_style=h;
+
+				fseek(f,LAYER+0x15,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				GRAPH.back().layer.back().curve.back().line_width=(double)w/500.0;
+
+				fseek(f,LAYER+0x19,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				GRAPH.back().layer.back().curve.back().symbol_size=(double)w/500.0;
+
+				fseek(f,LAYER+0x1C,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea=(h==2?true:false);
+
+				fseek(f,LAYER+0x1E,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_type=h;
+
+				fseek(f,LAYER+0xC2,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_color=h;
+
+				fseek(f,LAYER+0xCE,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern=h;
+
+				fseek(f,LAYER+0xCA,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern_color=h;
+
+				fseek(f,LAYER+0xC6,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern_width=(double)w/500.0;
+
+				fseek(f,LAYER+0xCF,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern_border_style=h;
+
+				fseek(f,LAYER+0xD2,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern_border_color=h;
+				
+				fseek(f,LAYER+0xD0,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				GRAPH.back().layer.back().curve.back().fillarea_pattern_border_width=(double)w/500.0;
+
+				fseek(f,LAYER+0x16A,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().line_color=h;
+
+				fseek(f,LAYER+0x17,SEEK_SET);
+				fread(&w,2,1,f);
+				if(IsBigEndian()) SwapBytes(w);
+				GRAPH.back().layer.back().curve.back().symbol_type=w;
+
+				fseek(f,LAYER+0x12E,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().symbol_fill_color=h;
+
+				fseek(f,LAYER+0x132,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().symbol_color=h;
+
+				fseek(f,LAYER+0x136,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().symbol_thickness=(h==255?1:h);
+
+				fseek(f,LAYER+0x137,SEEK_SET);
+				fread(&h,1,1,f);
+				GRAPH.back().layer.back().curve.back().point_offset=h;
+
+				LAYER+=0x1E7+0x1;
+				fseek(f,LAYER,SEEK_SET);
+				int comm_size=0;
+				fread(&comm_size,4,1,f);
+				if(IsBigEndian()) SwapBytes(comm_size);
+				LAYER+=0x5;
+				if(comm_size>0)
+				{
+					LAYER+=comm_size+0x1;
+				}
+				fseek(f,LAYER,SEEK_SET);
+				int ntmp;
+				fread(&ntmp,4,1,f);
+				if(IsBigEndian()) SwapBytes(ntmp);
+				if(ntmp!=0x1E7)
+					break;
+			}
+
+		}
 		//LAYER+=0x5*0x5+0x1ED*0x12;
 		LAYER+=2*0x5;
 
@@ -1967,7 +2390,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 	fseek(f,POS,SEEK_SET);
 }
 
-void OPJFile::skipObjectInfo(FILE *f, FILE *)
+void OPJFile::skipObjectInfo(FILE *f, FILE *debug)
 {
 	int POS=ftell(f);
 
@@ -2139,9 +2562,7 @@ void OPJFile::readGraphAxisFormatInfo(graphAxisFormat &format, FILE *f, int pos)
 void OPJFile::readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *f, int pos) {
 	unsigned char h;
 	unsigned char h1;
-	// unsigned char h2;
 	short w;
-	//double p;
 	fseek(f,pos+0x26,SEEK_SET);
 	fread(&h,1,1,f);
 	tick.hidden=(h==0);
@@ -2222,6 +2643,77 @@ void OPJFile::readGraphAxisTickLabelsInfo(graphAxisTick &tick, FILE *f, int pos)
 		tick.value_type_specification=0;
 		break;
 	}
+}
+
+void OPJFile::readProjectTree(FILE *f, FILE *debug)
+{
+	readProjectTreeFolder(f, debug, projectTree.begin());
+
+	fprintf(debug,"Origin project Tree\n");
+	tree<projectNode>::iterator sib2=projectTree.begin(projectTree.begin());
+    tree<projectNode>::iterator end2=projectTree.end(projectTree.begin());
+    while(sib2!=end2) 
+	{
+        for(int i=0; i<projectTree.depth(sib2)-1; ++i) 
+			fprintf(debug," ");
+		fprintf(debug,"%s\n",(*sib2).name.c_str());
+        ++sib2;
+    }
+	fflush(debug);
+}
+
+void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent)
+{
+	int POS=ftell(f);
+
+	POS+=5+0x20+1+5;
+	fseek(f,POS,SEEK_SET);
+
+	int namesize;
+	fread(&namesize,4,1,f);
+	if(IsBigEndian()) SwapBytes(namesize);
+
+	POS+=5;
+
+	// read folder name
+	char* name=new char[namesize+1];
+	name[namesize]='\0';
+	fseek(f,POS,SEEK_SET);
+	fread(name,namesize,1,f);
+	tree<projectNode>::iterator current_folder=projectTree.append_child(parent, projectNode(name, 1));
+	POS+=namesize+1+5+5;
+
+	int objectcount;
+	fseek(f,POS,SEEK_SET);
+	fread(&objectcount,4,1,f);
+	if(IsBigEndian()) SwapBytes(objectcount);
+	POS+=5+5;
+
+	for(int i=0; i<objectcount; ++i)
+	{
+		POS+=5;
+		char c;
+		fseek(f,POS+0x2,SEEK_SET);
+		fread(&c,1,1,f);
+		int objectID;
+		fseek(f,POS+0x4,SEEK_SET);
+		fread(&objectID,4,1,f);
+		if(IsBigEndian()) SwapBytes(objectID);
+		if(c==0x10)
+		{
+			NOTE[objectID].parentFolder=current_folder->name;
+			projectTree.append_child(current_folder, projectNode(NOTE[objectID].name, 0));
+		}
+		else
+			projectTree.append_child(current_folder, projectNode(findObjectByIndex(objectID, current_folder->name), 0));
+		POS+=8+1+5+5;
+	}
+	fseek(f,POS,SEEK_SET);
+	fread(&objectcount,4,1,f);
+	if(IsBigEndian()) SwapBytes(objectcount);
+	fseek(f,1,SEEK_CUR);
+	for(int i=0; i<objectcount; ++i)
+		readProjectTreeFolder(f, debug, current_folder);
 }
 
 bool OPJFile::IsBigEndian()
