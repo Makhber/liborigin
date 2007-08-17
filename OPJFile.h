@@ -32,6 +32,10 @@
 #ifndef OPJFILE_H
 #define OPJFILE_H
 
+/* version 0.0 2007-08-17 */
+#define LIBORIGIN_VERSION 0X00070817
+#define LIBORIGIN_VERSION_STRING "2007-08-17"
+
 #include <string>
 #include <vector>
 #include "tree.hh"

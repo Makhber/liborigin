@@ -10,15 +10,13 @@
 #include <math.h>
 #include "OPJFile.h"
 
-#define VERSION 20070529
-
 int main(int argc, char *argv[]) {
 	if(argc != 2) {
 		printf("Usage : ./opj2dat <file.opj>\n");
 		return -1;
 	}
 
-	printf("opj2dat %d, Copyright (C) 2007 Stefan Gerlach\n",VERSION);
+	printf("opj2dat %s, Copyright (C) 2007 Stefan Gerlach\n",LIBORIGIN_VERSION_STRING);
 
 	OPJFile opj(argv[1]);
 	int status = opj.Parse();
