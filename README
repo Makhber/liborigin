@@ -63,6 +63,8 @@ X	V Crash on Fred2_....OPJ
 ---------------------------------------------------------------------------
 Changelog :
 
+2007-08-21	* added build script and spec file
+		* added tree.hh installation to Makefile.LINUX
 2007-08-17	* clean up, Excel worksheets
 2007-07-08	* fixed crash in 7.0 projects
 2007-05-29	* full support of 7.5 projects (Alex Kargovsky)

@@ -36,8 +36,8 @@ install:
 	chmod 755 $(OPJ2DAT)
 	cp $(OPJ2DAT) $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/include/$(TARGET)
-	chmod 644 $(OPJ).h
-	cp $(OPJ).h $(DESTDIR)/usr/include/$(TARGET)
+	chmod 644 $(OPJ).h tree.hh
+	cp $(OPJ).h tree.hh $(DESTDIR)/usr/include/$(TARGET)
 	ldconfig
 uninstall:
 	rm -f $(DESTDIR)/usr/$(LIBEXT)/$(TARGET0)* $(DESTDIR)/usr/bin/$(OPJ2DAT) $(DESTDIR)/usr/include/$(TARGET)/$(OPJ).h

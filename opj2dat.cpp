@@ -17,6 +17,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("opj2dat %s, Copyright (C) 2007 Stefan Gerlach\n",LIBORIGIN_VERSION_STRING);
+	
+	if(!strcmp(argv[1],"-v"))
+		return 0;
 
 	OPJFile opj(argv[1]);
 	int status = opj.Parse();
