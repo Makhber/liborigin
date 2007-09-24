@@ -277,8 +277,6 @@ int OPJFile::ParseFormatOld() {
 		version=700;
 	else if(version == 2672) 	// 7.0 SR3
 		version=703;
-	else if(version >= 2766 && version <= 2769) 	// 7.5
-		version=750;
 	else {
 		fprintf(debug,"Found unknown project version %d\n",version);
 		fprintf(debug,"Please contact the author of opj2dat\n");
