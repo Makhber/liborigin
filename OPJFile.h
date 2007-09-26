@@ -32,9 +32,9 @@
 #ifndef OPJFILE_H
 #define OPJFILE_H
 
-/* version 0.0 2007-09-25 */
-#define LIBORIGIN_VERSION 0x00070925
-#define LIBORIGIN_VERSION_STRING "2007-09-25"
+/* version 0.0 2007-09-26 */
+#define LIBORIGIN_VERSION 0x00070926
+#define LIBORIGIN_VERSION_STRING "2007-09-26"
 
 #include <string>
 #include <vector>
@@ -439,8 +439,8 @@ public:
 	const char *matrixName(int s) const { return MATRIX[s].name.c_str(); }	//!< get name of matrix s
 	const char *matrixParentFolder(int s) const { return MATRIX[s].parentFolder.c_str(); }	//!< get parent folder of matrix s
 	const char *matrixLabel(int s) const { return MATRIX[s].label.c_str(); }	//!< get label of matrix s
-	int numMartixCols(int s) const { return MATRIX[s].nr_cols; }		//!< get number of columns of matrix s
-	int numMartixRows(int s) const { return MATRIX[s].nr_rows; }	//!< get number of rows of matrix s
+	int numMatrixCols(int s) const { return MATRIX[s].nr_cols; }		//!< get number of columns of matrix s
+	int numMatrixRows(int s) const { return MATRIX[s].nr_rows; }	//!< get number of rows of matrix s
 	const char *matrixFormula(int s) const { return MATRIX[s].command.c_str(); }	//!< get formula of matrix s
 	int matrixValueTypeSpec(int s) const { return MATRIX[s].value_type_specification; }	//!< get value type specification of matrix s
 	int matrixSignificantDigits(int s) const { return MATRIX[s].significant_digits; }	//!< get significant digits of matrix s
