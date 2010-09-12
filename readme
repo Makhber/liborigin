@@ -1,14 +1,13 @@
 liborigin2
 ---------------------
 
-AUTHOR: Alex Kargovsky
+AUTHORS: Ion Vasilief, Alex Kargovsky
 
-CONTRIBUTORS: Stefan Gerlach, Ion Vasilief
+CONTRIBUTORS: Stefan Gerlach
 
-ACKNOWLEDGEMENTS: The developement of liborigin2 is financially supported by Ion Vasilief.
-
-DEPENDENCIES: liborigin2 depends on the BOOST C++ libraries (version >= 1.33.0): http://www.boost.org/
-	(enter the correct version number in liborigin.pro)
+DEPENDENCIES: liborigin2 depends on the BOOST C++ libraries (version >= 1.33.0): http://www.boost.org/,
+	      tree.hh: http://tree.phi-sci.com/ 
+ 	      and an old version of loglite: http://code.google.com/p/loglite/
 
 ---------------------------------------------------------------------------
 COMPILING: liborigin2 uses qmake for the building process. 
@@ -16,12 +15,12 @@ COMPILING: liborigin2 uses qmake for the building process.
 		qmake reads project files, that contain the options and rules how to build a certain project. 
 		A project file ends with the suffix "*.pro". Please read the qmake documentation for more details.
 
-After installing qmake and the BOOST C++ libraries on your system, type the following command lines: 
+After installing qmake, tree.hh and the BOOST C++ libraries on your system, type the following command lines: 
 	$ qmake	
 	$ make
 
 ---------------------------------------------------------------------------
 FEATURES :
-	* supports the import of 7.5 projects only
+	* supports the import of 6.0 - 8.1 projects
 
 ---------------------------------------------------------------------------
