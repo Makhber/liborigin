@@ -28,7 +28,6 @@
 
 #include "OriginParser.h"
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/if.hpp>
 #include <boost/algorithm/string.hpp>
@@ -39,62 +38,56 @@ using namespace Origin;
 
 vector<Origin::SpreadSheet>::size_type OriginParser::findSpreadByName(const string& name) const
 {
-	vector<SpreadSheet>::const_iterator it = find_if(speadSheets.begin(), 
-													 speadSheets.end(),
-													 bind(iequals<string, string>,
-														  bind(&SpreadSheet::name, _1),
-														  name,
-														  locale()));
-	return it != speadSheets.end() ? it - speadSheets.begin() : -1;
+	for (vector<SpreadSheet>::const_iterator it = speadSheets.begin(); it != speadSheets.end(); ++it)
+	{
+		if (iequals(it->name, name, locale())) return it - speadSheets.begin();
+	}
+	return -1;
 }
 
 vector<Origin::Excel>::size_type OriginParser::findExcelByName(const string& name) const
 {
-	vector<Excel>::const_iterator it = find_if(excels.begin(),
-											   excels.end(),
-											   bind(iequals<string, string>,
-													bind(&Excel::name, _1),
-													name,
-													locale()));
-	return it != excels.end() ? it - excels.begin() : -1;
+	for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it)
+	{
+		if (iequals(it->name, name, locale())) return it - excels.begin();
+	}
+	return -1;
 }
 
 vector<Origin::SpreadColumn>::size_type OriginParser::findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread, const string& name) const
 {
-	vector<SpreadColumn>::const_iterator it = find_if(speadSheets[spread].columns.begin(),
-													  speadSheets[spread].columns.end(),
-													  bind(&SpreadColumn::name, _1) == name);
-	return it != speadSheets[spread].columns.end() ? it - speadSheets[spread].columns.begin() : -1;
+	for (vector<SpreadColumn>::const_iterator it = speadSheets[spread].columns.begin(); it != speadSheets[spread].columns.end(); ++it)
+	{
+		if (it->name == name) return it - speadSheets[spread].columns.begin();
+	}
+	return -1;
 }
 
 vector<Origin::SpreadColumn>::size_type OriginParser::findExcelColumnByName(vector<Origin::Excel>::size_type excel, vector<Origin::SpreadSheet>::size_type sheet, const string& name) const
 {
-	vector<SpreadColumn>::const_iterator it = find_if(excels[excel].sheets[sheet].columns.begin(),
-													  excels[excel].sheets[sheet].columns.end(),
-													  bind(&SpreadColumn::name, _1) == name);
-	return it != excels[excel].sheets[sheet].columns.end() ? it - excels[excel].sheets[sheet].columns.begin() : -1;
+	for (vector<SpreadColumn>::const_iterator it = excels[excel].sheets[sheet].columns.begin(); 	it != excels[excel].sheets[sheet].columns.end(); ++it)
+	{
+		if (it->name == name) return it - excels[excel].sheets[sheet].columns.begin();
+	}
+	return -1;
 }
 
 vector<Origin::Matrix>::size_type OriginParser::findMatrixByName(const string& name) const
 {
-	vector<Matrix>::const_iterator it = find_if(matrixes.begin(),
-												matrixes.end(),
-												bind(iequals<string, string>,
-													 bind(&Matrix::name, _1),
-													 name,
-													 locale()));
-	return it != matrixes.end() ? it - matrixes.begin() : -1;
+	for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it)
+	{
+		if (iequals(it->name, name, locale())) return it - matrixes.begin();
+	}
+	return -1;
 }
 
 vector<Origin::Function>::size_type OriginParser::findFunctionByName(const string& name) const
 {
-	vector<Function>::const_iterator it = find_if(functions.begin(),
-												  functions.end(),
-												  bind(iequals<string, string>,
-													   bind(&Function::name, _1),
-													   name,
-													   locale()));
-	return it != functions.end() ? it - functions.begin() : -1;
+	for (vector<Function>::const_iterator it = functions.begin(); it != functions.end(); ++it)
+	{
+		if (iequals(it->name, name, locale())) return it - functions.begin();
+	}
+	return -1;
 }
 
 pair<string, string> OriginParser::findDataByIndex(unsigned int index) const

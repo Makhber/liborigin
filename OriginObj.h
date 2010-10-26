@@ -34,7 +34,6 @@
 #include <string.h>
 #include <vector>
 #include "boost/variant.hpp"
-#include "boost/bind.hpp"
 #include "boost/date_time/posix_time/ptime.hpp"
 
 using namespace std;
@@ -699,9 +698,12 @@ namespace Origin
 		//bool threeDimensional;
 		bool is3D() const
 		{
-			return curves.end() != find_if(curves.begin(), curves.end(),
-											boost::bind(logical_or<bool>(), boost::bind(&GraphCurve::type, _1) == GraphCurve::Line3D,  
-											boost::bind(&GraphCurve::type, _1) == GraphCurve::Mesh3D));
+			for (vector<GraphCurve>::const_iterator it = curves.begin(); it != curves.end(); ++it)
+			{
+				if (it->type == GraphCurve::Line3D) return true;
+				if (it->type == GraphCurve::Mesh3D) return true;
+			}
+		return false;
 		}
 	};
 
