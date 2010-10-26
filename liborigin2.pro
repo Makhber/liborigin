@@ -10,12 +10,8 @@ DESTDIR      = ./
 # Path to the folder where the header files of the BOOST C++ libraries are installed
 INCLUDEPATH += ../boost
 
-# link statically against a copy of BOOST C++ libraries
-#LIBS        += ../boost/lib/libboost_thread.a
-# or dynamically against a system-wide installation
-LIBS        += -lboost_thread
-
 HEADERS += endianfstream.hh \
+	   tree.hh \
 	   OriginObj.h \
 	   OriginFile.h \
 	   OriginParser.h \
