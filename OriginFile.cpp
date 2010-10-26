@@ -28,29 +28,32 @@
  ***************************************************************************/
 
 #include "OriginFile.h"
-#include <stdio.h>
+#include <cstdio>  // for fprintf
 #include <fstream>
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <logging.hpp>
 
 using namespace boost;
 
 OriginFile::OriginFile(const string& fileName)
 :	fileVersion(0)
 {
-	BOOST_LOG_INIT((logging::trace >> logging::eol)); // log format
-	logging::sink s(new ofstream("./opjfile.log"), 1);
-	s.attach_qualifier(logging::log);
-	BOOST_LOG_ADD_OUTPUT_STREAM(s);
-
 	ifstream file(fileName.c_str(), ios_base::binary);
 
 	if(!file.is_open())
 	{
-		cerr << format("Could not open %s!") % fileName.c_str() << endl;
+		cerr << "Could not open " << fileName << "!" << endl;
 		return;
 	}
+
+#ifndef NO_CODE_GENERATION_FOR_LOG
+	FILE *logfile = NULL;
+	logfile = fopen("./opjfile.log", "w");
+	if (logfile == NULL)
+	{
+		cerr << "Could not open opjfile.log !" << endl;
+	        return;
+	}
+#endif // NO_CODE_GENERATION_FOR_LOG
 
 	string vers(4, 0);
 	file.seekg(0x7, ios_base::beg);
@@ -58,7 +61,7 @@ OriginFile::OriginFile(const string& fileName)
 	fileVersion = lexical_cast<unsigned int>(vers);
 	file.close();
 
-	BOOST_LOG_(1, format("	[version = %d]") % fileVersion);
+	LOG_PRINT(logfile, "        [version = %d]\n", fileVersion)
 
 	buildVersion = fileVersion;
 	// translate version
@@ -87,13 +90,22 @@ OriginFile::OriginFile(const string& fileName)
 	else if(fileVersion >= 2907)						// 8.1
 		fileVersion = 810;
 	else {
-		BOOST_LOG_(1, format("Found unknown project version %d") % fileVersion);
-		BOOST_LOG_(1, "Please contact the authors of liborigin2");
-		BOOST_LOG_FINALIZE();
+		LOG_PRINT(logfile, "Found unknown project version %d\n", fileVersion)
+		LOG_PRINT(logfile, "Please contact the authors of liborigin2")
+#ifndef NO_CODE_GENERATION_FOR_LOG
+		unsigned int ioret;
+		ioret = fclose(logfile);
+#endif // NO_CODE_GENERATION_FOR_LOG
 		throw std::logic_error("Unknown project version");
 	}
-	BOOST_LOG_(1, format("Found project version %.2f") % (fileVersion/100.0));
-
+	LOG_PRINT(logfile, "Found project version %.2f\n", fileVersion/100.0)
+	// Close logfile, will be reopened in parser routine.
+	// There are ways to keep logfile open and pass it to parser routine,
+	// but I choose to do the same as with 'file', close it and reopen in 'parse'
+	// routines.
+#ifndef NO_CODE_GENERATION_FOR_LOG
+	fclose(logfile);
+#endif NO_CODE_GENERATION_FOR_LOG
 	switch(fileVersion){
 		case 810:
 			 parser.reset(createOrigin810Parser(fileName));

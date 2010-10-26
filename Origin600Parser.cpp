@@ -28,10 +28,7 @@
 
 #include "Origin600Parser.h"
 #include <cstring>
-#include <sstream>
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <logging.hpp>
 
 using namespace boost;
 

@@ -18,7 +18,6 @@ LIBS        += -lboost_date_time
 LIBS        += -lboost_thread
 
 HEADERS += endianfstream.hh \
-	   logging.hpp \
 	   OriginObj.h \
 	   OriginFile.h \
 	   OriginParser.h \

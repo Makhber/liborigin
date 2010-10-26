@@ -34,8 +34,6 @@
 #include <math.h>
 #include <cstring>
 
-#include <logging.hpp>
-
 using namespace Origin;
 
 #define MAX_LEVEL 20
@@ -68,8 +66,6 @@ OriginDefaultParser::OriginDefaultParser(const string& fileName)
 
 bool OriginDefaultParser::parse()
 {
-	BOOST_LOG_FINALIZE();
-
 	int i;
 	FILE *f, *debug;
 	if((f=fopen(fileName.c_str(),"rb")) == NULL ) {

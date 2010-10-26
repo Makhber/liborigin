@@ -35,6 +35,7 @@
 #include "endianfstream.hh"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
+
 using namespace std;
 using namespace Origin;
 
@@ -76,6 +77,7 @@ protected:
 
 	unsigned int objectIndex;
 	iendianfstream file;
+	FILE *logfile;
 
 	unsigned int d_file_size;
 	unsigned int d_colormap_offset;

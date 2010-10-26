@@ -32,6 +32,16 @@
 #include "OriginObj.h"
 #include "tree.hh"
 
+#ifndef NO_CODE_GENERATION_FOR_LOG
+#define LOG_PRINT( logfile, args... ) \
+{                                     \
+	int ioret= fprintf(logfile, args); \
+	assert(ioret>0);                   \
+}
+#else // !NO_CODE_GENERATION_FOR_LOG
+#define LOG_PRINT( logfile, args... ) {};
+#endif // NO_CODE_GENERATION_FOR_LOG
+
 class OriginParser
 {
 public:
