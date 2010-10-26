@@ -104,7 +104,7 @@ OriginFile::OriginFile(const string& fileName)
 	// routines.
 #ifndef NO_CODE_GENERATION_FOR_LOG
 	fclose(logfile);
-#endif NO_CODE_GENERATION_FOR_LOG
+#endif // NO_CODE_GENERATION_FOR_LOG
 	switch(fileVersion){
 		case 810:
 			parser.reset(createOrigin810Parser(fileName));

@@ -31,7 +31,7 @@
 #ifndef ORIGIN_OBJ_H
 #define ORIGIN_OBJ_H
 
-#include <string.h>
+#include <cstring>
 #include <ctime>
 #include <vector>
 #include "boost/variant.hpp"
@@ -168,15 +168,15 @@ namespace Origin
 
 		SpreadColumn(const string& _name = "", unsigned int _index = 0)
 		:	name(_name)
-		,	index(_index)
-		,	command("")
-		,	comment("")
 		,	valueType(Numeric)
 		,	valueTypeSpecification(0)
 		,	significantDigits(6)
 		,	decimalPlaces(6)
-		,	width(8)
 		,	numericDisplayType(DefaultDecimalDigits)
+		,	command("")
+		,	comment("")
+		,	width(8)
+		,	index(_index)
 		,	sheet(0)
 		{};
 	};
@@ -234,14 +234,14 @@ namespace Origin
 
 		Matrix(const string& _name = "", unsigned int _index = 0)
 		:	Window(_name)
-		,	index(_index)
-		,	sheets(1)
-		,	command("")
 		,	valueTypeSpecification(0)
 		,	significantDigits(6)
 		,	decimalPlaces(6)
-		,	width(8)
 		,	numericDisplayType(DefaultDecimalDigits)
+		,	command("")
+		,	width(8)
+		,	index(_index)
+		,	sheets(1)
 		,	view(DataView)
 		,	header(ColumnRow)
 		{coordinates.push_back(10.0);coordinates.push_back(10.0);coordinates.push_back(1.0);coordinates.push_back(1.0);};
@@ -261,12 +261,12 @@ namespace Origin
 
 		Function(const string& _name = "", unsigned int _index = 0)
 		:	name(_name)
-		,	index(_index)
 		,	type(Normal)
 		,	formula("")
 		,	begin(0.0)
 		,	end(0.0)
 		,	totalPoints(0)
+		,	index(_index)
 		{};
 	};
 
@@ -616,9 +616,9 @@ namespace Origin
 
 		Bitmap(const string& _name = "")
 		:	size(0)
-		,	data(0)
 		,	windowName(_name)
 		,	borderType(Origin::None)
+		,	data(0)
 		{
 		};
 
@@ -753,8 +753,8 @@ namespace Origin
 		time_t modificationDate;
 
 		ProjectNode(const string& _name = "", NodeType _type = Folder, const time_t _creationDate = time(NULL), const time_t _modificationDate = time(NULL))
-		:	name(_name)
-		,	type(_type)
+		:	type(_type)
+		,	name(_name)
 		,	creationDate(_creationDate)
 		,	modificationDate(_modificationDate)
 		{};

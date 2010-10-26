@@ -34,7 +34,7 @@
 using namespace boost::algorithm;
 using namespace Origin;
 
-vector<Origin::SpreadSheet>::size_type OriginParser::findSpreadByName(const string& name) const
+vector<Origin::SpreadSheet>::difference_type OriginParser::findSpreadByName(const string& name) const
 {
 	for (vector<SpreadSheet>::const_iterator it = speadSheets.begin(); it != speadSheets.end(); ++it)
 	{
@@ -43,7 +43,7 @@ vector<Origin::SpreadSheet>::size_type OriginParser::findSpreadByName(const stri
 	return -1;
 }
 
-vector<Origin::Excel>::size_type OriginParser::findExcelByName(const string& name) const
+vector<Origin::Excel>::difference_type OriginParser::findExcelByName(const string& name) const
 {
 	for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it)
 	{
@@ -52,7 +52,7 @@ vector<Origin::Excel>::size_type OriginParser::findExcelByName(const string& nam
 	return -1;
 }
 
-vector<Origin::SpreadColumn>::size_type OriginParser::findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread, const string& name) const
+vector<Origin::SpreadColumn>::difference_type OriginParser::findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread, const string& name) const
 {
 	for (vector<SpreadColumn>::const_iterator it = speadSheets[spread].columns.begin(); it != speadSheets[spread].columns.end(); ++it)
 	{
@@ -61,7 +61,7 @@ vector<Origin::SpreadColumn>::size_type OriginParser::findSpreadColumnByName(vec
 	return -1;
 }
 
-vector<Origin::SpreadColumn>::size_type OriginParser::findExcelColumnByName(vector<Origin::Excel>::size_type excel, vector<Origin::SpreadSheet>::size_type sheet, const string& name) const
+vector<Origin::SpreadColumn>::difference_type OriginParser::findExcelColumnByName(vector<Origin::Excel>::size_type excel, vector<Origin::SpreadSheet>::size_type sheet, const string& name) const
 {
 	for (vector<SpreadColumn>::const_iterator it = excels[excel].sheets[sheet].columns.begin(); 	it != excels[excel].sheets[sheet].columns.end(); ++it)
 	{
@@ -70,7 +70,7 @@ vector<Origin::SpreadColumn>::size_type OriginParser::findExcelColumnByName(vect
 	return -1;
 }
 
-vector<Origin::Matrix>::size_type OriginParser::findMatrixByName(const string& name) const
+vector<Origin::Matrix>::difference_type OriginParser::findMatrixByName(const string& name) const
 {
 	for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it)
 	{
@@ -79,7 +79,7 @@ vector<Origin::Matrix>::size_type OriginParser::findMatrixByName(const string& n
 	return -1;
 }
 
-vector<Origin::Function>::size_type OriginParser::findFunctionByName(const string& name) const
+vector<Origin::Function>::difference_type OriginParser::findFunctionByName(const string& name) const
 {
 	for (vector<Function>::const_iterator it = functions.begin(); it != functions.end(); ++it)
 	{
@@ -130,25 +130,25 @@ pair<ProjectNode::NodeType, string> OriginParser::findObjectByIndex(unsigned int
 {
 	for(vector<SpreadSheet>::const_iterator it = speadSheets.begin(); it != speadSheets.end(); ++it)
 	{
-		if(it->objectID == index)
+		if(it->objectID == (int)index)
 			return make_pair(ProjectNode::SpreadSheet, it->name);
 	}
 
 	for(vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it)
 	{
-		if(it->objectID == index)
+		if(it->objectID == (int)index)
 			return make_pair(ProjectNode::Matrix, it->name);
 	}
 
 	for(vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it)
 	{
-		if(it->objectID == index)
+		if(it->objectID == (int)index)
 			return make_pair(ProjectNode::Excel, it->name);
 	}
 
 	for(vector<Graph>::const_iterator it = graphs.begin(); it != graphs.end(); ++it)
 	{
-		if(it->objectID == index){
+		if(it->objectID == (int)index){
 			if (it->is3D)
 				return make_pair(ProjectNode::Graph3D, it->name);
 			else

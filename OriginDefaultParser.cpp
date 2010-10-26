@@ -65,7 +65,8 @@ OriginDefaultParser::OriginDefaultParser(const string& fileName)
 
 bool OriginDefaultParser::parse()
 {
-	int i;
+	unsigned int i;
+	unsigned int ioret;  // return value of io functions
 	FILE *f, *debug;
 	if((f=fopen(fileName.c_str(),"rb")) == NULL ) {
 		printf("Could not open %s!\n", fileName.c_str());
@@ -83,50 +84,51 @@ bool OriginDefaultParser::parse()
 
 	// get version
 	fseek(f,0x7,SEEK_SET);
-	fread(&vers,4,1,f);
+	ioret = fread(&vers,4,1,f);
 	int version = atoi(vers);
 
 	unsigned char c=0;	// tmp char
 
 	fprintf(debug,"HEADER :\n");
 	for(i=0;i<0x16;i++) {	// skip header + 5 Bytes ("27")
-		fread(&c,1,1,f);
+		ioret = fread(&c,1,1,f);
 		fprintf(debug,"%.2X ",c);
 		if(!((i+1)%16)) fprintf(debug,"\n");
 	}
 	fprintf(debug,"\n");
 
 	do{
-		fread(&c,1,1,f);
+		ioret = fread(&c,1,1,f);
 	} while (c != '\n');
 	fprintf(debug,"	[file header @ 0x%X]\n", (unsigned int) ftell(f));
 
 	/////////////////// find column ///////////////////////////////////////////////////////////
 	if(version>410)
 		for(i=0;i<5;i++)	// skip "0"
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 
 	int col_found;
-	fread(&col_found,4,1,f);
+	ioret = fread(&col_found,4,1,f);
 	if(IsBigEndian()) SwapBytes(col_found);
 
-	fread(&c,1,1,f);	// skip '\n'
+	ioret = fread(&c,1,1,f);	// skip '\n'
 	fprintf(debug,"	[column found = %d/0x%X @ 0x%X]\n",col_found,col_found,(unsigned int) ftell(f));
 
-	int current_col=1, nr=0, nbytes=0;
+	int current_col=1, nbytes=0;
+	unsigned int nr;
 	double a;
 	char name[25], valuesize;
 	while(col_found > 0 && col_found < 0x84) {	// should be 0x72, 0x73 or 0x83
 		//////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
 		fprintf(debug,"COLUMN HEADER :\n");
 		for(i=0;i < 0x3D;i++) {	// skip 0x3C chars to value size
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 			fprintf(debug,"%.2X ",c);
 			if(!((i+1)%16)) fprintf(debug,"\n");
 		}
 		fprintf(debug,"\n");
 
-		fread(&valuesize,1,1,f);
+		ioret = fread(&valuesize,1,1,f);
 		fprintf(debug,"	[valuesize = %d @ 0x%X]\n",valuesize,(unsigned int) ftell(f)-1);
 		if(valuesize <= 0) {
 			fprintf(debug,"	WARNING : found strange valuesize of %d\n",valuesize);
@@ -135,7 +137,7 @@ bool OriginDefaultParser::parse()
 
 		fprintf(debug,"SKIP :\n");
 		for(i=0;i<0x1A;i++) {	// skip to name
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 			fprintf(debug,"%.2X ",c);
 			if(!((i+1)%16)) fprintf(debug,"\n");
 		}
@@ -144,7 +146,7 @@ bool OriginDefaultParser::parse()
 		// read name
 		fprintf(debug,"	[Spreadsheet @ 0x%X]\n",(unsigned int) ftell(f));
 		fflush(debug);
-		fread(&name,25,1,f);
+		ioret = fread(&name,25,1,f);
 		char sname[26];
 		sprintf(sname,"%s",strtok(name,"_"));	// spreadsheet name
 		char* cname = strtok(NULL,"_");	// column name
@@ -185,21 +187,21 @@ bool OriginDefaultParser::parse()
 			// TODO
 			fprintf(debug,"	SIGNATURE : ");
 			for(i=0;i<2;i++) {	// skip header
-				fread(&c,1,1,f);
+				ioret = fread(&c,1,1,f);
 				fprintf(debug,"%.2X ",c);
 			}
 			fflush(debug);
 
 			do{	// skip until '\n'
-				fread(&c,1,1,f);
+				ioret = fread(&c,1,1,f);
 			} while (c != '\n');
 			fprintf(debug,"\n");
 			fflush(debug);
 
 			// read size
-			int size;
-			fread(&size,4,1,f);
-			fread(&c,1,1,f);	// skip '\n'
+			unsigned int size;
+			ioret = fread(&size,4,1,f);
+			ioret = fread(&c,1,1,f);	// skip '\n'
 			// TODO : use entry size : double, float, ...
 			size /= 8;
 			fprintf(debug,"	SIZE = %d\n",size);
@@ -227,7 +229,7 @@ bool OriginDefaultParser::parse()
 					stmp[2] = i%26+0x41;
 				}
 				speadSheets[speadSheets.size()-1].columns.push_back(stmp);
-				fread(&value,8,1,f);
+				ioret = fread(&value,8,1,f);
 				speadSheets[speadSheets.size()-1].columns[i].data.push_back(/*Data(value)*/value);
 
 				fprintf(debug,"%g ",value);
@@ -241,10 +243,10 @@ bool OriginDefaultParser::parse()
 
 			////////////////////////////// SIZE of column /////////////////////////////////////////////
 			do{	// skip until '\n'
-				fread(&c,1,1,f);
+				ioret = fread(&c,1,1,f);
 			} while (c != '\n');
 
-			fread(&nbytes,4,1,f);
+			ioret = fread(&nbytes,4,1,f);
 			if(IsBigEndian()) SwapBytes(nbytes);
 			if(fmod(nbytes,(double)valuesize)>0)
 				fprintf(debug,"WARNING: data section could not be read correct\n");
@@ -255,24 +257,24 @@ bool OriginDefaultParser::parse()
 			speadSheets[spread].maxRows<nr?speadSheets[spread].maxRows=nr:0;
 
 			////////////////////////////////////// DATA ////////////////////////////////////////////////
-			fread(&c,1,1,f);	// skip '\n'
+			ioret = fread(&c,1,1,f);	// skip '\n'
 			if(valuesize != 8 && valuesize <= 16) {	// skip 0 0
-				fread(&c,1,1,f);
-				fread(&c,1,1,f);
+				ioret = fread(&c,1,1,f);
+				ioret = fread(&c,1,1,f);
 			}
 			fprintf(debug,"	[data @ 0x%X]\n",(unsigned int) ftell(f));
 			fflush(debug);
 
 			for (i=0;i<nr;i++) {
 				if(valuesize <= 16) {	// value
-					fread(&a,valuesize,1,f);
+					ioret = fread(&a,valuesize,1,f);
 					if(IsBigEndian()) SwapBytes(a);
 					fprintf(debug,"%g ",a);
 					speadSheets[spread].columns[(current_col-1)].data.push_back(/*Data(a)*/a);
 				}
 				else {			// label
 					char *stmp = new char[valuesize+1];
-					fread(stmp,valuesize,1,f);
+					ioret = fread(stmp,valuesize,1,f);
 					fprintf(debug,"%s ",stmp);
 					speadSheets[spread].columns[(current_col-1)].data.push_back(/*Data(stmp)*/string(stmp));
 					delete stmp;
@@ -283,14 +285,14 @@ bool OriginDefaultParser::parse()
 		fflush(debug);
 
 		for(i=0;i<4;i++)	// skip "0"
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 		if(valuesize == 8 || valuesize > 16) {	// skip 0 0
-			fread(&c,1,1,f);
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 		}
-		fread(&col_found,4,1,f);
+		ioret = fread(&col_found,4,1,f);
 		if(IsBigEndian()) SwapBytes(col_found);
-		fread(&c,1,1,f);	// skip '\n'
+		ioret = fread(&c,1,1,f);	// skip '\n'
 		fprintf(debug,"	[column found = %d/0x%X (@ 0x%X)]\n",col_found,col_found,(unsigned int) ftell(f)-5);
 		fflush(debug);
 	}
@@ -336,7 +338,7 @@ bool OriginDefaultParser::parse()
 			ORIGIN = 0x58;
 		fseek(f,POS + ORIGIN,SEEK_SET);	// check for 'O'RIGIN
 		char c;
-		fread(&c,1,1,f);
+		ioret = fread(&c,1,1,f);
 		int jump=0;
 		if( c == 'O')
 			fprintf(debug,"			\"ORIGIN\" found ! (@ 0x%X)\n",POS+ORIGIN);
@@ -346,7 +348,7 @@ bool OriginDefaultParser::parse()
 			fflush(debug);
 			POS+=0x1F2;
 			fseek(f,POS + ORIGIN,SEEK_SET);
-			fread(&c,1,1,f);
+			ioret = fread(&c,1,1,f);
 			jump++;
 		}
 
@@ -361,7 +363,7 @@ bool OriginDefaultParser::parse()
 
 		// check spreadsheet name
 		fseek(f,POS + 0x12,SEEK_SET);
-		fread(&name,25,1,f);
+		ioret = fread(&name,25,1,f);
 
 		spread=findSpreadByName(name);
 		if(spread == -1)
@@ -399,10 +401,10 @@ bool OriginDefaultParser::parse()
 			fprintf(debug,"			reading	COLUMN %d/%zd type\n",j+1,speadSheets[spread].columns.size());
 			fflush(debug);
 			fseek(f,LAYER+ATYPE+j*COL_JUMP, SEEK_SET);
-			fread(&name,25,1,f);
+			ioret = fread(&name,25,1,f);
 
 			fseek(f,LAYER+ATYPE+j*COL_JUMP-1, SEEK_SET);
-			fread(&c, 1, 1, f);
+			ioret = fread(&c, 1, 1, f);
 
 			SpreadColumn::ColumnType type;
 			switch(c) {

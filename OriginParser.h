@@ -49,14 +49,14 @@ public:
 	virtual bool parse() = 0;
 	void setFileVersion(unsigned int version){fileVersion = version;};
 
-	vector<Origin::SpreadSheet>::size_type findSpreadByName(const string& name) const;
-	vector<Origin::Matrix>::size_type findMatrixByName(const string& name) const;
-	vector<Origin::Function>::size_type findFunctionByName(const string& name) const;
-	vector<Origin::Excel>::size_type findExcelByName(const string& name) const;
+	vector<Origin::SpreadSheet>::difference_type findSpreadByName(const string& name) const;
+	vector<Origin::Matrix>::difference_type findMatrixByName(const string& name) const;
+	vector<Origin::Function>::difference_type findFunctionByName(const string& name) const;
+	vector<Origin::Excel>::difference_type findExcelByName(const string& name) const;
 
 protected:
-	vector<Origin::SpreadColumn>::size_type findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread, const string& name) const;
-	vector<Origin::SpreadColumn>::size_type findExcelColumnByName(vector<Origin::Excel>::size_type excel, vector<Origin::SpreadSheet>::size_type sheet, const string& name) const;
+	vector<Origin::SpreadColumn>::difference_type findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread, const string& name) const;
+	vector<Origin::SpreadColumn>::difference_type findExcelColumnByName(vector<Origin::Excel>::size_type excel, vector<Origin::SpreadSheet>::size_type sheet, const string& name) const;
 	pair<string, string> findDataByIndex(unsigned int index) const;
 	pair<Origin::ProjectNode::NodeType, string> findObjectByIndex(unsigned int index) const;
 	void convertSpreadToExcel(vector<Origin::SpreadSheet>::size_type spread);

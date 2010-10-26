@@ -1193,7 +1193,7 @@ void Origin700Parser::readGraphInfo()
 
 					file >> h;
 
-					if(h >= 0x64 && h < 0x1F4){
+					if(h >= 0x64){
 						column = findDataByIndex(nColY - 1 + h - 0x64);
 						if(column.first.size() > 0)
 							curve.vector.magnitudeColumnName = column.second;
@@ -1262,7 +1262,7 @@ void Origin700Parser::readGraphInfo()
 					file >> curve.surface.type;
 					file.seekg(LAYER + 0x1C, ios_base::beg);
 					file >> h;
-					if(h & 0x60 == 0x60)
+					if((h & 0x60) == 0x60)
 						curve.surface.grids = SurfaceProperties::X;
 					else if(h & 0x20)
 						curve.surface.grids = SurfaceProperties::Y;
@@ -1371,7 +1371,7 @@ void Origin700Parser::readGraphInfo()
 
 				LAYER += size + 0x1;
 
-				int newSize;
+				unsigned int newSize;
 				file.seekg(LAYER, ios_base::beg);
 				file >> newSize;
 

@@ -46,7 +46,7 @@ protected:
 	void readResultsLog();
 	virtual void readNotes();
 
-	bool findSection(const string& name, int length, int maxLength = 0);
+	bool findSection(const string& name, unsigned int length, unsigned int maxLength = 0);
 	unsigned int findStringPos(const string& name);
 
 	string notes_pos_mark;

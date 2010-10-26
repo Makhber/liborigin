@@ -1032,7 +1032,7 @@ void Origin800Parser::readMatrixInfo()
 		LOG_PRINT(logfile, "		Formula: %s cursor pos: 0x%X\n", matrixes[idx].command.c_str(), (unsigned int)file.tellg())
 	}
 
-	for (int i = 0; i < matrixes[idx].sheets; i++)
+	for (unsigned int i = 0; i < matrixes[idx].sheets; i++)
 		findSection("__LayerInfoStorage", 20);
 
 	for (int i = 0; i < 7; i++)
@@ -1698,7 +1698,7 @@ void Origin800Parser::readGraphInfo()
 
 					file >> h;
 
-					if(h >= 0x64 && h < 0x1F4){
+					if(h >= 0x64){
 						column = findDataByIndex(nColY - 1 + h - 0x64);
 						if(column.first.size() > 0)
 							curve.vector.magnitudeColumnName = column.second;
@@ -1767,7 +1767,7 @@ void Origin800Parser::readGraphInfo()
 					file >> curve.surface.type;
 					file.seekg(LAYER + 0x1C, ios_base::beg);
 					file >> h;
-					if(h & 0x60 == 0x60)
+					if((h & 0x60) == 0x60)
 						curve.surface.grids = SurfaceProperties::X;
 					else if(h & 0x20)
 						curve.surface.grids = SurfaceProperties::Y;
@@ -1877,7 +1877,7 @@ void Origin800Parser::readGraphInfo()
 
 				LAYER += size + 0x1;
 
-				int newSize;
+				unsigned int newSize;
 				file.seekg(LAYER, ios_base::beg);
 				file >> newSize;
 
@@ -2030,7 +2030,7 @@ unsigned int Origin800Parser::findStringPos(const string& name)
 	return pos;
 }
 
-bool Origin800Parser::findSection(const string& name, int length, int maxLength)
+bool Origin800Parser::findSection(const string& name, unsigned int length, unsigned int maxLength)
 {
 	if (!maxLength)
 		maxLength = d_file_size - 16;
