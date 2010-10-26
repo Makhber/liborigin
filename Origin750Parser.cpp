@@ -628,6 +628,7 @@ void Origin750Parser::readSpreadInfo()
 			if(col_index != -1)
 			{
 				file >> speadSheets[spread].columns[col_index].command.assign(size, 0);
+				LOG_PRINT(logfile, "				Column: %s has formula: %s\n", sec_name.c_str(), speadSheets[spread].columns[col_index].command.c_str());
 			}
 
 			//section_body_2_size
@@ -783,7 +784,7 @@ void Origin750Parser::readSpreadInfo()
 	for (unsigned int i = 0; i < header.size(); i++)
 		speadSheets[spread].columns[i] = header[i];
 
-	LOG_PRINT(logfile, "		Done with spreadsheet %d\n", spread)
+	LOG_PRINT(logfile, "		Done with spreadsheet %d POS (@ 0x%X)\n", spread, (unsigned int)file.tellg())
 
 	file.seekg(LAYER + 0x5*0x6 + 0x1ED*0x12, ios_base::beg);
 }

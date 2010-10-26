@@ -136,7 +136,7 @@ bool Origin610Parser::parse()
 				if (size){
 					LOG_PRINT(logfile, "NEW MATRIX\n")
 					matrixes.push_back(Matrix(name, dataIndex));
-					//LOG_PRINT(logfile, "MATRIX %s has dataIndex: %d\n", name.c_str(), dataIndex)
+					LOG_PRINT(logfile, "MATRIX %s has dataIndex: %d\n", name.c_str(), dataIndex)
 				}
 
 				++dataIndex;
@@ -318,7 +318,7 @@ bool Origin610Parser::parse()
 						speadSheets[spread].sheets = sheet;
 				}
 			}
-			LOG_PRINT(logfile, "SPREADSHEET = %s SHEET = %d COLUMN NAME = %s (%d) (@0x%X)\n", name.c_str(), speadSheets[spread].columns.back().sheet, columnname.c_str(), current_col, (unsigned int)file.tellg())
+			LOG_PRINT(logfile, "SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n", name.c_str(), columnname.c_str(), current_col, (unsigned int)file.tellg());
 
 			++dataIndex;
 
@@ -328,7 +328,7 @@ bool Origin610Parser::parse()
 			file >> nbytes;
 			if(fmod(nbytes, (double)valuesize)>0)
 			{
-				LOG_PRINT(logfile, "WARNING: data section could not be read correct")
+				LOG_PRINT(logfile, "WARNING: data section could not be properly read")
 			}
 			nr = nbytes / valuesize;
 			LOG_PRINT(logfile, "	[number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes, (unsigned int)file.tellg())
@@ -1861,7 +1861,7 @@ int Origin610Parser::findObjectInfoSectionByName(unsigned int start, const strin
 			if (!c && !end && name == s){
 				pos -= 0x8;
 				file.seekg(pos, ios_base::beg);
-				//LOG_PRINT(logfile, "        Object info section starts at: 0x%X\n", pos)
+				LOG_PRINT(logfile, "        Object info section starts at: 0x%X\n", pos)
 				return pos;
 			}
 		}

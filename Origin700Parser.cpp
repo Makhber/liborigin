@@ -79,7 +79,6 @@ bool Origin700Parser::parse()
 		LOG_PRINT(logfile, "	[valuesize = %d @ 0x%X]\n", (int)valuesize, ((unsigned int) file.tellg()-1))
 		if(valuesize <= 0)
 		{
-			LOG_PRINT(logfile , "	WARNING : found strange valuesize of %d\n", (int)valuesize)
 			valuesize = 10;
 		}
 
@@ -314,7 +313,7 @@ bool Origin700Parser::parse()
 			file >> nbytes;
 			if(fmod(nbytes, (double)valuesize)>0)
 			{
-				LOG_PRINT(logfile, "WARNING: data section could not be read correct")
+				LOG_PRINT(logfile, "WARNING: data section could not be properly read")
 			}
 			nr = nbytes / valuesize;
 			LOG_PRINT(logfile, "	[number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes, (unsigned int)file.tellg())
@@ -500,7 +499,7 @@ void Origin700Parser::readMatrixInfo()
 		string sec_name(41, 0);
 		file.seekg(LAYER + 0x46, ios_base::beg);
 		file >> sec_name;
-		//LOG_PRINT(logfile, "				SECTION NAME: %s (@ 0x%X)\n", sec_name.c_str(), (LAYER + 0x46))
+		LOG_PRINT(logfile, "				SECTION NAME: %s (@ 0x%X)\n", sec_name.c_str(), (LAYER + 0x46))
 
 		//section_body_1_size
 		LAYER += size + 0x1;

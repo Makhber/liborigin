@@ -139,7 +139,7 @@ bool Origin800Parser::parse()
 				if(pos != string::npos){
 					name.resize(pos);
 					file.seekg(valuesize*size, ios_base::cur);
-					//LOG_PRINT(logfile, "MATRIX %s is multisheet, only first sheet will be imported!\n", name.c_str())
+					LOG_PRINT(logfile, "MATRIX %s is multisheet, only first sheet will be imported!\n", name.c_str())
 					unsigned int sheets = matrixes.back().sheets;
 					sheets++;
 					matrixes.back().sheets = sheets;
@@ -149,7 +149,7 @@ bool Origin800Parser::parse()
 
 				LOG_PRINT(logfile, "NEW MATRIX\n")
 				matrixes.push_back(Matrix(name, dataIndex));
-				//LOG_PRINT(logfile, "MATRIX %s has dataIndex: %d\n", name.c_str(), dataIndex)
+				LOG_PRINT(logfile, "MATRIX %s has dataIndex: %d\n", name.c_str(), dataIndex)
 
 				++dataIndex;
 				LOG_PRINT(logfile, "VALUES :\n")
@@ -332,7 +332,7 @@ bool Origin800Parser::parse()
 						speadSheets[spread].sheets = sheet;
 				}
 			}
-			LOG_PRINT(logfile, "SPREADSHEET = %s SHEET = %d COLUMN NAME = %s (%d) (@0x%X)\n", name.c_str(), speadSheets[spread].columns.back().sheet, columnname.c_str(), current_col, (unsigned int)file.tellg())
+			LOG_PRINT(logfile, "SPREADSHEET = %s COLUMN NAME = %s (%d) (@0x%X)\n", name.c_str(), columnname.c_str(), current_col, (unsigned int)file.tellg())
 
 			++dataIndex;
 
@@ -342,7 +342,7 @@ bool Origin800Parser::parse()
 			file >> nbytes;
 			if(fmod(nbytes, (double)valuesize)>0)
 			{
-				LOG_PRINT(logfile, "WARNING: data section could not be read correct")
+				LOG_PRINT(logfile, "WARNING: data section could not be properly read")
 			}
 			nr = nbytes / valuesize;
 			LOG_PRINT(logfile, "	[number of rows = %d (%d Bytes) @ 0x%X]\n", nr, nbytes, (unsigned int)file.tellg())
@@ -660,7 +660,7 @@ void Origin800Parser::readSpreadInfo()
 			LAYER += size + 0x6;
 			file.seekg(LAYER, ios_base::beg);
 			file >> size;
-			//LOG_PRINT(logfile, "				Section size: %d (@ 0x%X)\n", size, (LAYER))
+			LOG_PRINT(logfile, "				Section size: %d (@ 0x%X)\n", size, (LAYER))
 		}
 	}
 
@@ -868,7 +868,6 @@ void Origin800Parser::readColumnInfo(int spread, int i)
 			break;
 	}
 	speadSheets[spread].columns[i].type = type;
-	//LOG_PRINT(logfile, "                        type: %s (@ 0x%X)", colTypes[type].c_str(), pos - 1)
 
 	short width = 0;
 	file.seekg(pos + 0x38, ios_base::beg);
@@ -1070,14 +1069,14 @@ void Origin800Parser::readMatrixInfo()
 
 	POS += size + 0x2;
 	file.seekg(POS, ios_base::beg);
-	//LOG_PRINT(logfile, "Cursor pos: 0x%X\n", POS)
+	LOG_PRINT(logfile, "Cursor pos: 0x%X\n", POS)
 
 	file >> size;
-	//LOG_PRINT(logfile, "		size: %d @ 0x%X\n", size, (unsigned int)file.tellg())
+	LOG_PRINT(logfile, "		size: %d @ 0x%X\n", size, (unsigned int)file.tellg())
 	POS += size + 0x2;
 
 	file.seekg(size, ios_base::cur);
-	//LOG_PRINT(logfile, "Cursor pos: 0x%X\n", POS)
+	LOG_PRINT(logfile, "Cursor pos: 0x%X\n", POS)
 
 	for (int i = 0; i < 3; i++)
 		skipLine();
@@ -1967,14 +1966,14 @@ void Origin800Parser::skipObjectInfo()
 	}
 	
 	unsigned int nextSize = size;
-	//LOG_PRINT(logfile, "	skipObjectInfo() size: %d (0x%X) @ 0x%X\n", size, size, POS)
+	LOG_PRINT(logfile, "	skipObjectInfo() size: %d (0x%X) @ 0x%X\n", size, size, POS)
 	while (POS < d_file_size && nextSize == size){
 		POS += nextSize + 0x2;
 		file.seekg(POS, ios_base::beg);
 
 		file >> nextSize;
 		POS += 0x4;
-		//LOG_PRINT(logfile, "	next size: %d (0x%X) @ 0x%X\n", nextSize, nextSize, POS)
+		LOG_PRINT(logfile, "	next size: %d (0x%X) @ 0x%X\n", nextSize, nextSize, POS)
 
 		if (!nextSize){
 			POS += 0x1;
@@ -1989,7 +1988,7 @@ void Origin800Parser::skipObjectInfo()
 		}
 	}
 	file.seekg(1, ios_base::cur);
-	//LOG_PRINT(logfile, "	skipObjectInfo() pos:  0x%X\n", (unsigned int)file.tellg())
+	LOG_PRINT(logfile, "	skipObjectInfo() pos:  0x%X\n", (unsigned int)file.tellg())
 }
 
 OriginParser* createOrigin800Parser(const string& fileName)
@@ -2021,7 +2020,7 @@ unsigned int Origin800Parser::findStringPos(const string& name)
 			if (!c && !end && name == s){
 				pos -= 0x1;
 				file.seekg(startPos, ios_base::beg);
-				//LOG_PRINT(logfile, "Found string: %s (@ 0x%X)\n", name.c_str(), pos)
+				LOG_PRINT(logfile, "Found string: %s (@ 0x%X)\n", name.c_str(), pos)
 				return pos;
 			}
 		}
@@ -2054,7 +2053,7 @@ bool Origin800Parser::findSection(const string& name, unsigned int length, unsig
 			if (!c && !end && name == s){
 				pos -= 0x1;
 				file.seekg(pos + length, ios_base::beg);
-				//LOG_PRINT(logfile, "Found section %s at: 0x%X\n", name.c_str(), pos)
+				LOG_PRINT(logfile, "Found section %s at: 0x%X\n", name.c_str(), pos)
 				return true;
 			}
 		} else
