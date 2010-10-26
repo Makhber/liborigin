@@ -27,7 +27,6 @@
  ***************************************************************************/
 
 #include "Origin610Parser.h"
-#include <cstring>
 #include <cstdio> // for fprintf
 
 Origin610Parser::Origin610Parser(const string& fileName)
@@ -141,7 +140,6 @@ bool Origin610Parser::parse()
 				}
 
 				++dataIndex;
-
 				LOG_PRINT(logfile, "VALUES :\n")
 				if (size >= 100)
 					LOG_PRINT(logfile, " matrix too big...")

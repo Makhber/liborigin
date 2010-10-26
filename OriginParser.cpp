@@ -28,9 +28,8 @@
 
 #include "OriginParser.h"
 #include <algorithm>
-#include <boost/lambda/if.hpp>
 #include <cstdlib> // for atoi
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp> // for iequals
 
 using namespace boost::algorithm;
 using namespace Origin;

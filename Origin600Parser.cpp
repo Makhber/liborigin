@@ -27,7 +27,6 @@
  ***************************************************************************/
 
 #include "Origin600Parser.h"
-#include <cstring>
 
 Origin600Parser::Origin600Parser(const string& fileName)
 :	Origin610Parser(fileName)

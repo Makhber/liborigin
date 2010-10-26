@@ -28,7 +28,6 @@
  ***************************************************************************/
 
 #include "Origin750Parser.h"
-#include <cstring>
 
 const char* colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 

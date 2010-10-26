@@ -1,7 +1,7 @@
 TARGET       = origin2
 TEMPLATE     = lib
 CONFIG      += warn_on release thread
-#CONFIG      += staticlib 
+#CONFIG      += staticlib
 MOC_DIR      = ./tmp
 OBJECTS_DIR  = ./tmp
 
@@ -15,7 +15,7 @@ HEADERS += endianfstream.hh \
 	   OriginObj.h \
 	   OriginFile.h \
 	   OriginParser.h \
-           OriginDefaultParser.h \
+	   OriginDefaultParser.h \
 	   Origin600Parser.h \
 	   Origin610Parser.h \
 	   Origin700Parser.h \
@@ -32,4 +32,3 @@ SOURCES += OriginFile.cpp \
 	   Origin750Parser.cpp \
 	   Origin800Parser.cpp \
 	   Origin810Parser.cpp
-

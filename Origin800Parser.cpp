@@ -27,7 +27,6 @@
  ***************************************************************************/
 
 #include "Origin800Parser.h"
-#include <cstring>
 
 Origin800Parser::Origin800Parser(const string& fileName)
 :	Origin750Parser(fileName)

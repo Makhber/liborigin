@@ -35,11 +35,12 @@
 OriginFile::OriginFile(const string& fileName)
 :	fileVersion(0)
 {
+	unsigned int ioret;  // return value of io functions
 	ifstream file(fileName.c_str(), ios_base::binary);
 
-	if(!file.is_open())
+	if (!file.is_open())
 	{
-		cerr << "Could not open " << fileName << "!" << endl;
+		ioret = fprintf(stderr, "Could not open %s!\n", fileName.c_str());
 		return;
 	}
 
@@ -48,8 +49,8 @@ OriginFile::OriginFile(const string& fileName)
 	logfile = fopen("./opjfile.log", "w");
 	if (logfile == NULL)
 	{
-		cerr << "Could not open opjfile.log !" << endl;
-	        return;
+		ioret = fprintf(stderr, "Could not open opjfile.log !\n");
+		return;
 	}
 #endif // NO_CODE_GENERATION_FOR_LOG
 
@@ -63,29 +64,29 @@ OriginFile::OriginFile(const string& fileName)
 
 	buildVersion = fileVersion;
 	// translate version
-	if(fileVersion >= 130 && fileVersion <= 140)		// 4.1
+	if(fileVersion >= 130 && fileVersion <= 140) // 4.1
 		fileVersion = 410;
-	else if(fileVersion == 210)							// 5.0
+	else if(fileVersion == 210) // 5.0
 		fileVersion = 500;
-	else if(fileVersion == 2625)						// 6.0
+	else if(fileVersion == 2625) // 6.0
 		fileVersion = 600;
-	else if(fileVersion == 2627)						// 6.0 SR1
+	else if(fileVersion == 2627) // 6.0 SR1
 		fileVersion = 601;
-	else if(fileVersion == 2630)						// 6.0 SR4
+	else if(fileVersion == 2630) // 6.0 SR4
 		fileVersion = 604;
-	else if(fileVersion == 2635)						// 6.1
+	else if(fileVersion == 2635) // 6.1
 		fileVersion = 610;
-	else if(fileVersion >= 2656 && fileVersion <= 2664)	// 7.0
+	else if(fileVersion >= 2656 && fileVersion <= 2664) // 7.0
 		fileVersion = 700;
-	else if(fileVersion == 2672)						// 7.0 SR3
+	else if(fileVersion == 2672) // 7.0 SR3
 		fileVersion = 703;
-	else if(fileVersion == 2673)						// 7.0 E
+	else if(fileVersion == 2673) // 7.0 E
 		fileVersion = 704;
-	else if(fileVersion >= 2766 && fileVersion <= 2769)	// 7.5
+	else if(fileVersion >= 2766 && fileVersion <= 2769) // 7.5
 		fileVersion = 750;
-	else if(fileVersion >= 2876 && fileVersion <= 2906)	// 8.0
+	else if(fileVersion >= 2876 && fileVersion <= 2906) // 8.0
 		fileVersion = 800;
-	else if(fileVersion >= 2907)						// 8.1
+	else if(fileVersion >= 2907) // 8.1
 		fileVersion = 810;
 	else {
 		LOG_PRINT(logfile, "Found unknown project version %d\n", fileVersion)
@@ -106,8 +107,8 @@ OriginFile::OriginFile(const string& fileName)
 #endif NO_CODE_GENERATION_FOR_LOG
 	switch(fileVersion){
 		case 810:
-			 parser.reset(createOrigin810Parser(fileName));
-			 break;
+			parser.reset(createOrigin810Parser(fileName));
+			break;
 		case 800:
 			parser.reset(createOrigin800Parser(fileName));
 			break;

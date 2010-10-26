@@ -32,7 +32,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
-#include <cstring>
 
 using namespace Origin;
 
@@ -122,10 +121,8 @@ bool OriginDefaultParser::parse()
 		fprintf(debug,"COLUMN HEADER :\n");
 		for(i=0;i < 0x3D;i++) {	// skip 0x3C chars to value size
 			fread(&c,1,1,f);
-			//if(i>21 && i<27) {
 			fprintf(debug,"%.2X ",c);
 			if(!((i+1)%16)) fprintf(debug,"\n");
-			//}
 		}
 		fprintf(debug,"\n");
 
@@ -148,7 +145,6 @@ bool OriginDefaultParser::parse()
 		fprintf(debug,"	[Spreadsheet @ 0x%X]\n",(unsigned int) ftell(f));
 		fflush(debug);
 		fread(&name,25,1,f);
-		//char* sname = new char[26];
 		char sname[26];
 		sprintf(sname,"%s",strtok(name,"_"));	// spreadsheet name
 		char* cname = strtok(NULL,"_");	// column name
@@ -196,7 +192,6 @@ bool OriginDefaultParser::parse()
 
 			do{	// skip until '\n'
 				fread(&c,1,1,f);
-				// fprintf(debug,"%.2X ",c);
 			} while (c != '\n');
 			fprintf(debug,"\n");
 			fflush(debug);
@@ -284,7 +279,6 @@ bool OriginDefaultParser::parse()
 				}
 			}
 		}	// else
-		//		fprintf(debug,"	[now @ 0x%X]\n",ftell(f));
 		fprintf(debug,"\n");
 		fflush(debug);
 
@@ -359,7 +353,6 @@ bool OriginDefaultParser::parse()
 		int spread=i;
 		if(jump == MAX_LEVEL){
 			fprintf(debug,"		Spreadsheet SECTION not found ! 	(@ 0x%X)\n",POS-10*0x1F2+0x55);
-			// setColName(spread);
 			return -5;
 		}
 
@@ -454,7 +447,6 @@ bool OriginDefaultParser::parse()
 			else {
 				fprintf(debug,"				TEST : COLUMN %d name mismatch (\"%s\" != \"%s\")\n",
 					j+1,name,speadSheets[spread].columns[j].name.c_str());
-				//fprintf(debug,"ERROR : column name mismatch! Continue anyway.\n"ERROR_MSG);
 			}
 			fflush(debug);
 		}
