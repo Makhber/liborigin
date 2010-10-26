@@ -29,9 +29,6 @@
 
 #include "Origin700Parser.h"
 #include <cstring>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-using namespace boost;
 
 Origin700Parser::Origin700Parser(const string& fileName)
 :	Origin610Parser(fileName)

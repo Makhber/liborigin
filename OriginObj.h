@@ -32,9 +32,9 @@
 #define ORIGIN_OBJ_H
 
 #include <string.h>
+#include <ctime>
 #include <vector>
 #include "boost/variant.hpp"
-#include "boost/date_time/posix_time/ptime.hpp"
 
 using namespace std;
 
@@ -133,8 +133,8 @@ namespace Origin
 		State state;
 		Title title;
 		Rect frameRect;
-		boost::posix_time::ptime creationDate;
-		boost::posix_time::ptime modificationDate;
+		time_t creationDate;
+		time_t modificationDate;
 
 		Window(const string& _name= "", const string& _label = "", bool _hidden = false)
 		:	name(_name)
@@ -749,10 +749,10 @@ namespace Origin
 
 		NodeType type;
 		string name;
-		boost::posix_time::ptime creationDate;
-		boost::posix_time::ptime modificationDate;
+		time_t creationDate;
+		time_t modificationDate;
 
-		ProjectNode(const string& _name = "", NodeType _type = Folder, const boost::posix_time::ptime& _creationDate = boost::posix_time::ptime(), const boost::posix_time::ptime& _modificationDate = boost::posix_time::ptime())
+		ProjectNode(const string& _name = "", NodeType _type = Folder, const time_t _creationDate = time(NULL), const time_t _modificationDate = time(NULL))
 		:	name(_name)
 		,	type(_type)
 		,	creationDate(_creationDate)

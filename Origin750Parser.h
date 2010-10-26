@@ -33,8 +33,8 @@
 
 #include "OriginParser.h"
 #include "endianfstream.hh"
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
+#include <cmath> // for floor()
 
 using namespace std;
 using namespace Origin;
@@ -70,9 +70,10 @@ protected:
 		return strtod(s1.c_str(), NULL);
 	}
 
-	inline boost::posix_time::ptime doubleToPosixTime(double jdt)
+	inline time_t doubleToPosixTime(double jdt)
 	{
-		return boost::posix_time::ptime(boost::gregorian::date(boost::gregorian::gregorian_calendar::from_julian_day_number(jdt+1)), boost::posix_time::seconds((jdt-(int)jdt)*86400));
+	        /* 2440587.5 is julian date for the unixtime epoch */
+	        return (time_t) floor((jdt - 2440587.5) * 86400. + 0.5);
 	}
 
 	unsigned int objectIndex;

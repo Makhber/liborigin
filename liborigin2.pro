@@ -11,10 +11,8 @@ DESTDIR      = ./
 INCLUDEPATH += ../boost
 
 # link statically against a copy of BOOST C++ libraries
-#LIBS        += ../boost/lib/libboost_date_time.a
 #LIBS        += ../boost/lib/libboost_thread.a
 # or dynamically against a system-wide installation
-LIBS        += -lboost_date_time
 LIBS        += -lboost_thread
 
 HEADERS += endianfstream.hh \
