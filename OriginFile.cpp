@@ -29,10 +29,8 @@
 
 #include "OriginFile.h"
 #include <cstdio>  // for fprintf
+#include <cstdlib> // for atoi
 #include <fstream>
-#include <boost/lexical_cast.hpp>
-
-using namespace boost;
 
 OriginFile::OriginFile(const string& fileName)
 :	fileVersion(0)
@@ -58,7 +56,7 @@ OriginFile::OriginFile(const string& fileName)
 	string vers(4, 0);
 	file.seekg(0x7, ios_base::beg);
 	file >> vers;
-	fileVersion = lexical_cast<unsigned int>(vers);
+	fileVersion = atoi(vers.c_str());
 	file.close();
 
 	LOG_PRINT(logfile, "        [version = %d]\n", fileVersion)

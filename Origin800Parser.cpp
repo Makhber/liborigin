@@ -28,9 +28,6 @@
 
 #include "Origin800Parser.h"
 #include <cstring>
-#include <boost/lexical_cast.hpp>
-
-using namespace boost;
 
 Origin800Parser::Origin800Parser(const string& fileName)
 :	Origin750Parser(fileName)
@@ -325,7 +322,7 @@ bool Origin800Parser::parse()
 			speadSheets[spread].columns.push_back(SpreadColumn(columnname, dataIndex));
 			string::size_type sheetpos = speadSheets[spread].columns.back().name.find_last_of("@");
 			if(sheetpos != string::npos){
-				unsigned int sheet = lexical_cast<int>(columnname.substr(sheetpos + 1).c_str());
+				unsigned int sheet = atoi(columnname.substr(sheetpos + 1).c_str());
 				if( sheet > 1){
 					speadSheets[spread].multisheet = true;
 

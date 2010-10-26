@@ -29,7 +29,6 @@
 
 #include "Origin700Parser.h"
 #include <cstring>
-#include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace boost;
@@ -305,7 +304,7 @@ bool Origin700Parser::parse()
 			string::size_type sheetpos = speadSheets[spread].columns.back().name.find_last_of("@");
 			if(!speadSheets[spread].multisheet && sheetpos != string::npos)
 			{
-				if(lexical_cast<int>(columnname.substr(sheetpos + 1).c_str()) > 1)
+				if(atoi(columnname.substr(sheetpos + 1).c_str()) > 1)
 				{
 					speadSheets[spread].multisheet = true;
 					LOG_PRINT(logfile, "SPREADSHEET \"%s\" IS MULTISHEET\n", name.c_str())

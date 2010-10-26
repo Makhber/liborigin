@@ -28,9 +28,6 @@
 
 #include "Origin600Parser.h"
 #include <cstring>
-#include <boost/lexical_cast.hpp>
-
-using namespace boost;
 
 Origin600Parser::Origin600Parser(const string& fileName)
 :	Origin610Parser(fileName)
