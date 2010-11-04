@@ -17,13 +17,15 @@ DEPENDENCIES: to compile, liborigin2 (still) depends on
 		Note that the BOOST libraries are not needed at run time,
 		neither are linked in the executable.
 ---------------------------------------------------------------------------
-COMPILING: liborigin2 uses qmake for the building process.
-		qmake is part of a Qt distribution: http://trolltech.com/
+COMPILING: liborigin2 uses CMake for the building process.
+		CMake is available at http://www.cmake.org/
 
-After installing qmake and the BOOST C++ library headers on your system, issue the following commands:
-	$ qmake
+After installing CMake and the BOOST C++ library headers on your system, issue the following commands:
+	$ mkdir build
+	$ cd build
+	$ cmake ../
 	$ make
-	$ make staticlib
+	$ make install
 
 ---------------------------------------------------------------------------
 FEATURES :
