@@ -419,6 +419,11 @@ bool Origin700Parser::parse()
 	}
 
 	readNotes();
+	// If file has no Note windows, last function will read to EOF,
+	// skipping the info for ResultsLog and ProjectTree.
+	// As we know there is always a ResultsLog window after the Note
+	// windows, we better rewind to the start of Notes
+	file.seekg(POS, ios_base::beg);
 	readResultsLog();
 
 	file.seekg(1 + 4*5 + 0x10 + 1, ios_base::cur);
