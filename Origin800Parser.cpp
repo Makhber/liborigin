@@ -844,7 +844,9 @@ void Origin800Parser::readColumnInfo(int spread, int i)
 	LOG_PRINT(logfile, "		Column %s\n", colName.c_str())
 
 	unsigned int pos = findStringPos(colName);
-	if (file.eof())
+	// even if colName was not found we are not yet at eof,
+	// just before it. We cannot use file.eof()
+	if (!(pos < d_file_size))
 		return;
 
 	file.seekg(pos - 1, ios_base::beg);
