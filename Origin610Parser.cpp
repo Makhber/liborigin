@@ -1013,8 +1013,33 @@ bool Origin610Parser::readGraphInfo()
 			//if (!QString(sec_name.c_str()).trimmed().isEmpty())
 			if (!sec_name.empty())
 				sectionNames.push_back(sec_name);
-			else
-				break;
+			else {
+				// section has no name, just skip it
+				LAYER += size + 0x01;
+				// skip header data
+				file.seekg(LAYER, ios_base::beg);
+				// get size of block_1 data
+				file >> size;
+				LAYER += 0x5 + size + 0x1;
+				// skip block_1
+				file.seekg(LAYER, ios_base::beg);
+				// get size of block_2 data
+				file >> size;
+				LAYER += 0x5 + size + (size > 0 ? 0x1 : 0);
+				// skip block_2
+				file.seekg(LAYER, ios_base::beg);
+				// get size of block_3 data
+				file >> size;
+				LAYER += 0x5 + size + (size > 0 ? 0x1 : 0);
+				// skip block_3
+				file.seekg(LAYER, ios_base::beg);
+				file >> size;
+				// if it is last section jump out
+				if (!size || size != sectionSize)
+					break;
+				// if not, continue with next section
+				continue;
+			}
 
 			unsigned int sectionNamePos = LAYER + 0x46;
 			LOG_PRINT(logfile, "				SECTION NAME: %s (@ 0x%X)\n", sec_name.c_str(), (LAYER + 0x46))
