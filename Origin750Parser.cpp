@@ -1,7 +1,7 @@
 /***************************************************************************
     File                 : Origin750Parser.cpp
     --------------------------------------------------------------------
-    Copyright            : (C) 2007-2008 Alex Kargovsky, Stefan Gerlach, 
+    Copyright            : (C) 2007-2008 Alex Kargovsky, Stefan Gerlach,
 						   Ion Vasilief
     Email (use @ for *)  : kargovsky*yumr.phys.msu.su, ion_vasilief*yahoo.fr
     Description          : Origin 7.5 file parser class
@@ -61,11 +61,11 @@ bool Origin750Parser::parse()
 	file >> size;
 
 	file.seekg(1, ios_base::cur);
-	LOG_PRINT(logfile, " [column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
+	LOG_PRINT(logfile, "	[column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
 
 	unsigned int colpos = file.tellg();
 	unsigned int current_col = 1, nr = 0, nbytes = 0;
-	
+
 	while(size > 0 && size < 0x84) {	// should be 0x72, 0x73 or 0x83
 		//////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
 		short data_type;
@@ -77,7 +77,7 @@ bool Origin750Parser::parse()
 
 		file.seekg(oldpos + 0x3F, ios_base::beg);
 		file >> data_type_u;
-		
+
 		char valuesize;
 		file.seekg(oldpos + 0x3D, ios_base::beg);
 		file >> valuesize;
@@ -151,7 +151,7 @@ bool Origin750Parser::parse()
 				case 0x6001://double
 					for(unsigned int i = 0; i < size; ++i)
 					{
-						double value;				
+						double value;
 						file >> value;
 						matrixes.back().data.push_back((double)value);
 						if (size < 100)
@@ -161,7 +161,7 @@ bool Origin750Parser::parse()
 				case 0x6003://float
 					for(unsigned int i = 0; i < size; ++i)
 					{
-						float value;						
+						float value;
 						file >> value;
 						matrixes.back().data.push_back((double)value);
 						if (size < 100)
@@ -173,7 +173,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned int value;						
+							unsigned int value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -184,7 +184,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							int value;							
+							int value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -197,7 +197,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned short value;						
+							unsigned short value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -208,7 +208,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							short value;							
+							short value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -221,7 +221,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned char value;						
+							unsigned char value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -232,7 +232,7 @@ bool Origin750Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							char value;							
+							char value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -409,7 +409,7 @@ bool Origin750Parser::parse()
 
 	unsigned int POS = (unsigned int)file.tellg()-11;
 	LOG_PRINT(logfile, "\nHEADER SECTION\n")
-	LOG_PRINT(logfile, "	nr_spreads = %d", speadSheets.size())
+	LOG_PRINT(logfile, "	nr_spreads = %d\n", speadSheets.size())
 	LOG_PRINT(logfile, "	[position @ 0x%X]\n", POS)
 
 	//////////////////////// OBJECT INFOS //////////////////////////////////////
@@ -443,12 +443,12 @@ bool Origin750Parser::parse()
 	}
 
 	file.seekg(1, ios_base::cur);
-	LOG_PRINT(logfile, "Some Origin params @ 0x%X:", (unsigned int)file.tellg())
+	LOG_PRINT(logfile, "Some Origin params @ 0x%X:\n", (unsigned int)file.tellg())
 
 	file >> c;
 	while(c != 0)
 	{
-		LOG_PRINT(logfile, "                ")
+		LOG_PRINT(logfile, "		")
 		while(c != '\n')
 		{
 			LOG_PRINT(logfile, "%c", c)
@@ -456,7 +456,7 @@ bool Origin750Parser::parse()
 		}
 		double parvalue;
 		file >> parvalue;
-		LOG_PRINT(logfile, ": %g", parvalue);
+		LOG_PRINT(logfile, ": %g\n", parvalue);
 
 		file.seekg(1, ios_base::cur);
 		file >> c;
@@ -525,7 +525,7 @@ bool Origin750Parser::parse()
 			notes.back().frameRect = rect;
 			notes.back().creationDate = doubleToPosixTime(creationDate);
 			notes.back().modificationDate = doubleToPosixTime(modificationDate);
-			
+
 			if(c & 0x01)
 				notes.back().title = Window::Label;
 			else if(c & 0x02)
@@ -650,7 +650,7 @@ void Origin750Parser::readSpreadInfo()
 	}
 
 	/////////////// COLUMN Types ///////////////////////////////////////////
-	LOG_PRINT(logfile, "			Spreadsheet has %d columns", speadSheets[spread].columns.size())
+	LOG_PRINT(logfile, "			Spreadsheet has %d columns\n", speadSheets[spread].columns.size())
 
 	vector<SpreadColumn> header;
 	while(1)
@@ -868,7 +868,7 @@ void Origin750Parser::readExcelInfo()
 		LAYER += 0x5;
 
 		/////////////// COLUMN Types ///////////////////////////////////////////
-		LOG_PRINT(logfile, "			Excel sheet %d has %d columns", isheet, excels[iexcel].sheets[isheet].columns.size())
+		LOG_PRINT(logfile, "			Excel sheet %d has %d columns\n", isheet, excels[iexcel].sheets[isheet].columns.size())
 
 		while(1)
 		{
@@ -1048,7 +1048,7 @@ void Origin750Parser::readMatrixInfo()
 
 	// LAYER section
 	LAYER += 0x5;
-	
+
 	file.seekg(LAYER + 0x2B, ios_base::beg);
 	file >> matrixes[idx].columnCount;
 
@@ -1155,7 +1155,7 @@ void Origin750Parser::readMatrixInfo()
 		}
 
 		LAYER += 0x1E7 + 0x1;
-		
+
 		file.seekg(LAYER, ios_base::beg);
 		file >> size;
 
@@ -1868,7 +1868,7 @@ void Origin750Parser::readGraphInfo()
 
 					file.seekg(LAYER + 0x13, ios_base::beg);
 					file >> h;
-					curve.surface.backColorEnabled = (h & 0x08);				
+					curve.surface.backColorEnabled = (h & 0x08);
 					file.seekg(LAYER + 0x15A, ios_base::beg);
 					file >> curve.surface.backColor;
 					file >> curve.surface.xSideWallColor;
@@ -1962,7 +1962,7 @@ void Origin750Parser::readGraphInfo()
 				file >> size;
 
 				LAYER += size + (size > 0 ? 0x1 : 0) + 0x5;
-	
+
 				file.seekg(LAYER, ios_base::beg);
 				file >> size;
 
@@ -2031,7 +2031,7 @@ void Origin750Parser::readGraphInfo()
 void Origin750Parser::readGraphGridInfo(GraphGrid& grid)
 {
 	unsigned int POS = file.tellg();
-	
+
 	unsigned char h;
 	short w;
 
@@ -2062,7 +2062,7 @@ void Origin750Parser::readGraphAxisBreakInfo(GraphAxisBreak& axis_break)
 	file >> axis_break.to;
 
 	file >> axis_break.scaleIncrementAfter;
-	
+
 	file >> axis_break.position;
 
 	unsigned char h;
@@ -2138,7 +2138,7 @@ void Origin750Parser::readGraphAxisTickLabelsInfo(GraphAxisTick& tick)
 	file.seekg(POS + 0x1A, ios_base::beg);
 	file >> h;
 	tick.fontBold = (h & 0x08);
-	
+
 	file.seekg(POS + 0x23, ios_base::beg);
 	file >> w;
 	file >> h;
@@ -2360,7 +2360,7 @@ void Origin750Parser::readWindowProperties(Window& window, unsigned int size)
 	{
 		LOG_PRINT(logfile, "			WINDOW %d NAME : %s	is hidden\n", objectIndex, window.name.c_str())
 	}
-	
+
 	double creationDate, modificationDate;
 	file.seekg(POS + 0x73, ios_base::beg);
 	file >> creationDate;

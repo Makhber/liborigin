@@ -61,11 +61,11 @@ bool Origin800Parser::parse()
 	file >> size;
 
 	file.seekg(1, ios_base::cur);
-	LOG_PRINT(logfile, " [column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
+	LOG_PRINT(logfile, "	[column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
 
 	unsigned int colpos = file.tellg();
 	unsigned int current_col = 1, nr = 0, nbytes = 0;
-	
+
 	while(size > 0 && size <= 0x8C){// should be 0x72, 0x73 or 0x83 ?
 		//////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
 
@@ -78,7 +78,7 @@ bool Origin800Parser::parse()
 
 		file.seekg(oldpos + 0x3F, ios_base::beg);
 		file >> data_type_u;
-		
+
 		char valuesize;
 		file.seekg(oldpos + 0x3D, ios_base::beg);
 		file >> valuesize;
@@ -161,7 +161,7 @@ bool Origin800Parser::parse()
 				case 0x6001://double
 					for(unsigned int i = 0; i < size; ++i)
 					{
-						double value;				
+						double value;
 						file >> value;
 						matrixes.back().data.push_back((double)value);
 						//if (size < 100)
@@ -171,7 +171,7 @@ bool Origin800Parser::parse()
 				case 0x6003://float
 					for(unsigned int i = 0; i < size; ++i)
 					{
-						float value;						
+						float value;
 						file >> value;
 						matrixes.back().data.push_back((double)value);
 						if (size < 100)
@@ -183,7 +183,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned int value;						
+							unsigned int value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -194,7 +194,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							int value;							
+							int value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -207,7 +207,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned short value;						
+							unsigned short value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -218,7 +218,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							short value;							
+							short value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -231,7 +231,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							unsigned char value;						
+							unsigned char value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -242,7 +242,7 @@ bool Origin800Parser::parse()
 					{
 						for(unsigned int i = 0; i < size; ++i)
 						{
-							char value;							
+							char value;
 							file >> value;
 							matrixes.back().data.push_back((double)value);
 							if (size < 100)
@@ -416,7 +416,7 @@ bool Origin800Parser::parse()
 
 	unsigned int POS = (unsigned int)file.tellg()-11;
 	LOG_PRINT(logfile, "\nHEADER SECTION\n")
-	LOG_PRINT(logfile, "	nr_spreads = %d", speadSheets.size())
+	LOG_PRINT(logfile, "	nr_spreads = %d\n", speadSheets.size())
 	LOG_PRINT(logfile, "	[position @ 0x%X]\n", POS)
 
 	POS += 0xB;
@@ -1008,7 +1008,7 @@ void Origin800Parser::readMatrixInfo()
 
 	// LAYER section
 	LAYER += 0x5;
-	
+
 	file.seekg(LAYER + 0x2B, ios_base::beg);
 	file >> matrixes[idx].columnCount;
 	LOG_PRINT(logfile, "			Columns: %d (@ 0x%X)\n", matrixes[idx].columnCount, (LAYER + 0x2B))
@@ -1795,7 +1795,7 @@ void Origin800Parser::readGraphInfo()
 
 					file.seekg(LAYER + 0x13, ios_base::beg);
 					file >> h;
-					curve.surface.backColorEnabled = (h & 0x08);				
+					curve.surface.backColorEnabled = (h & 0x08);
 					file.seekg(LAYER + 0x15A, ios_base::beg);
 					file >> curve.surface.backColor;
 					file >> curve.surface.xSideWallColor;
@@ -1891,7 +1891,7 @@ void Origin800Parser::readGraphInfo()
 				file >> newSize;
 
 				LAYER += newSize + (newSize > 0 ? 0x1 : 0) + 0x5;
-	
+
 				file.seekg(LAYER, ios_base::beg);
 				file >> newSize;
 
@@ -1974,7 +1974,7 @@ void Origin800Parser::skipObjectInfo()
 		file >> size;
 		POS = file.tellg();
 	}
-	
+
 	unsigned int nextSize = size;
 	LOG_PRINT(logfile, "	skipObjectInfo() size: %d (0x%X) @ 0x%X\n", size, size, POS)
 	while (POS < d_file_size && nextSize == size){

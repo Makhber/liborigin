@@ -60,7 +60,7 @@ OriginFile::OriginFile(const string& fileName)
 	fileVersion = atoi(vers.c_str());
 	file.close();
 
-	LOG_PRINT(logfile, "        [version = %d]\n", fileVersion)
+	LOG_PRINT(logfile, "	[version = %d]\n", fileVersion)
 
 	buildVersion = fileVersion;
 	// translate version

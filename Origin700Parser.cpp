@@ -55,7 +55,7 @@ bool Origin700Parser::parse()
 	file >> size;
 
 	file.seekg(1, ios_base::cur);
-	LOG_PRINT(logfile, " [column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
+	LOG_PRINT(logfile, "	[column found = %d/0x%X @ 0x%X]\n", size, size, (unsigned int) file.tellg())
 
 	unsigned int colpos = file.tellg();
 	unsigned int current_col = 1, nr = 0, nbytes = 0;
@@ -387,7 +387,7 @@ bool Origin700Parser::parse()
 
 	unsigned int POS = (unsigned int)file.tellg()-11;
 	LOG_PRINT(logfile, "\nHEADER SECTION\n")
-	LOG_PRINT(logfile, "	nr_spreads = %d", speadSheets.size())
+	LOG_PRINT(logfile, "	nr_spreads = %d\n", speadSheets.size())
 	LOG_PRINT(logfile, "	[position @ 0x%X]\n", POS)
 
 	//////////////////////// OBJECT INFOS //////////////////////////////////////
@@ -476,7 +476,7 @@ void Origin700Parser::readMatrixInfo()
 
 	// LAYER section
 	LAYER += 0x5;
-	
+
 	unsigned short width;
 	file.seekg(LAYER + 0x27, ios_base::beg);
 	file >> width;
