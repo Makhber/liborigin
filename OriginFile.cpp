@@ -90,7 +90,7 @@ OriginFile::OriginFile(const string& fileName)
 		fileVersion = 810;
 	else {
 		LOG_PRINT(logfile, "Found unknown project version %d\n", fileVersion)
-		LOG_PRINT(logfile, "Please contact the authors of liborigin2")
+		LOG_PRINT(logfile, "Please contact the authors of liborigin")
 #ifndef NO_CODE_GENERATION_FOR_LOG
 		unsigned int ioret;
 		ioret = fclose(logfile);

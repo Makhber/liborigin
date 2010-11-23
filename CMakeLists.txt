@@ -1,4 +1,4 @@
-# CMakeLists.txt for liborigin2
+# CMakeLists.txt for liborigin
 cmake_minimum_required(VERSION 2.8)
 
 # boost library headers
@@ -27,21 +27,21 @@ set (devel-headers
 	)
 
 # dynamic library
-add_library (origin2 SHARED ${sources})
-set_target_properties(origin2 PROPERTIES VERSION 0.0.1 SOVERSION 0 )
+add_library (origin SHARED ${sources})
+set_target_properties(origin PROPERTIES VERSION 2.0.0 SOVERSION 2 )
 
 # static library
-add_library (origin2-static STATIC ${sources})
-set_target_properties(origin2-static PROPERTIES OUTPUT_NAME "origin2")
+add_library (origin-static STATIC ${sources})
+set_target_properties(origin-static PROPERTIES OUTPUT_NAME "origin")
 
 # install libraries
-install(TARGETS origin2 origin2-static DESTINATION lib)
+install(TARGETS origin origin-static DESTINATION lib)
 
 # install headers
 install(FILES ${devel-headers} DESTINATION include)
 
 # command line util
 add_executable(opj2dat opj2dat.cpp)
-target_link_libraries (opj2dat origin2-static)
+target_link_libraries (opj2dat origin-static)
 
 install(TARGETS opj2dat DESTINATION bin)
