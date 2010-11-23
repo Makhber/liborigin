@@ -50,7 +50,7 @@ set_target_properties(origin-static PROPERTIES OUTPUT_NAME "origin")
 install(TARGETS origin origin-static DESTINATION lib)
 
 # install headers
-install(FILES ${devel-headers} DESTINATION include)
+install(FILES ${devel-headers} DESTINATION include/liborigin)
 
 # command line util
 add_executable(opj2dat opj2dat.cpp)
