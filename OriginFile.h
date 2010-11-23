@@ -30,9 +30,7 @@
 #ifndef ORIGIN_FILE_H
 #define ORIGIN_FILE_H
 
-#define LIBORIGIN_VERSION 0x02000000
-#define LIBORIGIN_VERSION_STRING "2.0.0"
-
+#include "config.h"
 #include "OriginObj.h"
 #include "OriginParser.h"
 #include <memory>
