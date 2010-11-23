@@ -6,7 +6,6 @@ This code is an (almost) standalone library for reading OriginLab project files.
 It is based on the code at
 	http://sourceforge.net/projects/liborigin
 	http://soft.proindependent.com/liborigin2
-and is API compatible with liborigin2 above
 
 AUTHORS:  Stefan Gerlach, Ion Vasilief, Alex Kargovsky
 
