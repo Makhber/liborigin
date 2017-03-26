@@ -60,11 +60,11 @@ OriginFile::OriginFile(const string& fileName)
 	fileVersion = atoi(vers.c_str());
 	file.close();
 
-	LOG_PRINT(logfile, "	[version = %d]\n", fileVersion)
+	LOG_PRINT(logfile, "File: %s [version = %d]\n", fileName.c_str(), fileVersion)
 
 	buildVersion = fileVersion;
 	// translate version
-	if(fileVersion >= 130 && fileVersion <= 140) // 4.1
+	/*if(fileVersion >= 130 && fileVersion <= 140) // 4.1
 		fileVersion = 410;
 	else if(fileVersion == 210) // 5.0
 		fileVersion = 500;
@@ -98,6 +98,7 @@ OriginFile::OriginFile(const string& fileName)
 		throw std::logic_error("Unknown project version");
 	}
 	LOG_PRINT(logfile, "Found project version %.2f\n", fileVersion/100.0)
+	*/
 	// Close logfile, will be reopened in parser routine.
 	// There are ways to keep logfile open and pass it to parser routine,
 	// but I choose to do the same as with 'file', close it and reopen in 'parse'
