@@ -120,13 +120,14 @@ OriginFile::OriginFile(const string& fileName)
 
 bool OriginFile::parse()
 {
-	parser->setBuildVersion(buildVersion);
+	parser->buildVersion = buildVersion;
+	parser->fileVersion = fileVersion;
 	return parser->parse();
 }
 
 double OriginFile::version() const
 {
-	return fileVersion/100.0;
+	return (parser->fileVersion)/100.0;
 }
 
 const tree<Origin::ProjectNode>* OriginFile::project() const
