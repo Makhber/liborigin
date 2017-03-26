@@ -60,6 +60,8 @@ bool OriginAnyParser::parse()
 		dataset_list_size++;
 	}
 	LOG_PRINT(logfile, " ... done. Data sets: %d\n", dataset_list_size)
+	curpos = file.tellg();
+	LOG_PRINT(logfile, "Now at %d [0x%X], filesize %d\n", curpos, curpos, d_file_size)
 
 	// get window list
 	unsigned int window_list_size = 0;
@@ -70,6 +72,7 @@ bool OriginAnyParser::parse()
 		window_list_size++;
 	}
 	LOG_PRINT(logfile, " ... done. Windows: %d\n", window_list_size)
+	curpos = file.tellg();
 	LOG_PRINT(logfile, "Now at %d [0x%X], filesize %d\n", curpos, curpos, d_file_size)
 
 	// get parameter list
@@ -81,6 +84,7 @@ bool OriginAnyParser::parse()
 		parameter_list_size++;
 	}
 	LOG_PRINT(logfile, " ... done. Parameters: %d\n", parameter_list_size)
+	curpos = file.tellg();
 	LOG_PRINT(logfile, "Now at %d [0x%X], filesize %d\n", curpos, curpos, d_file_size)
 
 
