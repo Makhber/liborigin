@@ -36,6 +36,9 @@ public:
 	bool parse();
 
 protected:
+	unsigned int readObjectSize();
+	string readObjectAsString(unsigned int);
+
 	iendianfstream file;
 	FILE *logfile;
 
