@@ -38,7 +38,7 @@ Origin800Parser::Origin800Parser(const string& fileName)
 
 bool Origin800Parser::parse()
 {
-	if (fileVersion >= 2882)
+	if (buildVersion >= 2882)
 		d_colormap_offset = 0x25F;
 
 	unsigned int dataIndex = 0;
