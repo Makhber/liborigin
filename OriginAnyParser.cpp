@@ -87,7 +87,6 @@ bool OriginAnyParser::parse()
 	curpos = file.tellg();
 	LOG_PRINT(logfile, "Now at %d [0x%X], filesize %d\n", curpos, curpos, d_file_size)
 
-
 	return true;
 }
 
@@ -486,7 +485,7 @@ bool OriginAnyParser::readAxisBreakElement() {
 
 bool OriginAnyParser::readAxisParameterElement(unsigned int naxis) {
 	/* get info of Axis parameters for naxis-axis (x,y,z) = (1,2,3)
-	 * return true if an Axis break, otherwise return false */
+	 * return true if an Axis break is found, otherwise return false */
 	unsigned int ape_data_size = 0;
 	unsigned long curpos = 0, apd_start = 0;
 
@@ -519,6 +518,7 @@ bool OriginAnyParser::readParameterElement() {
 		return false;
 	}
 	LOG_PRINT(logfile, " %s:", par_name.c_str())
+	// get value
 	double value;
 	file >> value;
 	LOG_PRINT(logfile, " %g\n", value)
