@@ -173,11 +173,13 @@ OriginParser* createOriginAnyParser(const string& fileName)
 
 unsigned int OriginAnyParser::readObjectSize() {
 	unsigned int obj_size = 0;
+	unsigned long curpos; (void) curpos;
+
 	char c = 0;
 	file >> obj_size;
 	file >> c;
 	if (c != '\n') {
-		unsigned long curpos = file.tellg();
+		curpos = file.tellg();
 		LOG_PRINT(logfile, "Wrong delimiter %c at %ld [0x%lX]\n", c, curpos, curpos)
 		exit(2);
 	}
@@ -186,6 +188,7 @@ unsigned int OriginAnyParser::readObjectSize() {
 
 string OriginAnyParser::readObjectAsString(unsigned int size) {
 	char c;
+	unsigned long curpos; (void) curpos;
 	// read a size-byte blob of data followed by '\n'
 	if (size > 0) {
 		// get a string large enough to hold the result, initialize it to all 0's
@@ -196,7 +199,7 @@ string OriginAnyParser::readObjectAsString(unsigned int size) {
 		// read the '\n'
 		file >> c;
 		if (c != '\n') {
-			unsigned long curpos = file.tellg();
+			curpos = file.tellg();
 			LOG_PRINT(logfile, "Wrong delimiter %c at %ld [0x%lX]\n", c, curpos, curpos)
 			exit(3);
 		}
@@ -222,6 +225,7 @@ void OriginAnyParser::readGlobalHeader() {
 	unsigned int gh_size = 0, gh_endmark = 0;
 	gh_size = readObjectSize();
 	unsigned long curpos = file.tellg();
+	(void) curpos;
 	LOG_PRINT(logfile, "Global header size: %d [0x%X], starts at %ld [0x%lX],", gh_size, gh_size, curpos, curpos)
 
 	// get global header data
@@ -391,7 +395,7 @@ bool OriginAnyParser::readLayerElement() {
 	file.seekg(lyh_start+lye_header_size+1, ios_base::beg);
 
 	// get annotation list
-	unsigned int annotation_list_size = 0;
+	unsigned int annotation_list_size = 0; (void) annotation_list_size;
 
 	LOG_PRINT(logfile, "   Reading Annotations ...\n")
 	/* Some annotations can be groups of annotations. We need a recursive function for those cases */
@@ -513,7 +517,7 @@ bool OriginAnyParser::readAnnotationElement() {
 
 	// check for group of annotations
 	if ((ane_data_1_size == 0x5e) and (ane_data_2_size == 0x04)) {
-		unsigned int angroup_size = 0;
+		unsigned int angroup_size = 0; (void) angroup_size;
 		curpos = file.tellg();
 		LOG_PRINT(logfile, "  Annotation group found at %ld [0x%lX] ...\n", curpos, curpos)
 		angroup_size = readAnnotationList();
@@ -530,7 +534,7 @@ bool OriginAnyParser::readAnnotationElement() {
 
 	// third block
 	unsigned int ane_data_3_size = 0;
-	unsigned long andt3_start = 0;
+	unsigned long andt3_start = 0; (void) andt3_start;
 	ane_data_3_size = readObjectSize();
 
 	andt3_start = file.tellg();
@@ -638,7 +642,7 @@ bool OriginAnyParser::readAxisParameterElement(unsigned int naxis) {
 
 bool OriginAnyParser::readParameterElement() {
 	// get parameter name
-	unsigned long curpos = 0;
+	unsigned long curpos = 0; (void) curpos;
 	string par_name;
 	char c;
 
@@ -668,7 +672,7 @@ bool OriginAnyParser::readNoteElement() {
 	/* get info of Note windows, including "Results Log"
 	 * return true if a Note window is found, otherwise return false */
 	unsigned int nwe_header_size = 0, nwe_label_size = 0, nwe_contents_size = 0;
-	unsigned long curpos = 0, nwh_start = 0, nwl_start = 0, nwc_start = 0;
+	unsigned long curpos = 0, nwh_start = 0, nwl_start = 0, nwc_start = 0; (void) nwc_start;
 
 	// get note header size
 	nwe_header_size = readObjectSize();
@@ -735,7 +739,7 @@ void OriginAnyParser::readProjectTree() {
 
 unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent, unsigned int depth) {
 	unsigned int fle_header_size = 0, fle_eofh_size = 0, fle_name_size = 0, fle_prop_size = 0;
-	unsigned long curpos = 0;
+	unsigned long curpos = 0; (void) curpos;
 
 	// folder header size, data, end mark
 	fle_header_size = readObjectSize();
@@ -802,7 +806,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 }
 
 void OriginAnyParser::readProjectLeaf(tree<ProjectNode>::iterator current_folder) {
-	unsigned long curpos = 0;
+	unsigned long curpos = 0; (void) curpos;
 
 	// preamble size (usually 0) and data
 	unsigned int ptl_pre_size = readObjectSize();
@@ -837,7 +841,7 @@ void OriginAnyParser::readAttachmentList() {
 
 	istringstream stmp(ios_base::binary);
 	string att_header;
-	unsigned long curpos = 0;
+	unsigned long curpos = 0; (void) curpos;
 	if (att_1st_empty == 8) {
 		// first group
 		unsigned int att_list1_size = 0;
@@ -1427,6 +1431,7 @@ Origin::Color OriginAnyParser::getColor(string strbincolor) {
 
 void OriginAnyParser::getAnnotationProperties(string anhd, unsigned int anhdsz, string andt1, unsigned int andt1sz, string andt2, unsigned int andt2sz, string andt3, unsigned int andt3sz) {
 	istringstream stmp;
+	(void) anhdsz; (void) andt3; (void) andt3sz;
 
 	if (ispread != -1) {
 
@@ -2399,6 +2404,7 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 
 void OriginAnyParser::getAxisBreakProperties(string abdata, unsigned int abdatasz) {
 	istringstream stmp;
+	(void) abdatasz;
 
 	if (ispread != -1) { // spreadsheet
 
@@ -2666,6 +2672,7 @@ void OriginAnyParser::getAxisParameterProperties(string apdata, unsigned int apd
 
 void OriginAnyParser::getNoteProperties(string nwehd, unsigned int nwehdsz, string nwelb, unsigned int nwelbsz, string nwect, unsigned int nwectsz) {
 	istringstream stmp;
+	(void) nwehdsz; (void) nwelbsz; (void) nwectsz;
 
 	// note window position and size
 	Rect rect;
@@ -2793,6 +2800,7 @@ void OriginAnyParser::getColorMap(ColorMap& cmap, string cmapdata, unsigned int 
 
 void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, string cmapdata, unsigned int cmapdatasz) {
 	istringstream stmp;
+	(void) cmapdatasz;
 
 	Color lowColor;//color below
 	lowColor.type = Origin::Color::Custom;
@@ -2813,8 +2821,8 @@ void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, string cmapdata, unsigne
 	GET_SHORT(stmp, colorMapSize)
 	// skip a short at 0x18-0x19
 
-	for(unsigned int i = 0; i < 4; ++i) {//low, high, middle and missing data colors
-		Color color;
+	for (int i = 0; i < 4; ++i) {//low, high, middle and missing data colors
+		Color color; (void) color;
 		color.type = Origin::Color::Custom;
 		color.custom[0] = cmapdata[0x1A+4*i];
 		color.custom[1] = cmapdata[0x1B+4*i];
@@ -2828,8 +2836,8 @@ void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, string cmapdata, unsigne
 	GET_DOUBLE(stmp, zmissing);
 
 	short val;
-	for (unsigned int i = 0; i < 2; ++i) {
-		Color color;
+	for (int i = 0; i < 2; ++i) {
+		Color color; (void) color;
 		color.type = Origin::Color::Custom;
 		color.custom[0] = cmapdata[0x66+10*i];
 		color.custom[1] = cmapdata[0x67+10*i];
@@ -2843,8 +2851,8 @@ void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, string cmapdata, unsigne
 	level.fillColor = lowColor;
 	colorMap.levels.push_back(make_pair(zmin, level));
 
-	for (unsigned int i = 0; i < (colorMapSize + 1); ++i) {
-		Color color;
+	for (int i = 0; i < (colorMapSize + 1); ++i) {
+		Color color; (void) color;
 		color.type = Origin::Color::Custom;
 		color.custom[0] = cmapdata[0x7A+10*i];
 		color.custom[1] = cmapdata[0x7B+10*i];
@@ -2863,6 +2871,7 @@ void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, string cmapdata, unsigne
 
 void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator current_folder, string ptldt, unsigned int ptldtsz) {
 	istringstream stmp;
+	(void) ptldtsz;
 
 	stmp.str(ptldt);
 	unsigned int file_type = 0, file_object_id = 0;
@@ -2881,6 +2890,7 @@ void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator curre
 
 void OriginAnyParser::getProjectFolderProperties(tree<ProjectNode>::iterator current_folder, string flehd, unsigned int flehdsz) {
 	istringstream stmp;
+	(void) flehdsz;
 
 	unsigned char a = flehd[0x02];
 	(*current_folder).active = (a == 1);
