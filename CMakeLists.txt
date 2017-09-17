@@ -29,6 +29,18 @@ set (devel-headers
 	tree.hh
 	)
 
+# LIB_SUFFIX can either be defined at cmake command line: cmake -DLIB_SUFFIX:STRING=64 ...
+if (NOT (LIB_SUFFIX STREQUAL "${LIB_SUFFIX}"))
+    message("LIB_SUFFIX not defined.")
+    # ... or deduced from size of void ptr
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set( LIB_SUFFIX "64")
+    else ()
+        set( LIB_SUFFIX "")
+    endif ()
+    message("LIB_SUFFIX set to '${LIB_SUFFIX}'")
+endif()
+
 # Generate a pkg-config file matching this config
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/liborigin.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc" @ONLY)
@@ -44,13 +56,13 @@ add_library (origin-static STATIC ${sources})
 set_target_properties(origin-static PROPERTIES OUTPUT_NAME "origin" POSITION_INDEPENDENT_CODE ON)
 
 # install libraries
-install(TARGETS origin origin-static DESTINATION lib)
+install(TARGETS origin origin-static DESTINATION lib${LIB_SUFFIX})
 
 # install headers
 install(FILES ${devel-headers} DESTINATION include/liborigin)
 
 # install pkg-config file
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION lib/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION lib${LIB_SUFFIX}/pkgconfig)
 
 # command line util
 add_executable(opj2dat opj2dat.cpp)
