@@ -29,6 +29,10 @@ set (devel-headers
 	tree.hh
 	)
 
+# Generate a pkg-config file matching this config
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/liborigin.pc.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc" @ONLY)
+
 # dynamic library
 add_library (origin SHARED ${sources})
 set_target_properties(origin PROPERTIES
@@ -44,6 +48,9 @@ install(TARGETS origin origin-static DESTINATION lib)
 
 # install headers
 install(FILES ${devel-headers} DESTINATION include/liborigin)
+
+# install pkg-config file
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION lib/pkgconfig)
 
 # command line util
 add_executable(opj2dat opj2dat.cpp)
