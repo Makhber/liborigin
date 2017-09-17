@@ -45,6 +45,9 @@ endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/liborigin.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc" @ONLY)
 
+# allow for installation of individual targets
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 # dynamic library
 add_library (origin SHARED ${sources})
 set_target_properties(origin PROPERTIES
@@ -56,7 +59,8 @@ add_library (origin-static STATIC ${sources})
 set_target_properties(origin-static PROPERTIES OUTPUT_NAME "origin" POSITION_INDEPENDENT_CODE ON)
 
 # install libraries
-install(TARGETS origin origin-static DESTINATION lib${LIB_SUFFIX})
+install(TARGETS origin DESTINATION lib${LIB_SUFFIX} OPTIONAL)
+install(TARGETS origin-static DESTINATION lib${LIB_SUFFIX} OPTIONAL)
 
 # install headers
 install(FILES ${devel-headers} DESTINATION include/liborigin)
@@ -68,14 +72,14 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION lib${LIB_SUFF
 add_executable(opj2dat opj2dat.cpp)
 target_link_libraries (opj2dat origin-static)
 
-install(TARGETS opj2dat DESTINATION bin)
+install(TARGETS opj2dat DESTINATION bin OPTIONAL)
 
 # documentation
-install(FILES COPYING FORMAT README DESTINATION share/doc/liborigin)
+install(FILES COPYING FORMAT README DESTINATION share/doc/liborigin OPTIONAL)
 configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-	add_custom_target(doc ALL ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+	add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc/liborigin)
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc/liborigin OPTIONAL)
 endif(DOXYGEN_FOUND)
