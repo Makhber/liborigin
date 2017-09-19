@@ -32,7 +32,7 @@
 #include "OriginObj.h"
 #include "tree.hh"
 
-#ifndef NO_CODE_GENERATION_FOR_LOG
+#ifdef GENERATE_CODE_FOR_LOG
 
 #ifdef HAVE_WINDOWS
 #define LOG_PRINT( logfile, ... ) { fprintf(logfile, __VA_ARGS__); }
@@ -40,7 +40,7 @@
 #define LOG_PRINT( logfile, args... ) { fprintf(logfile, args); }
 #endif
 
-#else // !NO_CODE_GENERATION_FOR_LOG
+#else // !GENERATE_CODE_FOR_LOG
 
 #ifdef HAVE_WINDOWS
 #define LOG_PRINT( logfile, ... ) {};
