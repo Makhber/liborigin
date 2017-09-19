@@ -50,6 +50,10 @@ To include liborigin in a project using qmake add
 	PKGCONFIG += liborigin
 to the project.pro file.
 
+Logging of origin file parsing process is deactivated by default.
+To enable it define a GENERATE_CODE_FOR_LOG variable at the cmake command:
+    $ cmake -DGENERATE_CODE_FOR_LOG=1 ..
+
 ---------------------------------------------------------------------------
 FEATURES:
 	* supports the import of any project from version 3.5 to latest (2017)
