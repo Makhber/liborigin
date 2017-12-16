@@ -50,7 +50,7 @@ bool OriginAnyParser::parse() {
 	d_file_size = (unsigned long)file.tellg();
 	file.seekg(0, ios_base::beg);
 
-	LOG_PRINT(logfile, "File size: %d\n", d_file_size)
+	LOG_PRINT(logfile, "File size: %d\n", (int)d_file_size)
 
 	// get file and program version, check it is a valid file
 	readFileVersion();
@@ -76,7 +76,7 @@ bool OriginAnyParser::parse() {
 	if (parseError > 1) return false;
 	LOG_PRINT(logfile, " ... done. Data sets: %d\n", dataset_list_size)
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 
 	for(unsigned int i = 0; i < spreadSheets.size(); ++i){
 		if(spreadSheets[i].sheets > 1){
@@ -96,7 +96,7 @@ bool OriginAnyParser::parse() {
 	}
 	LOG_PRINT(logfile, " ... done. Windows: %d\n", window_list_size)
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 
 	// get parameter list
 	unsigned int parameter_list_size = 0;
@@ -108,7 +108,7 @@ bool OriginAnyParser::parse() {
 	}
 	LOG_PRINT(logfile, " ... done. Parameters: %d\n", parameter_list_size)
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+	LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 
 	// Note windows were added between version >4.141 and 4.210,
 	// i.e., with Release 5.0
@@ -125,7 +125,7 @@ bool OriginAnyParser::parse() {
 		}
 		LOG_PRINT(logfile, " ... done. Note windows: %d\n", note_list_size)
 		curpos = (unsigned long)file.tellg();
-		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 	}
 
 	// Project Tree was added between version >4.210 and 4.2616,
@@ -134,7 +134,7 @@ bool OriginAnyParser::parse() {
 		// get project tree
 		readProjectTree();
 		curpos = (unsigned long)file.tellg();
-		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 	}
 
 	// Attachments were added between version >4.2673_558 and 4.2764_623,
@@ -142,7 +142,7 @@ bool OriginAnyParser::parse() {
 	if (curpos < d_file_size) {
 		readAttachmentList();
 		curpos = (unsigned long)file.tellg();
-		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, d_file_size)
+		LOG_PRINT(logfile, "Now at %ld [0x%lX], filesize %d\n", curpos, curpos, (int)d_file_size)
 	}
 
 	if (curpos >= d_file_size) LOG_PRINT(logfile, "Now at end of file\n")
@@ -223,11 +223,15 @@ void OriginAnyParser::readFileVersion() {
 	string sFileVersion;
 	getline(file, sFileVersion);
 
-	if (sFileVersion.substr(0,4) != "CPYA") {
-		LOG_PRINT(logfile, "File, is not a valid opj file\n")
-		parseError = 2;
-		return;
+	if ((sFileVersion.substr(0,4) != "CPYA")) {
+		LOG_PRINT(logfile, "File, is not a valid OPJ file\n")
+		if ((sFileVersion.substr(0,5) != "CPYUA")) {
+			LOG_PRINT(logfile, "File, is not a valid OPJU file\n")
+			parseError = 2;
+			return;
+		}
 	}
+
 	if (*sFileVersion.rbegin() != '#') parseError = 1;
 	LOG_PRINT(logfile, "File version string: %s\n", sFileVersion.c_str())
 }
@@ -902,7 +906,7 @@ void OriginAnyParser::readAttachmentList() {
 	/* Second group is a series of (header, name, data) triplets
 	   There is no number of attachments. It ends when we reach EOF. */
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Second attachment group starts at %ld [0x%lX], file size %d\n", curpos, curpos, d_file_size)
+	LOG_PRINT(logfile, "Second attachment group starts at %ld [0x%lX], file size %d\n", curpos, curpos, (int)d_file_size)
 	/* Header is a group of 3 integers, with no '\n' at end
 		1st attachment header+name size including itself
 		2nd attachment type (0x59 0x04 0xCA 0x7F for excel workbooks)
