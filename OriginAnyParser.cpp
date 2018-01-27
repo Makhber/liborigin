@@ -181,13 +181,14 @@ OriginParser* createOriginAnyParser(const string& fileName)
 
 unsigned int OriginAnyParser::readObjectSize() {
 	unsigned int obj_size = 0;
-	unsigned long curpos; (void) curpos;
 
 	char c = 0;
 	file >> obj_size;
 	file >> c;
 	if (c != '\n') {
-		curpos = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+		unsigned long curpos = (unsigned long)file.tellg();
+#endif
 		LOG_PRINT(logfile, "Wrong delimiter %c at %ld [0x%lX]\n", c, curpos, curpos)
 		parseError = 3;
 		return 0;
@@ -197,7 +198,6 @@ unsigned int OriginAnyParser::readObjectSize() {
 
 string OriginAnyParser::readObjectAsString(unsigned int size) {
 	char c;
-	unsigned long curpos; (void) curpos;
 	// read a size-byte blob of data followed by '\n'
 	if (size > 0) {
 		// get a string large enough to hold the result, initialize it to all 0's
@@ -208,7 +208,9 @@ string OriginAnyParser::readObjectAsString(unsigned int size) {
 		// read the '\n'
 		file >> c;
 		if (c != '\n') {
-			curpos = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+			unsigned long curpos = (unsigned long)file.tellg();
+#endif
 			LOG_PRINT(logfile, "Wrong delimiter %c at %ld [0x%lX]\n", c, curpos, curpos)
 			parseError = 4;
 			return string();
@@ -240,15 +242,18 @@ void OriginAnyParser::readGlobalHeader() {
 	// get global header size
 	unsigned int gh_size = 0, gh_endmark = 0;
 	gh_size = readObjectSize();
+#ifdef GENERATE_CODE_FOR_LOG
 	unsigned long curpos = (unsigned long)file.tellg();
-	(void) curpos;
+#endif
 	LOG_PRINT(logfile, "Global header size: %d [0x%X], starts at %ld [0x%lX],", gh_size, gh_size, curpos, curpos)
 
 	// get global header data
 	string gh_data;
 	gh_data = readObjectAsString(gh_size);
 
+#ifdef GENERATE_CODE_FOR_LOG
 	curpos = (unsigned long)file.tellg();
+#endif
 	LOG_PRINT(logfile, " ends at %ld [0x%lX]\n", curpos, curpos)
 
 	// when gh_size > 0x1B, a double with fileVersion/100 can be read at gh_data[0x1B:0x23]
@@ -268,7 +273,9 @@ void OriginAnyParser::readGlobalHeader() {
 	// now read a zero size end mark
 	gh_endmark = readObjectSize();
 	if (gh_endmark != 0) {
+#ifdef GENERATE_CODE_FOR_LOG
 		curpos = (unsigned long)file.tellg();
+#endif
 		LOG_PRINT(logfile, "Wrong end of list mark %d at %ld [0x%lX]\n", gh_endmark, curpos, curpos)
 		parseError = 5;
 		return;
@@ -412,12 +419,9 @@ bool OriginAnyParser::readLayerElement() {
 	file.seekg(lyh_start+lye_header_size+1, ios_base::beg);
 
 	// get annotation list
-	unsigned int annotation_list_size = 0; (void) annotation_list_size;
-
 	LOG_PRINT(logfile, "   Reading Annotations ...\n")
 	/* Some annotations can be groups of annotations. We need a recursive function for those cases */
-	annotation_list_size = readAnnotationList();
-	LOG_PRINT(logfile, "   ... done. Annotations: %d\n", annotation_list_size)
+	LOG_PRINT(logfile, "   ... done. Annotations: %d\n", readAnnotationList())
 
 	// get curve list
 	unsigned int curve_list_size = 0;
@@ -534,11 +538,14 @@ bool OriginAnyParser::readAnnotationElement() {
 
 	// check for group of annotations
 	if ((ane_data_1_size == 0x5e) && (ane_data_2_size == 0x04)) {
-		unsigned int angroup_size = 0; (void) angroup_size;
-		curpos = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+		unsigned long curpos = (unsigned long)file.tellg();
+#endif
 		LOG_PRINT(logfile, "  Annotation group found at %ld [0x%lX] ...\n", curpos, curpos)
-		angroup_size = readAnnotationList();
+#ifdef GENERATE_CODE_FOR_LOG
+		unsigned int angroup_size = readAnnotationList();
 		curpos = (unsigned long)file.tellg();
+#endif
 		LOG_PRINT(logfile, "  ... group end at %ld [0x%lX]. Annotations: %d\n", curpos, curpos, angroup_size)
 		andt2_data = string("");
 	} else {
@@ -551,10 +558,11 @@ bool OriginAnyParser::readAnnotationElement() {
 
 	// third block
 	unsigned int ane_data_3_size = 0;
-	unsigned long andt3_start = 0; (void) andt3_start;
 	ane_data_3_size = readObjectSize();
 
-	andt3_start = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+	unsigned long andt3_start = (unsigned long)file.tellg();
+#endif
 	LOG_PRINT(logfile, "     block 3 size %d [0x%X] at %ld [0x%lX]\n", ane_data_3_size, ane_data_3_size, andt3_start, andt3_start)
 	string andt3_data = readObjectAsString(ane_data_3_size);
 
@@ -659,14 +667,13 @@ bool OriginAnyParser::readAxisParameterElement(unsigned int naxis) {
 
 bool OriginAnyParser::readParameterElement() {
 	// get parameter name
-	unsigned long curpos = 0; (void) curpos;
 	string par_name;
 	char c;
 
 	getline(file, par_name);
 	if (par_name[0] == '\0') {
-		unsigned int eof_parameters_mark = readObjectSize();
-		(void) eof_parameters_mark; // supress compiler warning
+		//unsigned int eof_parameters_mark = readObjectSize();
+		readObjectSize();
 		return false;
 	}
 	LOG_PRINT(logfile, " %s:", par_name.c_str())
@@ -677,7 +684,9 @@ bool OriginAnyParser::readParameterElement() {
 	// read the '\n'
 	file >> c;
 	if (c != '\n') {
-		curpos = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+		unsigned long curpos = (unsigned long)file.tellg();
+#endif
 		LOG_PRINT(logfile, "Wrong delimiter %c at %ld [0x%lX]\n", c, curpos, curpos)
 		parseError = 6;
 		return false;
@@ -690,7 +699,7 @@ bool OriginAnyParser::readNoteElement() {
 	/* get info of Note windows, including "Results Log"
 	 * return true if a Note window is found, otherwise return false */
 	unsigned int nwe_header_size = 0, nwe_label_size = 0, nwe_contents_size = 0;
-	unsigned long curpos = 0, nwh_start = 0, nwl_start = 0, nwc_start = 0; (void) nwc_start;
+	unsigned long curpos = 0, nwh_start = 0, nwl_start = 0;
 
 	// get note header size
 	nwe_header_size = readObjectSize();
@@ -718,7 +727,9 @@ bool OriginAnyParser::readNoteElement() {
 
 	// get contents size
 	nwe_contents_size = readObjectSize();
-	nwc_start = (unsigned long)file.tellg();
+#ifdef GENERATE_CODE_FOR_LOG
+	unsigned long nwc_start = (unsigned long)file.tellg();
+#endif
 	string nwe_contents = readObjectAsString(nwe_contents_size);
 	LOG_PRINT(logfile, "  contents at %ld [0x%lX]: \n%s\n", nwc_start, nwc_start, nwe_contents.c_str())
 
@@ -740,12 +751,12 @@ void OriginAnyParser::readProjectTree() {
 	string pte_pre2 = readObjectAsString(pte_pre2_size);
 
 	// root element and children
-	unsigned int rootfolder = readFolderTree(projectTree.begin(), pte_depth);
-	(void) rootfolder; // supress compiler warning
+	//unsigned int rootfolder = readFolderTree(projectTree.begin(), pte_depth);
+	readFolderTree(projectTree.begin(), pte_depth);
 
 	// epilogue (should be zero)
-	unsigned int pte_post_size = readObjectSize();
-	(void) pte_post_size; // supress compiler warning
+	//unsigned int pte_post_size = readObjectSize();
+	readObjectSize();
 
 	// log info on project tree
 #ifdef GENERATE_CODE_FOR_LOG
@@ -756,19 +767,20 @@ void OriginAnyParser::readProjectTree() {
 }
 
 unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent, unsigned int depth) {
-	unsigned int fle_header_size = 0, fle_eofh_size = 0, fle_name_size = 0, fle_prop_size = 0;
-	unsigned long curpos = 0; (void) curpos;
+	unsigned int fle_header_size = 0, fle_name_size = 0, fle_prop_size = 0;
 
 	// folder header size, data, end mark
 	fle_header_size = readObjectSize();
 	string fle_header = readObjectAsString(fle_header_size);
-	fle_eofh_size = readObjectSize(); // (usually 0)
-	(void) fle_eofh_size; // supress compiler warning
+	//unsigned int fle_eofh_size = readObjectSize(); // (usually 0)
+	readObjectSize();
 
 	// folder name size
 	fle_name_size = readObjectSize();
-	curpos = (unsigned long)file.tellg();
 	string fle_name = readObjectAsString(fle_name_size);
+#ifdef GENERATE_CODE_FOR_LOG
+	unsigned long curpos = (unsigned long)file.tellg();
+#endif
 	LOG_PRINT(logfile, "Folder name at %ld [0x%lX]: %s\n", curpos, curpos, fle_name.c_str());
 
 	// additional properties
@@ -786,8 +798,10 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 	unsigned int number_of_files_size = 0;
 
 	number_of_files_size = readObjectSize(); // should be 4 as number_of_files is an integer
+#ifdef GENERATE_CODE_FOR_LOG
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Number of files at %ld [0x%lX] ", curpos, curpos);
+#endif
+	LOG_PRINT(logfile, "Number of files at %ld [0x%lX] ", curpos, curpos)
 	string fle_nfiles = readObjectAsString(number_of_files_size);
 
 	istringstream stmp(ios_base::binary);
@@ -804,8 +818,10 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 	unsigned int number_of_folders_size = 0;
 
 	number_of_folders_size = readObjectSize(); // should be 4 as number_of_subfolders is an integer
+#ifdef GENERATE_CODE_FOR_LOG
 	curpos = (unsigned long)file.tellg();
-	LOG_PRINT(logfile, "Number of subfolders at %ld [0x%lX] ", curpos, curpos);
+#endif
+	LOG_PRINT(logfile, "Number of subfolders at %ld [0x%lX] ", curpos, curpos)
 	string fle_nfolders = readObjectAsString(number_of_folders_size);
 
 	stmp.str(fle_nfolders);
@@ -815,8 +831,8 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 
 	for (unsigned int i=0; i < number_of_folders; i++) {
 		depth++;
-		unsigned int files_in_subfolder = readFolderTree(current_folder, depth);
-		(void) files_in_subfolder; // supress compiler warning
+		//unsigned int files_in_subfolder = readFolderTree(current_folder, depth);
+		readFolderTree(current_folder, depth);
 		depth--;
 	}
 
@@ -824,21 +840,22 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 }
 
 void OriginAnyParser::readProjectLeaf(tree<ProjectNode>::iterator current_folder) {
-	unsigned long curpos = 0; (void) curpos;
-
 	// preamble size (usually 0) and data
 	unsigned int ptl_pre_size = readObjectSize();
 	string ptl_pre = readObjectAsString(ptl_pre_size);
 
 	// file data size (usually 8) and data
 	unsigned int ptl_data_size = readObjectSize();
-	curpos = (unsigned long)file.tellg();
 	string ptl_data = readObjectAsString(ptl_data_size);
+
+#ifdef GENERATE_CODE_FOR_LOG
+	unsigned long curpos = (unsigned long)file.tellg();
+#endif
 	LOG_PRINT(logfile, "File at %ld [0x%lX]\n", curpos, curpos)
 
 	// epilogue (should be zero)
-	unsigned int ptl_post_size = readObjectSize();
-	(void) ptl_post_size; // supress compiler warning
+	//unsigned int ptl_post_size = readObjectSize();
+	readObjectSize();
 
 	// get project node properties
 	getProjectLeafProperties(current_folder, ptl_data, ptl_data_size);
@@ -859,7 +876,9 @@ void OriginAnyParser::readAttachmentList() {
 
 	istringstream stmp(ios_base::binary);
 	string att_header;
-	unsigned long curpos = 0; (void) curpos;
+#ifdef GENERATE_CODE_FOR_LOG
+	unsigned long curpos = 0;
+#endif
 	if (att_1st_empty == 8) {
 		// first group
 		unsigned int att_list1_size = 0;
@@ -867,7 +886,9 @@ void OriginAnyParser::readAttachmentList() {
 		// get two integers
 		// next line fails if first attachment group is empty: readObjectSize exits as there is no '\n' after 4 bytes for uint
 		att_list1_size = readObjectSize(); // should be 8 as we expect two integer values
+#ifdef GENERATE_CODE_FOR_LOG
 		curpos = (unsigned long)file.tellg();
+#endif
 		string att_list1 = readObjectAsString(att_list1_size);
 		LOG_PRINT(logfile, "First attachment group at %ld [0x%lX]", curpos, curpos)
 
@@ -891,7 +912,9 @@ void OriginAnyParser::readAttachmentList() {
 			GET_INT(stmp, att_mark) // should be 4096
 			GET_INT(stmp, iattno)
 			GET_INT(stmp, att_data_size)
+#ifdef GENERATE_CODE_FOR_LOG
 			curpos = (unsigned long)file.tellg();
+#endif
 			LOG_PRINT(logfile, "Attachment no %d (%d) at %ld [0x%lX], size %d\n", i, iattno, curpos, curpos, att_data_size)
 
 			// get data
@@ -905,7 +928,9 @@ void OriginAnyParser::readAttachmentList() {
 
 	/* Second group is a series of (header, name, data) triplets
 	   There is no number of attachments. It ends when we reach EOF. */
+#ifdef GENERATE_CODE_FOR_LOG
 	curpos = (unsigned long)file.tellg();
+#endif
 	LOG_PRINT(logfile, "Second attachment group starts at %ld [0x%lX], file size %d\n", curpos, curpos, (int)d_file_size)
 	/* Header is a group of 3 integers, with no '\n' at end
 		1st attachment header+name size including itself
@@ -932,7 +957,9 @@ void OriginAnyParser::readAttachmentList() {
 		unsigned int name_size = att_header_size - 3*4;
 		string att_name = string(name_size, 0);
 		file.read(&att_name[0], name_size);
+#ifdef GENERATE_CODE_FOR_LOG
 		curpos = (unsigned long)file.tellg();
+#endif
 		string att_data = string(att_size, 0);
 		file.read(&att_data[0], att_size);
 		LOG_PRINT(logfile, "attachment at %ld [0x%lX], type 0x%X, size %d [0x%X]: %s\n", curpos, curpos, att_type, att_size, att_size, att_name.c_str())
@@ -1265,7 +1292,7 @@ void OriginAnyParser::getWindowProperties(Origin::Window& window, string wde_hea
 	else
 		window.title = Window::Both;
 
-	window.hidden = (c & 0x08);
+	window.hidden = ((c & 0x08) != 0);
 	if (window.hidden) {
 		LOG_PRINT(logfile, "			WINDOW %d NAME : %s	is hidden\n", objectIndex, window.name.c_str());
 	} else {
@@ -1302,7 +1329,7 @@ void OriginAnyParser::getWindowProperties(Origin::Window& window, string wde_hea
 		GET_SHORT(stmp, graphs[igraph].height)
 
 		unsigned char c = wde_header[0x38];
-		graphs[igraph].connectMissingData = (c & 0x40);
+		graphs[igraph].connectMissingData = ((c & 0x40) != 0);
 
 		string templateName = wde_header.substr(0x45,20).c_str();
 		graphs[igraph].templateName = templateName;
@@ -1363,8 +1390,8 @@ void OriginAnyParser::getLayerProperties(string lye_header, unsigned int lye_hea
 		glayer.xAxis.majorTicks = lye_header[0x2B];
 
 		unsigned char g = lye_header[0x2D];
-		glayer.xAxis.zeroLine = (g & 0x80);
-		glayer.xAxis.oppositeLine = (g & 0x40);
+		glayer.xAxis.zeroLine = ((g & 0x80) != 0);
+		glayer.xAxis.oppositeLine = ((g & 0x40) != 0);
 
 		glayer.xAxis.minorTicks = lye_header[0x37];
 		glayer.xAxis.scale = lye_header[0x38];
@@ -1377,15 +1404,15 @@ void OriginAnyParser::getLayerProperties(string lye_header, unsigned int lye_hea
 		glayer.yAxis.majorTicks = lye_header[0x56];
 
 		g = lye_header[0x58];
-		glayer.yAxis.zeroLine = (g & 0x80);
-		glayer.yAxis.oppositeLine = (g & 0x40);
+		glayer.yAxis.zeroLine = ((g & 0x80) != 0);
+		glayer.yAxis.oppositeLine = ((g & 0x40) != 0);
 
 		glayer.yAxis.minorTicks = lye_header[0x62];
 		glayer.yAxis.scale = lye_header[0x63];
 
 		g = lye_header[0x68];
-		glayer.gridOnTop = (g & 0x04);
-		glayer.exchangedAxes = (g & 0x40);
+		glayer.gridOnTop = ((g & 0x04) != 0);
+		glayer.exchangedAxes = ((g & 0x40) != 0);
 
 		stmp.str(lye_header.substr(0x71));
 		GET_SHORT(stmp, glayer.clientRect.left)
@@ -1789,7 +1816,7 @@ void OriginAnyParser::getAnnotationProperties(string anhd, unsigned int anhdsz, 
 		else if (sec_name == "SPECTRUM1") {
 			glayer.isXYY3D = false;
 			glayer.colorScale.visible = true;
-			glayer.colorScale.reverseOrder = andt2[0x18];
+			glayer.colorScale.reverseOrder = (andt2[0x18] != 0);
 			stmp.str(andt2.substr(0x20));
 			GET_SHORT(stmp, glayer.colorScale.colorBarThickness)
 			GET_SHORT(stmp, glayer.colorScale.labelGap)
@@ -2199,10 +2226,10 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 			}
 
 			h = cvehd[0x20];
-			curve.text.fontUnderline = (h & 0x1);
-			curve.text.fontItalic = (h & 0x2);
-			curve.text.fontBold = (h & 0x8);
-			curve.text.whiteOut = (h & 0x20);
+			curve.text.fontUnderline = ((h & 0x1) != 0);
+			curve.text.fontItalic = ((h & 0x2) != 0);
+			curve.text.fontBold = ((h & 0x8) != 0);
+			curve.text.whiteOut = ((h & 0x20) != 0);
 
 			char offset = cvehd[0x37];
 			curve.text.xOffset = offset * 5;
@@ -2269,10 +2296,10 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 		if (curve.type == GraphCurve::Pie) {
 			// code from Origin410/500Parser
 			h = cvehd[0x14];
-			curve.pie.formatPercentages = (h & 0x08);
+			curve.pie.formatPercentages = ((h & 0x08) != 0);
 			curve.pie.formatValues = !curve.pie.formatPercentages;
-			curve.pie.positionAssociate = (h & 0x80);
-			curve.pie.formatCategories  = (h & 0x20);
+			curve.pie.positionAssociate = ((h & 0x80) != 0);
+			curve.pie.formatCategories  = ((h & 0x20) != 0);
 
 			h = cvehd[0x19];
 			curve.pie.radius = 100 - h;
@@ -2288,13 +2315,13 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 			if (cvehdsz > 0xA9) { // code from Origin750Parser.cpp
 
 				h = cvehd[0x92];
-				curve.pie.formatPercentages = (h & 0x01);
-				curve.pie.formatValues		= (h & 0x02);
-				curve.pie.positionAssociate = (h & 0x08);
-				curve.pie.clockwiseRotation = (h & 0x20);
-				curve.pie.formatCategories	= (h & 0x80);
+				curve.pie.formatPercentages = ((h & 0x01) != 0);
+				curve.pie.formatValues = ((h & 0x02) != 0);
+				curve.pie.positionAssociate = ((h & 0x08) != 0);
+				curve.pie.clockwiseRotation = ((h & 0x20) != 0);
+				curve.pie.formatCategories = ((h & 0x80) != 0);
 
-				curve.pie.formatAutomatic = cvehd[0x93];
+				curve.pie.formatAutomatic = (cvehd[0x93] != 0);
 				stmp.str(cvehd.substr(0x94));
 				GET_SHORT(stmp, curve.pie.distance)
 				curve.pie.viewAngle = cvehd[0x96];
@@ -2327,17 +2354,17 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 			else
 				curve.surface.grids = SurfaceProperties::XY;
 
-			curve.surface.sideWallEnabled = (h & 0x10);
+			curve.surface.sideWallEnabled = ((h & 0x10) != 0);
 			curve.surface.frontColor = getColor(cvehd.substr(0x1D,4));
 
 			h = cvehd[0x13];
-			curve.surface.backColorEnabled = (h & 0x08);
-			curve.surface.surface.fill = (h & 0x10);
-			curve.surface.surface.contour = (h & 0x40);
-			curve.surface.topContour.fill = (h & 0x02);
-			curve.surface.topContour.contour = (h & 0x04);
-			curve.surface.bottomContour.fill = (h & 0x80);
-			curve.surface.bottomContour.contour = (h & 0x01);
+			curve.surface.backColorEnabled = ((h & 0x08) != 0);
+			curve.surface.surface.fill = ((h & 0x10) != 0);
+			curve.surface.surface.contour = ((h & 0x40) != 0);
+			curve.surface.topContour.fill = ((h & 0x02) != 0);
+			curve.surface.topContour.contour = ((h & 0x04) != 0);
+			curve.surface.bottomContour.fill = ((h & 0x80) != 0);
+			curve.surface.bottomContour.contour = ((h & 0x01) != 0);
 
 			if (cvehdsz > 0x165) {
 				stmp.str(cvehd.substr(0x14C));
@@ -2370,17 +2397,17 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 			if (curve.type == GraphCurve::Contour || curve.type == GraphCurve::XYZContour) glayer.isXYY3D = false;
 			ColorMap& colorMap = (curve.type == GraphCurve::Mesh3D ? curve.surface.colorMap : curve.colorMap);
 			h = cvehd[0x13];
-			colorMap.fillEnabled = (h & 0x82);
+			colorMap.fillEnabled = ((h & 0x82) != 0);
 
 			if ((curve.type == GraphCurve::Contour) && (cvehdsz > 0x89)) {
 				stmp.str(cvehd.substr(0x7A));
 				GET_SHORT(stmp, curve.text.fontSize)
 
 				h = cvehd[0x83];
-				curve.text.fontUnderline = (h & 0x1);
-				curve.text.fontItalic = (h & 0x2);
-				curve.text.fontBold = (h & 0x8);
-				curve.text.whiteOut = (h & 0x20);
+				curve.text.fontUnderline = ((h & 0x1) != 0);
+				curve.text.fontItalic = ((h & 0x2) != 0);
+				curve.text.fontBold = ((h & 0x8) != 0);
+				curve.text.whiteOut = ((h & 0x20) != 0);
 
 				curve.text.color = getColor(cvehd.substr(0x86,4));
 			}
@@ -2429,7 +2456,7 @@ void OriginAnyParser::getCurveProperties(string cvehd, unsigned int cvehdsz, str
 			curve.symbolFillTransparency = cvehd[0x139];
 
 			h = cvehd[0x143];
-			curve.connectSymbols = (h&0x8);
+			curve.connectSymbols = ((h & 0x8) != 0);
 		}
 	}
 }
@@ -2514,7 +2541,7 @@ void OriginAnyParser::getAxisParameterProperties(string apdata, unsigned int apd
 			axis.majorGrid.width = (double)w/500.0;
 		} else if (iaxispar == 2) { // tickaxis 0
 			h = apdata[0x26];
-			axis.tickAxis[0].showMajorLabels = (h & 0x40);
+			axis.tickAxis[0].showMajorLabels = ((h & 0x40) != 0);
 			axis.tickAxis[0].color = apdata[0x0F];
 			stmp.str(apdata.substr(0x13));
 			GET_SHORT(stmp, w)
@@ -2522,7 +2549,7 @@ void OriginAnyParser::getAxisParameterProperties(string apdata, unsigned int apd
 			GET_SHORT(stmp, w)
 			axis.tickAxis[0].fontSize = w;
 			h = apdata[0x1A];
-			axis.tickAxis[0].fontBold = (h & 0x08);
+			axis.tickAxis[0].fontBold = ((h & 0x08) != 0);
 			stmp.str(apdata.substr(0x23));
 			GET_SHORT(stmp, w)
 			h = apdata[0x25];
@@ -2601,7 +2628,7 @@ void OriginAnyParser::getAxisParameterProperties(string apdata, unsigned int apd
 			}
 		} else if (iaxispar == 4) { // tickaxis 1
 			h = apdata[0x26];
-			axis.tickAxis[1].showMajorLabels = (h & 0x40);
+			axis.tickAxis[1].showMajorLabels = ((h & 0x40) != 0);
 			axis.tickAxis[1].color = apdata[0x0F];
 			stmp.str(apdata.substr(0x13));
 			GET_SHORT(stmp, w)
@@ -2609,7 +2636,7 @@ void OriginAnyParser::getAxisParameterProperties(string apdata, unsigned int apd
 			GET_SHORT(stmp, w)
 			axis.tickAxis[1].fontSize = w;
 			h = apdata[0x1A];
-			axis.tickAxis[1].fontBold = (h & 0x08);
+			axis.tickAxis[1].fontBold = ((h & 0x08) != 0);
 			stmp.str(apdata.substr(0x23));
 			GET_SHORT(stmp, w)
 			h = apdata[0x25];
@@ -2762,7 +2789,7 @@ void OriginAnyParser::getNoteProperties(string nwehd, unsigned int nwehdsz, stri
 	else if (state == 0x0b)
 		notes.back().state = Window::Maximized;
 
-	notes.back().hidden = (state & 0x40);
+	notes.back().hidden = ((state & 0x40) != 0);
 
 	if (labellen > 1) {
 		notes.back().label = nwect.substr(0,labellen);
