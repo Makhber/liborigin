@@ -24,14 +24,22 @@
 #include <cinttypes>
 
 /* define a macro to get an int (or uint) from a istringstream in binary mode */
-#define GET_INT(iss, ovalue) {iss.read(reinterpret_cast<char *>(&ovalue), 4);};
-#define GET_SHORT(iss, ovalue) {iss.read(reinterpret_cast<char *>(&ovalue), 2);};
-#define GET_FLOAT(iss, ovalue) {iss.read(reinterpret_cast<char *>(&ovalue), 4);};
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define GET_SHORT(iss, ovalue)  {iss.read(reinterpret_cast<char *>(&ovalue), 2);};
+#define GET_INT(iss, ovalue)    {iss.read(reinterpret_cast<char *>(&ovalue), 4);};
+#define GET_FLOAT(iss, ovalue)  {iss.read(reinterpret_cast<char *>(&ovalue), 4);};
 #define GET_DOUBLE(iss, ovalue) {iss.read(reinterpret_cast<char *>(&ovalue), 8);};
+#else
+void inline swap_bytes(unsigned char* data, int size) {int i = 0, j = size - 1; while(i < j) {std::swap(data[i], data[j]); ++i, --j;}}
+#define GET_SHORT(iss, ovalue)  {iss.read(reinterpret_cast<char *>(&ovalue), 2); swap_bytes(reinterpret_cast<unsigned char *>(&ovalue), 2);};
+#define GET_INT(iss, ovalue)    {iss.read(reinterpret_cast<char *>(&ovalue), 4); swap_bytes(reinterpret_cast<unsigned char *>(&ovalue), 4);};
+#define GET_FLOAT(iss, ovalue)  {iss.read(reinterpret_cast<char *>(&ovalue), 4); swap_bytes(reinterpret_cast<unsigned char *>(&ovalue), 4);};
+#define GET_DOUBLE(iss, ovalue) {iss.read(reinterpret_cast<char *>(&ovalue), 8); swap_bytes(reinterpret_cast<unsigned char *>(&ovalue), 8);};
+#endif
 
 OriginAnyParser::OriginAnyParser(const string& fileName)
 :	file(fileName.c_str(),ios::binary),
-	logfile(NULL),
+	logfile(nullptr),
 	d_file_size(0),
 	curpos(0),
 	objectIndex(0),
@@ -850,7 +858,7 @@ void OriginAnyParser::readProjectLeaf(tree<ProjectNode>::iterator current_folder
 
 void OriginAnyParser::readAttachmentList() {
 	/* Attachments are divided in two groups (which can be empty)
-	 first group is preceeded by two integers: 4096 (0x1000) and number_of_attachments followed as usual by a '\n' mark
+	 first group is preceded by two integers: 4096 (0x1000) and number_of_attachments followed as usual by a '\n' mark
 	 second group is a series of (header, name, data) triplets without the '\n' mark.
 	*/
 
@@ -1067,7 +1075,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string& col_header, unsigned in
 
 		string::size_type sheetpos = spreadSheets[spread].columns.back().name.find_last_of("@");
 		if(sheetpos != string::npos){
-			unsigned int sheet = strtol(column_name.substr(sheetpos + 1).c_str(), 0, 10);
+			unsigned int sheet = strtol(column_name.substr(sheetpos + 1).c_str(), nullptr, 10);
 			if( sheet > 1){
 				spreadSheets[spread].columns.back().name = column_name;
 
