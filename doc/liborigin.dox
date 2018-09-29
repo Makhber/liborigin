@@ -12,7 +12,7 @@
   \section platforms Platforms
 
   liborigin might be usable in all environments where you find a C/C++ compiler.
-  
+
  \section dependencies Dependencies
 
   liborigin depends on the following libraries:
@@ -22,7 +22,7 @@
    From <a href="https://sourceforge.net/projects/liborigin/files/latest/download">liborigin</a> sourceforge page
 
   \section installonmainpage Installation
- 
+
   See the \ref liborigin2install file.
 
   \section relatedprojects Related Projects
