@@ -37,23 +37,23 @@
 #ifdef HAVE_WINDOWS
 #define LOG_PRINT( logfile, ... ) { fprintf(logfile, __VA_ARGS__); }
 #else	// NOT WINDOWS
+
+#ifdef NDEBUG
 #define LOG_PRINT( logfile, args... ) { fprintf(logfile, args); }
+#else
+#define LOG_PRINT( logfile, args... ) { int ioret = fprintf(logfile, args); assert(ioret > 0); }
+#endif
+
 #endif
 
 #else // !GENERATE_CODE_FOR_LOG
-
-#ifdef HAVE_WINDOWS
-#define LOG_PRINT( logfile, ... ) {};
-#else	// NOT WINDOWS
-#define LOG_PRINT( logfile, args... ) {};
-#endif
-
+#define LOG_PRINT( logfile, args, ... ) {};
 #endif
 
 class OriginParser
 {
 public:
-	virtual ~OriginParser() {};
+	virtual ~OriginParser() = default;
 	virtual bool parse() = 0;
 
 	vector<Origin::SpreadSheet>::difference_type findSpreadByName(const string& name) const;
