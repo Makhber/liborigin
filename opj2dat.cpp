@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 	OriginFile opj(inputfile);
 	int status = opj.parse();
 	cout << "Parsing status = " << status << endl;
+	if (! status)
+		return -1;
 	cout << "OPJ PROJECT \"" << inputfile.c_str() << "\" VERSION = " <<  opj.version() << endl;
 
 	cout << "number of datasets     = " << opj.datasetCount() << endl;
