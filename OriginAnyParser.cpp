@@ -743,7 +743,10 @@ void OriginAnyParser::readProjectTree() {
 	string pte_pre2 = readObjectAsString(pte_pre2_size);
 
 	// root element and children
-	unsigned int rootfolder = readFolderTree(projectTree.begin(), pte_depth);
+	unsigned int rootfolder = readFolderTree(
+		projectTree.insert(projectTree.begin(), ProjectNode("", ProjectNode::Folder)),
+		pte_depth
+	);
 	if (rootfolder > 0) {
 		LOG_PRINT(logfile, "Number of files at root: %d\n", rootfolder)
 	}
