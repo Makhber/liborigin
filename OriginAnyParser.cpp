@@ -1543,6 +1543,7 @@ void OriginAnyParser::getAnnotationProperties(const string& anhd, unsigned int a
 		GET_SHORT(stmp, r.bottom)
 
 		unsigned char attach = anhd[0x28];
+		if (attach >= (unsigned char)Attach::End_) attach = Attach::Frame;
 		unsigned char border = anhd[0x29];
 
 		Color color = getColor(anhd.substr(0x33,4));
