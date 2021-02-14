@@ -26,7 +26,7 @@ jobs:
 
     runs-on: windows-latest
 
-    name: MSVC
+    name: Windows MSVC
 
     steps:
       - name: Checkout
@@ -40,40 +40,6 @@ jobs:
       - name: Building
         run: |
           cmake --build build --config Debug -- -maxCpuCount
-
-  MinGW-w64:
-
-    runs-on: windows-latest
-
-    name: MinGW-w64
-
-    defaults:
-      run:
-        shell: msys2 {0}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-
-      - name: Install MinGW-w64 packages
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >-
-            make
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-gcc
-
-      - name: Configuring
-        run: |
-          mkdir build && cd build
-          cmake .. -G"MSYS Makefiles"
-
-      - name: Building
-        run: |
-          make -C build -j$(nproc)
 
   macos:
 
