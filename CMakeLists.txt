@@ -27,7 +27,6 @@ endif()
 
 # compile-time configuration variables to be linked in
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # source files
 set (sources
@@ -48,15 +47,19 @@ set (devel-headers
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 # object library
-add_library (origin OBJECT ${sources})
-set_target_properties(origin PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library( origin OBJECT ${sources} )
+set_target_properties( origin PROPERTIES POSITION_INDEPENDENT_CODE ON )
+
+target_include_directories( origin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+target_include_directories( origin PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )
 
 # inform on log setting
-if (DEFINED GENERATE_CODE_FOR_LOG)
-    message("File parsing will be logged.")
+if( GENERATE_CODE_FOR_LOG )
+    message( STATUS "liborigin: File parsing will be logged." )
     target_compile_definitions(origin PRIVATE GENERATE_CODE_FOR_LOG=${GENERATE_CODE_FOR_LOG})
 else()
-    message("File parsing will NOT be logged. Define GENERATE_CODE_FOR_LOG to activate logging.")
+    message( STATUS "liborigin: File parsing will NOT be logged.\
+      Define GENERATE_CODE_FOR_LOG to activate logging." )
 endif ()
 
 # Static library
