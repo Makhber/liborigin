@@ -1,10 +1,9 @@
-# CMakeLists.txt for liborigin
 cmake_minimum_required(VERSION 3.16.3)
 
 project( liborigin
   VERSION 3.0.0
   LANGUAGES CXX
-  )
+)
 
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
@@ -30,18 +29,19 @@ configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 # source files
 set (sources
-	OriginFile.cpp
-	OriginParser.cpp
-	OriginAnyParser.cpp
-	)
+  "OriginFile.cpp"
+  "OriginParser.cpp"
+  "OriginAnyParser.cpp"
+)
 
 # header files for development
 set (devel-headers
-	OriginObj.h
-	OriginFile.h
-	OriginParser.h
-	tree.hh
-	)
+  "OriginObj.h"
+  "OriginFile.h"
+  "OriginParser.h"
+  "tree.hh"
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
 
 # allow for installation of individual targets
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -53,37 +53,30 @@ set_target_properties( origin PROPERTIES POSITION_INDEPENDENT_CODE ON )
 target_include_directories( origin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 target_include_directories( origin PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )
 
-# inform on log setting
-if( GENERATE_CODE_FOR_LOG )
-    message( STATUS "liborigin: File parsing will be logged." )
-    target_compile_definitions(origin PRIVATE GENERATE_CODE_FOR_LOG=${GENERATE_CODE_FOR_LOG})
-else()
-    message( STATUS "liborigin: File parsing will NOT be logged.\
-      Define GENERATE_CODE_FOR_LOG to activate logging." )
-endif ()
+option( LIBORIGIN_GENERATE_CODE_FOR_LOG "Log File parsing" OFF )
+if( LIBORIGIN_GENERATE_CODE_FOR_LOG )
+  target_compile_definitions( origin PUBLIC GENERATE_CODE_FOR_LOG )
+endif()
 
 # Static library
-add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
+add_library( origin_static STATIC $<TARGET_OBJECTS:origin> )
 
 set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 
+  include(GNUInstallDirs)
+
   # Shared library
   add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
   set_target_properties(origin_shared PROPERTIES
     OUTPUT_NAME "origin"
-	VERSION ${PROJECT_VERSION}
-	SOVERSION ${PROJECT_VERSION_MAJOR}
-    )
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+  )
   # Generate a pkg-config file matching this config
   configure_file( "liborigin.pc.in" "$liborigin.pc" @ONLY )
 
-  # command line util
-  add_executable(opj2dat opj2dat.cpp)
-  target_link_libraries (opj2dat origin_static)
-  
-  include(GNUInstallDirs)
   # install libraries
   install( TARGETS origin_shared origin_static
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -91,26 +84,41 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
   # install headers
-  install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
+  install(FILES ${devel-headers}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin
+  )
   # install pkg-config file
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-  #
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+  )
+
+  # command line util
+  add_executable(opj2dat opj2dat.cpp)
+  target_link_libraries(opj2dat origin_static)
+
   install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+
   # documentation
   install(FILES COPYING FORMAT README
     DESTINATION ${CMAKE_INSTALL_DOCDIR}
     OPTIONAL
-    )
+  )
+
   # Doxygen
-  configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   find_package(Doxygen)
   if(DOXYGEN_FOUND)
-	add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-	set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+    configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    add_custom_target(doc
+      COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    )
+    set_property(DIRECTORY APPEND
+      PROPERTY
+        ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html
+    )
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
       DESTINATION ${CMAKE_INSTALL_DOCDIR}
       OPTIONAL
-      )
+    )
   endif()
 endif()
