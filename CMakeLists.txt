@@ -75,7 +75,7 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
     SOVERSION ${PROJECT_VERSION_MAJOR}
   )
   # Generate a pkg-config file matching this config
-  configure_file( "liborigin.pc.in" "$liborigin.pc" @ONLY )
+  configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
 
   # install libraries
   install( TARGETS origin_shared origin_static
