@@ -2,9 +2,9 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 project( liborigin
-  VERSION 3.0.0
-  LANGUAGES CXX
-  )
+    VERSION 3.0.0
+    LANGUAGES CXX
+)
 
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
@@ -14,18 +14,18 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_STATIC_LIBS "Build static library" ON)
 
 if( MSVC )
-  # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
-  add_compile_definitions( _CRT_SECURE_NO_WARNINGS
-    _SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING )
-  if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-include-path" )
-  else()
-    add_compile_options( "/MP" )
-  endif()
+    # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
+    add_compile_definitions( _CRT_SECURE_NO_WARNINGS
+        _SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING )
+    if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-include-path" )
+    else()
+        add_compile_options( "/MP" )
+    endif()
 else()
-  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic" )
-  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic" )
+    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
 endif()
 
 # compile-time configuration variables to be linked in
@@ -34,18 +34,18 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # source files
 set (sources
-	OriginFile.cpp
-	OriginParser.cpp
-	OriginAnyParser.cpp
-	)
+    OriginFile.cpp
+    OriginParser.cpp
+    OriginAnyParser.cpp
+)
 
 # header files for development
 set (devel-headers
-	OriginObj.h
-	OriginFile.h
-	OriginParser.h
-	tree.hh
-	)
+    OriginObj.h
+    OriginFile.h
+    OriginParser.h
+    tree.hh
+)
 
 # allow for installation of individual targets
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
@@ -91,32 +91,33 @@ if (BUILD_SHARED_LIBS)
     )
 endif ()
 
-if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
+    # Generate a pkg-config file matching this config
+    configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
 
-  # Generate a pkg-config file matching this config
-  configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
-
-  include(GNUInstallDirs)
-  # install headers
-  install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
-  # install pkg-config file
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-  #
-  # documentation
-  install(FILES COPYING FORMAT README
-    DESTINATION ${CMAKE_INSTALL_DOCDIR}
-    OPTIONAL
+    include(GNUInstallDirs)
+    # install headers
+    install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
+    # install pkg-config file
+    if (BUILD_STATIC_LIBS OR BUILD_SHARED_LIBS)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    endif ()
+    #
+    # documentation
+    install(FILES COPYING FORMAT README
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        OPTIONAL
     )
-  # Doxygen
-  configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-  find_package(Doxygen)
-  if(DOXYGEN_FOUND)
-	add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-	set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-      DESTINATION ${CMAKE_INSTALL_DOCDIR}
-      OPTIONAL
-      )
-  endif()
+    # Doxygen
+    configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    find_package(Doxygen)
+    if(DOXYGEN_FOUND)
+        add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}
+            OPTIONAL
+        )
+    endif()
 endif()
