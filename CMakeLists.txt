@@ -10,6 +10,9 @@ set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
+option(BUILD_SHARED_LIBS "Build shared library" ON)
+option(BUILD_STATIC_LIBS "Build static library" ON)
+
 if( MSVC )
   # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
@@ -60,39 +63,45 @@ else()
 endif ()
 
 # Static library
-add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
+if (BUILD_STATIC_LIBS)
+    add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
+    set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
 
-set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
+    # command line util
+    add_executable(opj2dat opj2dat.cpp)
+    target_link_libraries (opj2dat origin_static)
+
+    install( TARGETS origin_static
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+  install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+endif ()
+
+# Shared library
+if (BUILD_SHARED_LIBS)
+    add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
+    set_target_properties(origin_shared PROPERTIES
+        OUTPUT_NAME "origin"
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
+    install( TARGETS origin_shared
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+endif ()
 
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
 
-  # Shared library
-  add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
-  set_target_properties(origin_shared PROPERTIES
-    OUTPUT_NAME "origin"
-	VERSION ${PROJECT_VERSION}
-	SOVERSION ${PROJECT_VERSION_MAJOR}
-    )
   # Generate a pkg-config file matching this config
   configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
 
-  # command line util
-  add_executable(opj2dat opj2dat.cpp)
-  target_link_libraries (opj2dat origin_static)
-
   include(GNUInstallDirs)
-  # install libraries
-  install( TARGETS origin_shared origin_static
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
   # install headers
   install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
   # install pkg-config file
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
   #
-  install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
   # documentation
   install(FILES COPYING FORMAT README
     DESTINATION ${CMAKE_INSTALL_DOCDIR}
