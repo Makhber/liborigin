@@ -47,9 +47,6 @@ set (devel-headers
     tree.hh
 )
 
-# allow for installation of individual targets
-set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
-
 # object library
 add_library (origin OBJECT ${sources})
 set_target_properties(origin PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -62,20 +59,18 @@ else()
     message("File parsing will NOT be logged. Define GENERATE_CODE_FOR_LOG to activate logging.")
 endif ()
 
+include(GNUInstallDirs)
+
 # Static library
 if (BUILD_STATIC_LIBS)
     add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
     set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
 
-    # command line util
-    add_executable(opj2dat opj2dat.cpp)
-    target_link_libraries (opj2dat origin_static)
 
     install( TARGETS origin_static
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
-  install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
 endif ()
 
 # Shared library
@@ -91,33 +86,42 @@ if (BUILD_SHARED_LIBS)
     )
 endif ()
 
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
-    # Generate a pkg-config file matching this config
-    configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
+# command line util
+if (BUILD_STATIC_LIBS)
+    add_executable(opj2dat opj2dat.cpp)
+    target_link_libraries (opj2dat origin_static)
+elseif (BUILD_SHARED_LIBS)
+    add_executable(opj2dat opj2dat.cpp)
+    target_link_libraries (opj2dat origin_shared)
+endif ()
 
-    include(GNUInstallDirs)
-    # install headers
-    install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
-    # install pkg-config file
-    if (BUILD_STATIC_LIBS OR BUILD_SHARED_LIBS)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-    endif ()
-    #
-    # documentation
-    install(FILES COPYING FORMAT README
+# Generate a pkg-config file matching this config
+configure_file("liborigin.pc.in" "liborigin.pc" @ONLY)
+
+# install headers
+install(FILES ${devel-headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin)
+# install pkg-config file
+if (BUILD_STATIC_LIBS OR BUILD_SHARED_LIBS)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+endif ()
+
+# documentation
+install(FILES COPYING FORMAT README
+    DESTINATION ${CMAKE_INSTALL_DOCDIR}
+    OPTIONAL
+)
+
+# Doxygen
+configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    MESSAGE (STATUS "Building Doxygen docu")
+    add_custom_target(doc ALL ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
         DESTINATION ${CMAKE_INSTALL_DOCDIR}
         OPTIONAL
     )
-    # Doxygen
-    configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-    find_package(Doxygen)
-    if(DOXYGEN_FOUND)
-        add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-	    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-        set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
-        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-            DESTINATION ${CMAKE_INSTALL_DOCDIR}
-            OPTIONAL
-        )
-    endif()
-endif()
+endif ()

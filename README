@@ -38,8 +38,8 @@ This will compile and install:
 	liborigin.pc a pkg-config metadata file to get compiler and linker flags
 	c++ devel headers
 
-To disable shared or static libraries (and opj2dat in the later case) you can also specify the cmake options
--DBUILD_SHARED_LIBS=off or -DBUILD_STATIC_LIBS=off.
+To disable shared or static libraries you can also specify the cmake options
+-DBUILD_SHARED_LIBS=off or -DBUILD_STATIC_LIBS=off. opj2dat will be build if one of them is enabled.
 
 Doc generation requires doxygen (http://doxygen.org)
 
