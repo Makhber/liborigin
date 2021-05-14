@@ -67,3 +67,7 @@ FEATURES:
 ---------------------------------------------------------------------------
 EXAMPLES:
 	* opj2dat (included) extracts the data tables of an origin project file into dat files
+---------------------------------------------------------------------------
+RELATED PROJECTS:
+	* Ropj (https://github.com/aitap/Ropj)
+	* openopj (https://github.com/jgonera/openopj)
