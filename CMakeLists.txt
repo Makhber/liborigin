@@ -58,32 +58,37 @@ if( LIBORIGIN_GENERATE_CODE_FOR_LOG )
   target_compile_definitions( origin PUBLIC GENERATE_CODE_FOR_LOG )
 endif()
 
-# Static library
-add_library( origin_static STATIC $<TARGET_OBJECTS:origin> )
+include(GNUInstallDirs)
 
-set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
+option( LIBORIGIN_STATIC_LIB "Build Static Library" ON )
 
-if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
+if( NOT LIBORIGIN_STATIC_LIB AND NOT BUILD_SHARED_LIBS )
+  message( FATAL_ERROR "You must enable building shared or static library" )
+endif()
 
-  include(GNUInstallDirs)
+if( LIBORIGIN_STATIC_LIB )
+  # Static library
+  add_library( origin_static STATIC $<TARGET_OBJECTS:origin> )
+  set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
+endif()
 
-  # Shared library
+if( BUILD_SHARED_LIBS )
   add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
   set_target_properties(origin_shared PROPERTIES
     OUTPUT_NAME "origin"
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
   )
-  # Generate a pkg-config file matching this config
-  configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
-
-  # install libraries
-  install( TARGETS origin_shared origin_static
+  install( TARGETS origin_shared
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-  # install headers
+  )
+endif()
+
+if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
+  # Generate a pkg-config file matching this config
+  configure_file( "liborigin.pc.in" "liborigin.pc" @ONLY )
+  # install Headers
   install(FILES ${devel-headers}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liborigin
   )
@@ -91,28 +96,38 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
   )
-
   # command line util
   add_executable(opj2dat opj2dat.cpp)
-  target_link_libraries(opj2dat origin_static)
-
-  install(TARGETS opj2dat DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
-
+  if( BUILD_SHARED_LIBS )
+    target_link_libraries( opj2dat origin_shared )
+  else()
+    target_link_libraries( opj2dat origin_static )
+  endif()
+  install(TARGETS opj2dat
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    OPTIONAL
+  )
+  # install static lib
+  if( LIBORIGIN_STATIC_LIB )
+    install( TARGETS origin_static
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+  endif()
   # documentation
   install(FILES COPYING FORMAT README
     DESTINATION ${CMAKE_INSTALL_DOCDIR}
     OPTIONAL
   )
-
   # Doxygen
-  find_package(Doxygen)
-  if(DOXYGEN_FOUND)
-    configure_file(doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-    add_custom_target(doc
+  find_package( Doxygen )
+  if( DOXYGEN_FOUND )
+    configure_file( doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile )
+    add_custom_target( doc
       COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     )
-    set_property(DIRECTORY APPEND
+    set_property( DIRECTORY APPEND
       PROPERTY
         ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html
     )
