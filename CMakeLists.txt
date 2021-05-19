@@ -74,11 +74,7 @@ endif()
 
 if( BUILD_SHARED_LIBS )
   add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
-  set_target_properties(origin_shared PROPERTIES
-    OUTPUT_NAME "origin"
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-  )
+  set_target_properties( origin_shared PROPERTIES OUTPUT_NAME "origin" )
   install( TARGETS origin_shared
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -96,6 +92,12 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborigin.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
   )
+  if( BUILD_SHARED_LIBS )
+    set_target_properties( origin_shared PROPERTIES
+      VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION_MAJOR}
+    )
+  endif()
   # command line util
   add_executable(opj2dat opj2dat.cpp)
   if( BUILD_SHARED_LIBS )
