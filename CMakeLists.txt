@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16.3)
 
 project( liborigin
-  VERSION 3.0.0
+  VERSION 3.0.1
   LANGUAGES CXX
 )
 
@@ -32,6 +32,12 @@ set (sources
   "OriginFile.cpp"
   "OriginParser.cpp"
   "OriginAnyParser.cpp"
+  "OriginObj.h"
+  "OriginFile.h"
+  "OriginParser.h"
+  "tree.h"
+  "endianfstream.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
 )
 
 # header files for development
