@@ -24,8 +24,6 @@
 #include <sstream>
 #include <cinttypes>
 
-using namespace std;
-
 /* define a macro to get an int (or uint) from a istringstream in binary mode */
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define GET_SHORT(iss, ovalue)                                                                     \
@@ -75,8 +73,8 @@ void inline swap_bytes(unsigned char *data, int size)
     };
 #endif
 
-OriginAnyParser::OriginAnyParser(const string &fileName)
-    : file(fileName.c_str(), ios::binary),
+OriginAnyParser::OriginAnyParser(const std::string &fileName)
+    : file(fileName.c_str(), std::ios::binary),
       logfile(nullptr),
       d_file_size(0),
       curpos(0),
@@ -98,9 +96,9 @@ bool OriginAnyParser::parse()
 #endif // GENERATE_CODE_FOR_LOG
 
     // get length of file:
-    file.seekg(0, ios_base::end);
+    file.seekg(0, std::ios_base::end);
     d_file_size = file.tellg();
-    file.seekg(0, ios_base::beg);
+    file.seekg(0, std::ios_base::beg);
 
     LOG_PRINT(logfile, "File size: %" PRId64 "\n", d_file_size)
 
@@ -221,7 +219,7 @@ bool OriginAnyParser::parse()
     return true;
 }
 
-string toLowerCase(string str)
+std::string toLowerCase(std::string str)
 {
     for (unsigned int i = 0; i < str.length(); i++)
         if (str[i] >= 0x41 && str[i] <= 0x5A)
@@ -229,7 +227,7 @@ string toLowerCase(string str)
     return str;
 }
 
-OriginParser *createOriginAnyParser(const string &fileName)
+OriginParser *createOriginAnyParser(const std::string &fileName)
 {
     return new OriginAnyParser(fileName);
 }
@@ -250,13 +248,13 @@ unsigned int OriginAnyParser::readObjectSize()
     return obj_size;
 }
 
-string OriginAnyParser::readObjectAsString(unsigned int size)
+std::string OriginAnyParser::readObjectAsString(unsigned int size)
 {
     char c;
     // read a size-byte blob of data followed by '\n'
     if (size > 0) {
         // get a string large enough to hold the result, initialize it to all 0's
-        string blob = string(size, '\0');
+        std::string blob = std::string(size, '\0');
         // read data into that string
         // cannot use '>>' operator because iendianfstream truncates it at first '\0'
         file.read(&blob[0], size);
@@ -267,17 +265,17 @@ string OriginAnyParser::readObjectAsString(unsigned int size)
             LOG_PRINT(logfile, "Wrong delimiter %c at %" PRId64 " [0x%" PRIx64 "]\n", c, curpos,
                       curpos)
             parseError = 4;
-            return string();
+            return std::string();
         }
         return blob;
     }
-    return string();
+    return std::string();
 }
 
 void OriginAnyParser::readFileVersion()
 {
     // get file and program version, check it is a valid file
-    string sFileVersion;
+    std::string sFileVersion;
     getline(file, sFileVersion);
 
     if ((sFileVersion.substr(0, 4) != "CPYA")) {
@@ -304,7 +302,7 @@ void OriginAnyParser::readGlobalHeader()
               gh_size, gh_size, curpos, curpos)
 
     // get global header data
-    string gh_data;
+    std::string gh_data;
     gh_data = readObjectAsString(gh_size);
 
     curpos = file.tellg();
@@ -312,7 +310,7 @@ void OriginAnyParser::readGlobalHeader()
 
     // when gh_size > 0x1B, a double with fileVersion/100 can be read at gh_data[0x1B:0x23]
     if (gh_size > 0x1B) {
-        istringstream stmp;
+        std::istringstream stmp;
         stmp.str(gh_data.substr(0x1B));
         double dFileVersion;
         GET_DOUBLE(stmp, dFileVersion)
@@ -342,7 +340,7 @@ bool OriginAnyParser::readDataSetElement()
      * return true if a DataSet is found, otherwise return false */
     unsigned int dse_header_size = 0, dse_data_size = 0, dse_mask_size = 0;
     std::streamoff dsh_start = 0, dsd_start = 0, dsm_start = 0;
-    string dse_header;
+    std::string dse_header;
 
     // get dataset header size
     dse_header_size = readObjectSize();
@@ -356,14 +354,14 @@ bool OriginAnyParser::readDataSetElement()
     dse_header = readObjectAsString(dse_header_size);
 
     // get known info
-    string name(25, 0);
+    std::string name(25, 0);
     name = dse_header.substr(0x58, 25);
 
     // go to end of dataset header, get data size
-    file.seekg(dsh_start + dse_header_size + 1, ios_base::beg);
+    file.seekg(dsh_start + dse_header_size + 1, std::ios_base::beg);
     dse_data_size = readObjectSize();
     dsd_start = file.tellg();
-    string dse_data = readObjectAsString(dse_data_size);
+    std::string dse_data = readObjectAsString(dse_data_size);
     curpos = file.tellg();
     LOG_PRINT(logfile,
               "data size %d [0x%X], from %" PRId64 " [0x%" PRIx64 "] to %" PRId64 " [0x%" PRIx64
@@ -374,15 +372,15 @@ bool OriginAnyParser::readDataSetElement()
     getColumnInfoAndData(dse_header, dse_header_size, dse_data, dse_data_size);
 
     // go to end of data values, get mask size (often zero)
-    file.seekg(dsd_start + dse_data_size, ios_base::beg); // dse_data_size can be zero
+    file.seekg(dsd_start + dse_data_size, std::ios_base::beg); // dse_data_size can be zero
     if (dse_data_size > 0)
-        file.seekg(1, ios_base::cur);
+        file.seekg(1, std::ios_base::cur);
     dse_mask_size = readObjectSize();
     dsm_start = file.tellg();
     if (dse_mask_size > 0)
         LOG_PRINT(logfile, "\nmask size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64 "]",
                   dse_mask_size, dse_mask_size, dsm_start, dsm_start)
-    string dse_mask = readObjectAsString(dse_mask_size);
+    std::string dse_mask = readObjectAsString(dse_mask_size);
 
     // get mask values
     if (dse_mask_size > 0) {
@@ -390,7 +388,7 @@ bool OriginAnyParser::readDataSetElement()
         LOG_PRINT(logfile, ", ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
         // TODO: extract mask values from dse_mask
         // go to end of dataset mask
-        file.seekg(dsm_start + dse_mask_size + 1, ios_base::beg);
+        file.seekg(dsm_start + dse_mask_size + 1, std::ios_base::beg);
     }
     curpos = file.tellg();
     LOG_PRINT(logfile, " ends at %" PRId64 " [0x%" PRIx64 "]: ", curpos, curpos)
@@ -416,10 +414,10 @@ bool OriginAnyParser::readWindowElement()
     LOG_PRINT(logfile,
               "Window found: header size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64 "]: ",
               wde_header_size, wde_header_size, curpos, curpos)
-    string wde_header = readObjectAsString(wde_header_size);
+    std::string wde_header = readObjectAsString(wde_header_size);
 
     // get known info
-    string name(25, 0);
+    std::string name(25, 0);
     name = wde_header.substr(0x02, 25).c_str();
     LOG_PRINT(logfile, "%s\n", name.c_str())
 
@@ -446,7 +444,7 @@ bool OriginAnyParser::readWindowElement()
     }
 
     // go to end of window header
-    file.seekg(wdh_start + wde_header_size + 1, ios_base::beg);
+    file.seekg(wdh_start + wde_header_size + 1, std::ios_base::beg);
 
     // get layer list
     unsigned int layer_list_size = 0;
@@ -482,13 +480,13 @@ bool OriginAnyParser::readLayerElement()
     LOG_PRINT(logfile,
               "  Layer found: header size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64 "]\n",
               lye_header_size, lye_header_size, curpos, curpos)
-    string lye_header = readObjectAsString(lye_header_size);
+    std::string lye_header = readObjectAsString(lye_header_size);
 
     // get known info
     getLayerProperties(lye_header, lye_header_size);
 
     // go to end of layer header
-    file.seekg(lyh_start + lye_header_size + 1, ios_base::beg);
+    file.seekg(lyh_start + lye_header_size + 1, std::ios_base::beg);
 
     // get annotation list
     unsigned int annotation_list_size = 0;
@@ -593,15 +591,15 @@ bool OriginAnyParser::readAnnotationElement()
               "    Annotation found: header size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64
               "]: ",
               ane_header_size, ane_header_size, curpos, curpos)
-    string ane_header = readObjectAsString(ane_header_size);
+    std::string ane_header = readObjectAsString(ane_header_size);
 
     // get known info
-    string name(41, 0);
+    std::string name(41, 0);
     name = ane_header.substr(0x46, 41);
     LOG_PRINT(logfile, "%s\n", name.c_str())
 
     // go to end of annotation header
-    file.seekg(anh_start + ane_header_size + 1, ios_base::beg);
+    file.seekg(anh_start + ane_header_size + 1, std::ios_base::beg);
 
     // data of an annotation element is divided in three blocks
     // first block
@@ -612,12 +610,12 @@ bool OriginAnyParser::readAnnotationElement()
     andt1_start = file.tellg();
     LOG_PRINT(logfile, "     block 1 size %d [0x%X] at %" PRId64 " [0x%" PRIx64 "]\n",
               ane_data_1_size, ane_data_1_size, andt1_start, andt1_start)
-    string andt1_data = readObjectAsString(ane_data_1_size);
+    std::string andt1_data = readObjectAsString(ane_data_1_size);
 
     // TODO: get known info
 
     // go to end of first data block
-    file.seekg(andt1_start + ane_data_1_size + 1, ios_base::beg);
+    file.seekg(andt1_start + ane_data_1_size + 1, std::ios_base::beg);
 
     // second block
     unsigned int ane_data_2_size = 0;
@@ -626,7 +624,7 @@ bool OriginAnyParser::readAnnotationElement()
     andt2_start = file.tellg();
     LOG_PRINT(logfile, "     block 2 size %d [0x%X] at %" PRId64 " [0x%" PRIx64 "]\n",
               ane_data_2_size, ane_data_2_size, andt2_start, andt2_start)
-    string andt2_data;
+    std::string andt2_data;
 
     // check for group of annotations
     if (((ane_data_1_size == 0x5e) || (ane_data_1_size == 0x0A)) && (ane_data_2_size == 0x04)) {
@@ -639,14 +637,14 @@ bool OriginAnyParser::readAnnotationElement()
             LOG_PRINT(logfile, "  ... group end at %" PRId64 " [0x%" PRIx64 "]. Annotations: %d\n",
                       curpos, curpos, angroup_size)
         }
-        andt2_data = string();
+        andt2_data = std::string();
     } else {
         andt2_data = readObjectAsString(ane_data_2_size);
         // TODO: get known info
         // go to end of second data block
-        file.seekg(andt2_start + ane_data_2_size, ios_base::beg);
+        file.seekg(andt2_start + ane_data_2_size, std::ios_base::beg);
         if (ane_data_2_size > 0)
-            file.seekg(1, ios_base::cur);
+            file.seekg(1, std::ios_base::cur);
     }
 
     // third block
@@ -658,7 +656,7 @@ bool OriginAnyParser::readAnnotationElement()
         LOG_PRINT(logfile, "     block 3 size %d [0x%X] at %" PRId64 " [0x%" PRIx64 "]\n",
                   ane_data_3_size, ane_data_3_size, andt3_start, andt3_start)
     }
-    string andt3_data = readObjectAsString(ane_data_3_size);
+    std::string andt3_data = readObjectAsString(ane_data_3_size);
 
     curpos = file.tellg();
     LOG_PRINT(logfile, "    annotation ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
@@ -686,25 +684,25 @@ bool OriginAnyParser::readCurveElement()
     cvh_start = curpos;
     LOG_PRINT(logfile, "    Curve: header size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64 "], ",
               cve_header_size, cve_header_size, curpos, curpos)
-    string cve_header = readObjectAsString(cve_header_size);
+    std::string cve_header = readObjectAsString(cve_header_size);
 
     // TODO: get known info from curve header
-    string name = cve_header.substr(0x12, 12);
+    std::string name = cve_header.substr(0x12, 12);
 
     // go to end of header, get curve data size
-    file.seekg(cvh_start + cve_header_size + 1, ios_base::beg);
+    file.seekg(cvh_start + cve_header_size + 1, std::ios_base::beg);
     cve_data_size = readObjectSize();
     cvd_start = file.tellg();
     LOG_PRINT(logfile, "data size %d [0x%X], from %" PRId64 " [0x%" PRIx64 "]", cve_data_size,
               cve_data_size, cvd_start, cvd_start)
-    string cve_data = readObjectAsString(cve_data_size);
+    std::string cve_data = readObjectAsString(cve_data_size);
 
     // TODO: get known info from curve data
 
     // go to end of data
-    file.seekg(cvd_start + cve_data_size, ios_base::beg);
+    file.seekg(cvd_start + cve_data_size, std::ios_base::beg);
     if (cve_data_size > 0)
-        file.seekg(1, ios_base::cur);
+        file.seekg(1, std::ios_base::cur);
 
     curpos = file.tellg();
     LOG_PRINT(logfile, "to %" PRId64 " [0x%" PRIx64 "]: %s\n", curpos, curpos, name.c_str())
@@ -729,12 +727,12 @@ bool OriginAnyParser::readAxisBreakElement()
 
     curpos = file.tellg();
     abd_start = curpos;
-    string abd_data = readObjectAsString(abe_data_size);
+    std::string abd_data = readObjectAsString(abe_data_size);
 
     // get known info
 
     // go to end of axis break data
-    file.seekg(abd_start + abe_data_size + 1, ios_base::beg);
+    file.seekg(abd_start + abe_data_size + 1, std::ios_base::beg);
 
     // get axis break info
     getAxisBreakProperties(abd_data, abe_data_size);
@@ -756,12 +754,12 @@ bool OriginAnyParser::readAxisParameterElement(unsigned int naxis)
 
     curpos = file.tellg();
     apd_start = curpos;
-    string apd_data = readObjectAsString(ape_data_size);
+    std::string apd_data = readObjectAsString(ape_data_size);
 
     // get known info
 
     // go to end of axis break data
-    file.seekg(apd_start + ape_data_size + 1, ios_base::beg);
+    file.seekg(apd_start + ape_data_size + 1, std::ios_base::beg);
 
     // get axis parameter info
     getAxisParameterProperties(apd_data, ape_data_size, naxis);
@@ -772,7 +770,7 @@ bool OriginAnyParser::readAxisParameterElement(unsigned int naxis)
 bool OriginAnyParser::readParameterElement()
 {
     // get parameter name
-    string par_name;
+    std::string par_name;
     char c;
 
     getline(file, par_name);
@@ -817,29 +815,29 @@ bool OriginAnyParser::readNoteElement()
     LOG_PRINT(logfile,
               "  Note window found: header size %d [0x%X], starts at %" PRId64 " [0x%" PRIx64 "]\n",
               nwe_header_size, nwe_header_size, curpos, curpos)
-    string nwe_header = readObjectAsString(nwe_header_size);
+    std::string nwe_header = readObjectAsString(nwe_header_size);
 
     // TODO: get known info from header
 
     // go to end of header
-    file.seekg(nwh_start + nwe_header_size + 1, ios_base::beg);
+    file.seekg(nwh_start + nwe_header_size + 1, std::ios_base::beg);
 
     // get label size
     nwe_label_size = readObjectSize();
     nwl_start = file.tellg();
-    string nwe_label = readObjectAsString(nwe_label_size);
+    std::string nwe_label = readObjectAsString(nwe_label_size);
     LOG_PRINT(logfile, "  label at %" PRId64 " [0x%" PRIx64 "]: %s\n", nwl_start, nwl_start,
               nwe_label.c_str())
 
     // go to end of label
-    file.seekg(nwl_start + nwe_label_size, ios_base::beg);
+    file.seekg(nwl_start + nwe_label_size, std::ios_base::beg);
     if (nwe_label_size > 0)
-        file.seekg(1, ios_base::cur);
+        file.seekg(1, std::ios_base::cur);
 
     // get contents size
     nwe_contents_size = readObjectSize();
     nwc_start = file.tellg();
-    string nwe_contents = readObjectAsString(nwe_contents_size);
+    std::string nwe_contents = readObjectAsString(nwe_contents_size);
     if (nwc_start > 0) {
         LOG_PRINT(logfile, "  contents at %" PRId64 " [0x%" PRIx64 "]: \n%s\n", nwc_start,
                   nwc_start, nwe_contents.c_str())
@@ -858,11 +856,11 @@ void OriginAnyParser::readProjectTree()
 
     // first preamble size and data (usually 4)
     unsigned int pte_pre1_size = readObjectSize();
-    string pte_pre1 = readObjectAsString(pte_pre1_size);
+    std::string pte_pre1 = readObjectAsString(pte_pre1_size);
 
     // second preamble size and data (usually 16)
     unsigned int pte_pre2_size = readObjectSize();
-    string pte_pre2 = readObjectAsString(pte_pre2_size);
+    std::string pte_pre2 = readObjectAsString(pte_pre2_size);
 
     // root element and children
     unsigned int rootfolder = readFolderTree(
@@ -892,7 +890,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
 
     // folder header size, data, end mark
     fle_header_size = readObjectSize();
-    string fle_header = readObjectAsString(fle_header_size);
+    std::string fle_header = readObjectAsString(fle_header_size);
     fle_eofh_size = readObjectSize(); // (usually 0)
     if (fle_eofh_size != 0) {
         LOG_PRINT(logfile, "Wrong end of folder header mark")
@@ -901,7 +899,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     // folder name size
     fle_name_size = readObjectSize();
     curpos = file.tellg();
-    string fle_name = readObjectAsString(fle_name_size);
+    std::string fle_name = readObjectAsString(fle_name_size);
     LOG_PRINT(logfile, "Folder name at %" PRId64 " [0x%" PRIx64 "]: %s\n", curpos, curpos,
               fle_name.c_str());
 
@@ -909,7 +907,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     fle_prop_size = readObjectSize();
     for (unsigned int i = 0; i < fle_prop_size; i++) {
         unsigned int obj_size = readObjectSize();
-        string obj_data = readObjectAsString(obj_size);
+        std::string obj_data = readObjectAsString(obj_size);
     }
 
     // get project folder properties
@@ -923,9 +921,9 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     number_of_files_size = readObjectSize(); // should be 4 as number_of_files is an integer
     curpos = file.tellg();
     LOG_PRINT(logfile, "Number of files at %" PRId64 " [0x%" PRIx64 "] ", curpos, curpos)
-    string fle_nfiles = readObjectAsString(number_of_files_size);
+    std::string fle_nfiles = readObjectAsString(number_of_files_size);
 
-    istringstream stmp(ios_base::binary);
+    std::istringstream stmp(std::ios_base::binary);
     stmp.str(fle_nfiles);
     unsigned int number_of_files = 0;
     GET_INT(stmp, number_of_files)
@@ -941,7 +939,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     number_of_folders_size = readObjectSize(); // should be 4 as number_of_subfolders is an integer
     curpos = file.tellg();
     LOG_PRINT(logfile, "Number of subfolders at %" PRId64 " [0x%" PRIx64 "] ", curpos, curpos)
-    string fle_nfolders = readObjectAsString(number_of_folders_size);
+    std::string fle_nfolders = readObjectAsString(number_of_folders_size);
 
     stmp.str(fle_nfolders);
     unsigned int number_of_folders = 0;
@@ -964,12 +962,12 @@ void OriginAnyParser::readProjectLeaf(tree<ProjectNode>::iterator current_folder
 {
     // preamble size (usually 0) and data
     unsigned int ptl_pre_size = readObjectSize();
-    string ptl_pre = readObjectAsString(ptl_pre_size);
+    std::string ptl_pre = readObjectAsString(ptl_pre_size);
 
     // file data size (usually 8) and data
     unsigned int ptl_data_size = readObjectSize();
     curpos = file.tellg();
-    string ptl_data = readObjectAsString(ptl_data_size);
+    std::string ptl_data = readObjectAsString(ptl_data_size);
     LOG_PRINT(logfile, "File at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
 
     // epilogue (should be zero)
@@ -996,10 +994,10 @@ void OriginAnyParser::readAttachmentList()
     // position
     unsigned int att_1st_empty = 0;
     file >> att_1st_empty;
-    file.seekg(-4, ios_base::cur);
+    file.seekg(-4, std::ios_base::cur);
 
-    istringstream stmp(ios_base::binary);
-    string att_header;
+    std::istringstream stmp(std::ios_base::binary);
+    std::string att_header;
     if (att_1st_empty == 8) {
         // first group
         unsigned int att_list1_size = 0;
@@ -1009,7 +1007,7 @@ void OriginAnyParser::readAttachmentList()
         // '\n' after 4 bytes for uint
         att_list1_size = readObjectSize(); // should be 8 as we expect two integer values
         curpos = file.tellg();
-        string att_list1 = readObjectAsString(att_list1_size);
+        std::string att_list1 = readObjectAsString(att_list1_size);
         LOG_PRINT(logfile, "First attachment group at %" PRId64 " [0x%" PRIx64 "]", curpos, curpos)
 
         stmp.str(att_list1);
@@ -1037,10 +1035,10 @@ void OriginAnyParser::readAttachmentList()
                       iattno, curpos, curpos, att_data_size)
 
             // get data
-            string att_data = readObjectAsString(att_data_size);
+            std::string att_data = readObjectAsString(att_data_size);
             // even if att_data_size is zero, we get a '\n' mark
             if (att_data_size == 0)
-                file.seekg(1, ios_base::cur);
+                file.seekg(1, std::ios_base::cur);
         }
     } else {
         LOG_PRINT(logfile, "First attachment group is empty\n")
@@ -1059,7 +1057,7 @@ void OriginAnyParser::readAttachmentList()
             3rd size of data */
 
     // get header
-    att_header = string(12, 0);
+    att_header = std::string(12, 0);
     while (true) {
         // check for eof
         if ((d_file_size == file.tellg()) || (file.eof()))
@@ -1078,10 +1076,10 @@ void OriginAnyParser::readAttachmentList()
 
         // get name and data
         unsigned int name_size = att_header_size - 3 * 4;
-        string att_name = string(name_size, 0);
+        std::string att_name = std::string(name_size, 0);
         file.read(&att_name[0], name_size);
         curpos = file.tellg();
-        string att_data = string(att_size, 0);
+        std::string att_data = std::string(att_size, 0);
         file.read(&att_data[0], att_size);
         LOG_PRINT(logfile,
                   "attachment at %" PRId64 " [0x%" PRIx64 "], type 0x%X, size %d [0x%X]: %s\n",
@@ -1091,14 +1089,15 @@ void OriginAnyParser::readAttachmentList()
     return;
 }
 
-bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned int col_header_size,
-                                           const string &col_data, unsigned int col_data_size)
+bool OriginAnyParser::getColumnInfoAndData(const std::string &col_header,
+                                           unsigned int col_header_size,
+                                           const std::string &col_data, unsigned int col_data_size)
 {
-    istringstream stmp(ios_base::binary);
+    std::istringstream stmp(std::ios_base::binary);
     short data_type;
     char data_type_u;
     unsigned char valuesize;
-    string name(25, 0), column_name;
+    std::string name(25, 0), column_name;
 
     stmp.str(col_header.substr(0x16));
     GET_SHORT(stmp, data_type);
@@ -1119,10 +1118,10 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
     } else {
         name = col_header.substr(0x58, 25).c_str();
     }
-    string dataset_name = name;
-    string::size_type colpos = name.find_last_of("_");
+    std::string dataset_name = name;
+    std::string::size_type colpos = name.find_last_of("_");
 
-    if (colpos != string::npos) {
+    if (colpos != std::string::npos) {
         column_name = name.substr(colpos + 1);
         name.resize(colpos);
     }
@@ -1151,7 +1150,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
     size_t current_col = 1; //, nr = 0, nbytes = 0;
     static unsigned int col_index = 0;
     unsigned int current_sheet = 0;
-    vector<Origin::SpreadSheet>::difference_type spread = 0;
+    std::vector<Origin::SpreadSheet>::difference_type spread = 0;
 
     if (column_name.empty()) { // Matrix or function
         if (data_type == 0x6081) { // Function
@@ -1177,10 +1176,10 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                       f.totalPoints);
 
         } else { // Matrix
-            vector<Origin::Matrix>::difference_type mIndex = -1;
-            string::size_type pos = name.find_first_of("@");
-            if (pos != string::npos) {
-                string sheetName = name;
+            std::vector<Origin::Matrix>::difference_type mIndex = -1;
+            std::string::size_type pos = name.find_first_of("@");
+            if (pos != std::string::npos) {
+                std::string sheetName = name;
                 name.resize(pos);
                 mIndex = findMatrixByName(name);
                 if (mIndex != -1) {
@@ -1218,8 +1217,9 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
         spreadSheets[spread].columns.back().beginRow = first_row;
         spreadSheets[spread].columns.back().endRow = last_row;
 
-        string::size_type sheetpos = spreadSheets[spread].columns.back().name.find_last_of("@");
-        if (sheetpos != string::npos) {
+        std::string::size_type sheetpos =
+                spreadSheets[spread].columns.back().name.find_last_of("@");
+        if (sheetpos != std::string::npos) {
             unsigned int sheet = strtol(column_name.substr(sheetpos + 1).c_str(), nullptr, 10);
             if (sheet > 1) {
                 spreadSheets[spread].columns.back().name = column_name;
@@ -1253,7 +1253,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
             } else if ((data_type & 0x100) == 0x100) // Text&Numeric
             {
                 unsigned char c = col_data[i * valuesize];
-                stmp.seekg(i * valuesize + 2, ios_base::beg);
+                stmp.seekg(i * valuesize + 2, std::ios_base::beg);
                 if (c != 1) // value
                 {
                     GET_DOUBLE(stmp, value);
@@ -1265,11 +1265,11 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                     spreadSheets[spread].columns[(current_col - 1)].data.push_back(value);
                 } else // text
                 {
-                    string svaltmp = col_data.substr(i * valuesize + 2, valuesize - 2);
+                    std::string svaltmp = col_data.substr(i * valuesize + 2, valuesize - 2);
                     // TODO: check if this test is still needed
                     if (svaltmp.find(0x0E)
-                        != string::npos) { // try find non-printable symbol - garbage test
-                        svaltmp = string();
+                        != std::string::npos) { // try find non-printable symbol - garbage test
+                        svaltmp = std::string();
                         LOG_PRINT(logfile, "Non printable symbol found, place 1 for i=%d\n", i)
                     }
                     if ((i < 5) || (i > (nr - 5))) {
@@ -1281,11 +1281,11 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                 }
             } else // text
             {
-                string svaltmp = col_data.substr(i * valuesize, valuesize).c_str();
+                std::string svaltmp = col_data.substr(i * valuesize, valuesize).c_str();
                 // TODO: check if this test is still needed
                 if (svaltmp.find(0x0E)
-                    != string::npos) { // try find non-printable symbol - garbage test
-                    svaltmp = string();
+                    != std::string::npos) { // try find non-printable symbol - garbage test
+                    svaltmp = std::string();
                     LOG_PRINT(logfile, "Non printable symbol found, place 2 for i=%d\n", i)
                 }
                 if ((i < 5) || (i > (nr - 5))) {
@@ -1304,18 +1304,18 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
     return true;
 }
 
-void OriginAnyParser::getMatrixValues(const string &col_data, unsigned int col_data_size,
+void OriginAnyParser::getMatrixValues(const std::string &col_data, unsigned int col_data_size,
                                       short data_type, char data_type_u, char valuesize,
-                                      vector<Origin::Matrix>::difference_type mIndex)
+                                      std::vector<Origin::Matrix>::difference_type mIndex)
 {
     if (matrixes.empty())
         return;
 
-    istringstream stmp;
+    std::istringstream stmp;
     stmp.str(col_data);
 
     if (mIndex < 0)
-        mIndex = (vector<Origin::Matrix>::difference_type)matrixes.size() - 1;
+        mIndex = (std::vector<Origin::Matrix>::difference_type)matrixes.size() - 1;
 
     unsigned int size = col_data_size / valuesize;
     bool logValues = true;
@@ -1392,13 +1392,13 @@ void OriginAnyParser::getMatrixValues(const string &col_data, unsigned int col_d
     }
 }
 
-void OriginAnyParser::getWindowProperties(Origin::Window &window, const string &wde_header,
+void OriginAnyParser::getWindowProperties(Origin::Window &window, const std::string &wde_header,
                                           unsigned int wde_header_size)
 {
     window.objectID = objectIndex;
     ++objectIndex;
 
-    istringstream stmp;
+    std::istringstream stmp;
 
     stmp.str(wde_header.substr(0x1B));
     GET_SHORT(stmp, window.frameRect.left)
@@ -1486,16 +1486,17 @@ void OriginAnyParser::getWindowProperties(Origin::Window &window, const string &
         unsigned char c = wde_header[0x38];
         graphs[igraph].connectMissingData = ((c & 0x40) != 0);
 
-        string templateName = wde_header.substr(0x45, 20).c_str();
+        std::string templateName = wde_header.substr(0x45, 20).c_str();
         graphs[igraph].templateName = templateName;
         if (templateName == "LAYOUT")
             graphs[igraph].isLayout = true;
     }
 }
 
-void OriginAnyParser::getLayerProperties(const string &lye_header, unsigned int lye_header_size)
+void OriginAnyParser::getLayerProperties(const std::string &lye_header,
+                                         unsigned int lye_header_size)
 {
-    istringstream stmp;
+    std::istringstream stmp;
 
     if (ispread != -1) { // spreadsheet
 
@@ -1586,7 +1587,7 @@ void OriginAnyParser::getLayerProperties(const string &lye_header, unsigned int 
     }
 }
 
-Origin::Color OriginAnyParser::getColor(const string &strbincolor)
+Origin::Color OriginAnyParser::getColor(const std::string &strbincolor)
 {
     /* decode a color value from a 4 byte binary string */
     Origin::Color result;
@@ -1641,19 +1642,19 @@ Origin::Color OriginAnyParser::getColor(const string &strbincolor)
     return result;
 }
 
-void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int anhdsz,
-                                              const string &andt1, unsigned int andt1sz,
-                                              const string &andt2, unsigned int andt2sz,
-                                              const string &andt3, unsigned int andt3sz)
+void OriginAnyParser::getAnnotationProperties(const std::string &anhd, unsigned int anhdsz,
+                                              const std::string &andt1, unsigned int andt1sz,
+                                              const std::string &andt2, unsigned int andt2sz,
+                                              const std::string &andt3, unsigned int andt3sz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     (void)anhdsz;
     (void)andt3;
     (void)andt3sz;
 
     if (ispread != -1) {
 
-        string sec_name = anhd.substr(0x46, 41).c_str();
+        std::string sec_name = anhd.substr(0x46, 41).c_str();
         int col_index = findColumnByName((int)ispread, sec_name);
         if (col_index != -1) { // check if it is a formula
             spreadSheets[ispread].columns[col_index].command = andt1.c_str();
@@ -1664,7 +1665,7 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
     } else if (imatrix != -1) {
 
         MatrixSheet &sheet = matrixes[imatrix].sheets[ilayer];
-        string sec_name = anhd.substr(0x46, 41).c_str();
+        std::string sec_name = anhd.substr(0x46, 41).c_str();
 
         stmp.str(andt1.c_str());
         if (sec_name == "MV") {
@@ -1685,8 +1686,8 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
 
     } else if (iexcel != -1) {
 
-        string sec_name = anhd.substr(0x46, 41).c_str();
-        vector<Origin::SpreadColumn>::difference_type col_index =
+        std::string sec_name = anhd.substr(0x46, 41).c_str();
+        std::vector<Origin::SpreadColumn>::difference_type col_index =
                 findExcelColumnByName(iexcel, ilayer, sec_name);
         if (col_index != -1) { // check if it is a formula
             excels[iexcel].sheets[ilayer].columns[col_index].command = andt1.c_str();
@@ -1695,7 +1696,7 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
     } else {
 
         GraphLayer &glayer = graphs[igraph].layers[ilayer];
-        string sec_name = anhd.substr(0x46, 41).c_str();
+        std::string sec_name = anhd.substr(0x46, 41).c_str();
 
         Rect r;
         stmp.str(anhd.substr(0x03));
@@ -1770,16 +1771,16 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
                     stmp.str(andt1.substr(0x01));
                     GET_SHORT(stmp, x1)
                     GET_SHORT(stmp, x2)
-                    stmp.seekg(4, ios_base::cur);
+                    stmp.seekg(4, std::ios_base::cur);
                     GET_SHORT(stmp, y1)
                     GET_SHORT(stmp, y2)
                 } else if (type == 4) { // curved line/arrow has 4 points
                     stmp.str(andt1.substr(0x01));
                     GET_SHORT(stmp, x1)
-                    stmp.seekg(4, ios_base::cur);
+                    stmp.seekg(4, std::ios_base::cur);
                     GET_SHORT(stmp, x2)
                     GET_SHORT(stmp, y1)
-                    stmp.seekg(4, ios_base::cur);
+                    stmp.seekg(4, std::ios_base::cur);
                     GET_SHORT(stmp, y2)
                 }
 
@@ -1869,37 +1870,37 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
         }
 
         if (sec_name == "XB") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.xAxis.position = GraphAxis::Bottom;
             glayer.xAxis.formatAxis[0].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
         } else if (sec_name == "XT") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.xAxis.position = GraphAxis::Top;
             glayer.xAxis.formatAxis[1].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
         } else if (sec_name == "YL") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.yAxis.position = GraphAxis::Left;
             glayer.yAxis.formatAxis[0].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
         } else if (sec_name == "YR") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.yAxis.position = GraphAxis::Right;
             glayer.yAxis.formatAxis[1].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
         } else if (sec_name == "ZF") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.zAxis.position = GraphAxis::Front;
             glayer.zAxis.formatAxis[0].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
         } else if (sec_name == "ZB") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.zAxis.position = GraphAxis::Back;
             glayer.zAxis.formatAxis[1].label =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
@@ -1928,7 +1929,7 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
 
             glayer.orthographic3D = (andt2[0x240] != 0);
         } else if (sec_name == "Legend") {
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             glayer.legend =
                     TextBox(text, r, color, fontSize, rotation / 10, tab,
                             (BorderType)(border >= 0x80 ? border - 0x80 : None), (Attach)attach);
@@ -2007,8 +2008,8 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
             glayer.colorScale.labelsColor = getColor(andt2.substr(0x5C, 4));
         } else if (sec_name == "&0") {
             glayer.isWaterfall = true;
-            string text = andt1.c_str();
-            string::size_type commaPos = text.find_first_of(",");
+            std::string text = andt1.c_str();
+            std::string::size_type commaPos = text.find_first_of(",");
             stmp.str(text.substr(0, commaPos));
             stmp >> glayer.xOffset;
             stmp.str(text.substr(commaPos + 1));
@@ -2024,7 +2025,7 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
            Line/Arrow, 0x23 for Polygon/Polyline)
         */
         else if ((ankind == 0x0) && (sec_name != "DelData")) { // text
-            string text = andt2.c_str();
+            std::string text = andt2.c_str();
             if (sec_name.substr(0, 3) == "PIE")
                 glayer.pieTexts.push_back(TextBox(
                         text, r, color, fontSize, rotation / 10, tab,
@@ -2086,7 +2087,7 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
             } else if (type == 6) {
                 // TODO check if 0x5E is right (obtained from anhdsz-0x46+93-andt1sz = 111-70+93-40
                 // = 94)
-                string gname = andt2.substr(0x5E).c_str();
+                std::string gname = andt2.substr(0x5E).c_str();
                 glayer.bitmaps.push_back(Bitmap(gname));
                 Bitmap &bitmap(glayer.bitmaps.back());
                 bitmap.clientRect = r;
@@ -2099,17 +2100,17 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
     return;
 }
 
-void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehdsz,
-                                         const string &cvedt, unsigned int cvedtsz)
+void OriginAnyParser::getCurveProperties(const std::string &cvehd, unsigned int cvehdsz,
+                                         const std::string &cvedt, unsigned int cvedtsz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
 
     if (ispread != -1) { // spreadsheet: curves are columns
 
         // TODO: check that spreadsheet columns are stored in proper order
         // vector<SpreadColumn> header;
         unsigned char c = cvehd[0x11];
-        string name = cvehd.substr(0x12).c_str();
+        std::string name = cvehd.substr(0x12).c_str();
         unsigned short width = 0;
         if (cvehdsz > 0x4B) {
             stmp.str(cvehd.substr(0x4A));
@@ -2228,7 +2229,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
     } else if (iexcel != -1) {
 
         unsigned char c = cvehd[0x11];
-        string name = cvehd.substr(0x12).c_str();
+        std::string name = cvehd.substr(0x12).c_str();
         unsigned short width = 0;
         stmp.str(cvehd.substr(0x4A));
         GET_SHORT(stmp, width)
@@ -2237,7 +2238,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
         GET_SHORT(stmp, dataID)
 
         unsigned int isheet = datasets[dataID - 1].sheet;
-        vector<Origin::SpreadColumn>::difference_type col_index =
+        std::vector<Origin::SpreadColumn>::difference_type col_index =
                 findExcelColumnByName(iexcel, isheet, name);
         if (col_index != -1) {
             SpreadColumn::ColumnType type;
@@ -2339,7 +2340,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
         unsigned short w;
         stmp.str(cvehd.substr(0x04));
         GET_SHORT(stmp, w)
-        pair<string, string> column = findDataByIndex(w - 1);
+        std::pair<std::string, std::string> column = findDataByIndex(w - 1);
         short nColY = w;
         if (column.first.size() > 0) {
             curve.dataName = column.first;
@@ -2354,7 +2355,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
         GET_SHORT(stmp, w)
         column = findDataByIndex(w - 1);
         if (column.first.size() > 0) {
-            curve.xDataName = (curve.dataName != column.first) ? column.first : string();
+            curve.xDataName = (curve.dataName != column.first) ? column.first : std::string();
             if (glayer.is3D() || (curve.type == GraphCurve::XYZContour)) {
                 curve.yColumnName = column.second;
             } else if (glayer.isXYY3D) {
@@ -2662,9 +2663,9 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
     }
 }
 
-void OriginAnyParser::getAxisBreakProperties(const string &abdata, unsigned int abdatasz)
+void OriginAnyParser::getAxisBreakProperties(const std::string &abdata, unsigned int abdatasz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     (void)abdatasz;
 
     if (ispread != -1) { // spreadsheet
@@ -2705,10 +2706,10 @@ void OriginAnyParser::getAxisBreakProperties(const string &abdata, unsigned int 
     }
 }
 
-void OriginAnyParser::getAxisParameterProperties(const string &apdata, unsigned int apdatasz,
+void OriginAnyParser::getAxisParameterProperties(const std::string &apdata, unsigned int apdatasz,
                                                  int naxis)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     static int iaxispar = 0;
 
     if (igraph != -1) {
@@ -2756,7 +2757,7 @@ void OriginAnyParser::getAxisParameterProperties(const string &apdata, unsigned 
             h = apdata[0x25];
             unsigned char h1 = apdata[0x26];
             axis.tickAxis[0].valueType = (ValueType)(h & 0x0F);
-            pair<string, string> column;
+            std::pair<std::string, std::string> column;
             switch (axis.tickAxis[0].valueType) {
             case Numeric:
                 /*switch ((h>>4)) {
@@ -2845,7 +2846,7 @@ void OriginAnyParser::getAxisParameterProperties(const string &apdata, unsigned 
             h = apdata[0x25];
             unsigned char h1 = apdata[0x26];
             axis.tickAxis[1].valueType = (ValueType)(h & 0x0F);
-            pair<string, string> column;
+            std::pair<std::string, std::string> column;
             switch (axis.tickAxis[1].valueType) {
             case Numeric:
                 /*switch ((h>>4)) {
@@ -2933,12 +2934,12 @@ void OriginAnyParser::getAxisParameterProperties(const string &apdata, unsigned 
     }
 }
 
-void OriginAnyParser::getNoteProperties(const string &nwehd, unsigned int nwehdsz,
-                                        const string &nwelb, unsigned int nwelbsz,
-                                        const string &nwect, unsigned int nwectsz)
+void OriginAnyParser::getNoteProperties(const std::string &nwehd, unsigned int nwehdsz,
+                                        const std::string &nwelb, unsigned int nwelbsz,
+                                        const std::string &nwect, unsigned int nwectsz)
 {
     LOG_PRINT(logfile, "OriginAnyParser::getNoteProperties()");
-    istringstream stmp;
+    std::istringstream stmp;
     (void)nwehdsz;
     (void)nwelbsz;
     (void)nwectsz;
@@ -2956,7 +2957,7 @@ void OriginAnyParser::getNoteProperties(const string &nwehd, unsigned int nwehds
     GET_INT(stmp, coord)
     rect.bottom = static_cast<short>(coord);
 
-    string name = nwelb.c_str();
+    std::string name = nwelb.c_str();
 
     // ResultsLog note window has left, top, right, bottom all zero.
     // All other parameters are also zero, except "name" and "text".
@@ -3016,9 +3017,10 @@ void OriginAnyParser::getNoteProperties(const string &nwehd, unsigned int nwehds
     }
 }
 
-void OriginAnyParser::getColorMap(ColorMap &cmap, const string &cmapdata, unsigned int cmapdatasz)
+void OriginAnyParser::getColorMap(ColorMap &cmap, const std::string &cmapdata,
+                                  unsigned int cmapdatasz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     unsigned int cmoffset = 0;
     // color maps for matrix annotations have a different offset than graph curve's colormaps
     if (imatrix != -1) {
@@ -3074,14 +3076,14 @@ void OriginAnyParser::getColorMap(ColorMap &cmap, const string &cmapdata, unsign
         stmp.str(cmapdata.substr(lvl_offset + 0x30));
         GET_DOUBLE(stmp, value)
 
-        cmap.levels.push_back(make_pair(value, level));
+        cmap.levels.push_back(std::make_pair(value, level));
     }
 }
 
-void OriginAnyParser::getZcolorsMap(ColorMap &colorMap, const string &cmapdata,
+void OriginAnyParser::getZcolorsMap(ColorMap &colorMap, const std::string &cmapdata,
                                     unsigned int cmapdatasz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     (void)cmapdatasz;
 
     Color lowColor; // color below
@@ -3133,7 +3135,7 @@ void OriginAnyParser::getZcolorsMap(ColorMap &colorMap, const string &cmapdata,
 
     ColorMapLevel level;
     level.fillColor = lowColor;
-    colorMap.levels.push_back(make_pair(zmin, level));
+    colorMap.levels.push_back(std::make_pair(zmin, level));
 
     for (int i = 0; i < (colorMapSize + 1); ++i) {
         Color color;
@@ -3147,18 +3149,18 @@ void OriginAnyParser::getZcolorsMap(ColorMap &colorMap, const string &cmapdata,
         GET_SHORT(stmp, val)
 
         level.fillColor = color;
-        colorMap.levels.push_back(make_pair(val, level));
+        colorMap.levels.push_back(std::make_pair(val, level));
     }
 
     level.fillColor = highColor;
-    colorMap.levels.push_back(make_pair(zmax, level));
+    colorMap.levels.push_back(std::make_pair(zmax, level));
 }
 
 void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator current_folder,
-                                               const string &ptldt, unsigned int ptldtsz)
+                                               const std::string &ptldt, unsigned int ptldtsz)
 {
     LOG_PRINT(logfile, "OriginAnyParser::getProjectLeafProperties()\n");
-    istringstream stmp;
+    std::istringstream stmp;
     (void)ptldtsz;
 
     stmp.str(ptldt);
@@ -3175,7 +3177,7 @@ void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator curre
         }
     } else { // other windows
         tree<Origin::ProjectNode>::iterator childnode;
-        pair<ProjectNode::NodeType, Origin::Window> object =
+        std::pair<ProjectNode::NodeType, Origin::Window> object =
                 findWindowObjectByIndex(file_object_id);
         childnode = projectTree.append_child(current_folder,
                                              ProjectNode(object.second.name, object.first));
@@ -3185,9 +3187,9 @@ void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator curre
 }
 
 void OriginAnyParser::getProjectFolderProperties(tree<ProjectNode>::iterator current_folder,
-                                                 const string &flehd, unsigned int flehdsz)
+                                                 const std::string &flehd, unsigned int flehdsz)
 {
-    istringstream stmp;
+    std::istringstream stmp;
     (void)flehdsz;
 
     unsigned char a = flehd[0x02];
@@ -3207,13 +3209,14 @@ void OriginAnyParser::outputProjectTree(std::ostream &out)
     size_t windowsCount =
             spreadSheets.size() + matrixes.size() + excels.size() + graphs.size() + notes.size();
 
-    out << "Project has " << windowsCount << " windows." << endl;
-    out << "Origin project Tree" << endl;
+    out << "Project has " << windowsCount << " windows." << std::endl;
+    out << "Origin project Tree" << std::endl;
 
     char cdsz[21];
     for (tree<ProjectNode>::iterator it = projectTree.begin(projectTree.begin());
          it != projectTree.end(projectTree.begin()); ++it) {
         strftime(cdsz, sizeof(cdsz), "%F %T", gmtime(&(*it).creationDate));
-        out << string(projectTree.depth(it) - 1, ' ') << (*it).name.c_str() << "\t" << cdsz << endl;
+        out << std::string(projectTree.depth(it) - 1, ' ') << (*it).name.c_str() << "\t" << cdsz
+            << std::endl;
     }
 }

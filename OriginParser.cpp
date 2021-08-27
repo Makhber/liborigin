@@ -30,10 +30,10 @@
 #include <cctype>
 #include <locale>
 
-using namespace std;
 using namespace Origin;
 
-bool OriginParser::iequals(const string &s1, const string &s2, const std::locale &loc) const
+bool OriginParser::iequals(const std::string &s1, const std::string &s2,
+                           const std::locale &loc) const
 {
     bool equal = s1.size() == s2.size();
     for (unsigned int n = 0; n < s1.size() && equal; ++n) {
@@ -43,31 +43,32 @@ bool OriginParser::iequals(const string &s1, const string &s2, const std::locale
     return equal;
 }
 
-vector<Origin::SpreadSheet>::difference_type
-OriginParser::findSpreadByName(const string &name) const
+std::vector<Origin::SpreadSheet>::difference_type
+OriginParser::findSpreadByName(const std::string &name) const
 {
-    for (vector<SpreadSheet>::const_iterator it = spreadSheets.begin(); it != spreadSheets.end();
-         ++it) {
-        if (iequals(it->name, name, locale()))
+    for (std::vector<SpreadSheet>::const_iterator it = spreadSheets.begin();
+         it != spreadSheets.end(); ++it) {
+        if (iequals(it->name, name, std::locale()))
             return it - spreadSheets.begin();
     }
     return -1;
 }
 
-vector<Origin::Excel>::difference_type OriginParser::findExcelByName(const string &name) const
+std::vector<Origin::Excel>::difference_type
+OriginParser::findExcelByName(const std::string &name) const
 {
-    for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
-        if (iequals(it->name, name, locale()))
+    for (std::vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
+        if (iequals(it->name, name, std::locale()))
             return it - excels.begin();
     }
     return -1;
 }
 
-vector<Origin::SpreadColumn>::difference_type
-OriginParser::findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spread,
-                                     const string &name) const
+std::vector<Origin::SpreadColumn>::difference_type
+OriginParser::findSpreadColumnByName(std::vector<Origin::SpreadSheet>::size_type spread,
+                                     const std::string &name) const
 {
-    for (vector<SpreadColumn>::const_iterator it = spreadSheets[spread].columns.begin();
+    for (std::vector<SpreadColumn>::const_iterator it = spreadSheets[spread].columns.begin();
          it != spreadSheets[spread].columns.end(); ++it) {
         if (it->name == name)
             return it - spreadSheets[spread].columns.begin();
@@ -75,12 +76,12 @@ OriginParser::findSpreadColumnByName(vector<Origin::SpreadSheet>::size_type spre
     return -1;
 }
 
-vector<Origin::SpreadColumn>::difference_type
-OriginParser::findExcelColumnByName(vector<Origin::Excel>::size_type excel,
-                                    vector<Origin::SpreadSheet>::size_type sheet,
-                                    const string &name) const
+std::vector<Origin::SpreadColumn>::difference_type
+OriginParser::findExcelColumnByName(std::vector<Origin::Excel>::size_type excel,
+                                    std::vector<Origin::SpreadSheet>::size_type sheet,
+                                    const std::string &name) const
 {
-    for (vector<SpreadColumn>::const_iterator it = excels[excel].sheets[sheet].columns.begin();
+    for (std::vector<SpreadColumn>::const_iterator it = excels[excel].sheets[sheet].columns.begin();
          it != excels[excel].sheets[sheet].columns.end(); ++it) {
         if (it->name == name)
             return it - excels[excel].sheets[sheet].columns.begin();
@@ -88,51 +89,54 @@ OriginParser::findExcelColumnByName(vector<Origin::Excel>::size_type excel,
     return -1;
 }
 
-vector<Origin::Matrix>::difference_type OriginParser::findMatrixByName(const string &name) const
+std::vector<Origin::Matrix>::difference_type
+OriginParser::findMatrixByName(const std::string &name) const
 {
-    for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
-        if (iequals(it->name, name, locale()))
+    for (std::vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
+        if (iequals(it->name, name, std::locale()))
             return it - matrixes.begin();
     }
     return -1;
 }
 
-vector<Origin::Function>::difference_type OriginParser::findFunctionByName(const string &name) const
+std::vector<Origin::Function>::difference_type
+OriginParser::findFunctionByName(const std::string &name) const
 {
-    for (vector<Function>::const_iterator it = functions.begin(); it != functions.end(); ++it) {
-        if (iequals(it->name, name, locale()))
+    for (std::vector<Function>::const_iterator it = functions.begin(); it != functions.end();
+         ++it) {
+        if (iequals(it->name, name, std::locale()))
             return it - functions.begin();
     }
     return -1;
 }
 
-pair<string, string> OriginParser::findDataByIndex(unsigned int index) const
+std::pair<std::string, std::string> OriginParser::findDataByIndex(unsigned int index) const
 {
-    for (vector<SpreadSheet>::const_iterator it = spreadSheets.begin(); it != spreadSheets.end();
-         ++it) {
-        for (vector<SpreadColumn>::const_iterator it1 = it->columns.begin();
+    for (std::vector<SpreadSheet>::const_iterator it = spreadSheets.begin();
+         it != spreadSheets.end(); ++it) {
+        for (std::vector<SpreadColumn>::const_iterator it1 = it->columns.begin();
              it1 != it->columns.end(); ++it1) {
             if (it1->index == index)
                 return make_pair("T_" + it->name, it1->name);
         }
     }
 
-    for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
-        for (vector<MatrixSheet>::const_iterator it1 = it->sheets.begin(); it1 != it->sheets.end();
-             ++it1) {
+    for (std::vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
+        for (std::vector<MatrixSheet>::const_iterator it1 = it->sheets.begin();
+             it1 != it->sheets.end(); ++it1) {
             if (it1->index == index)
                 return make_pair("M_" + it->name, it1->name);
         }
     }
 
-    for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
-        for (vector<SpreadSheet>::const_iterator it1 = it->sheets.begin(); it1 != it->sheets.end();
-             ++it1) {
-            for (vector<SpreadColumn>::const_iterator it2 = it1->columns.begin();
+    for (std::vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
+        for (std::vector<SpreadSheet>::const_iterator it1 = it->sheets.begin();
+             it1 != it->sheets.end(); ++it1) {
+            for (std::vector<SpreadColumn>::const_iterator it2 = it1->columns.begin();
                  it2 != it1->columns.end(); ++it2) {
                 if (it2->index == index) {
                     int sheetno = (int)(it1 - it->sheets.begin()) + 1;
-                    string sheetsuffix = string("@") + std::to_string(sheetno);
+                    std::string sheetsuffix = std::string("@") + std::to_string(sheetno);
                     if (sheetno > 1)
                         return make_pair("E_" + it->name + sheetsuffix, it2->name);
                     else
@@ -142,33 +146,35 @@ pair<string, string> OriginParser::findDataByIndex(unsigned int index) const
         }
     }
 
-    for (vector<Function>::const_iterator it = functions.begin(); it != functions.end(); ++it) {
+    for (std::vector<Function>::const_iterator it = functions.begin(); it != functions.end();
+         ++it) {
         if (it->index == index)
             return make_pair("F_" + it->name, it->name);
     }
 
-    return pair<string, string>();
+    return std::pair<std::string, std::string>();
 }
 
-pair<ProjectNode::NodeType, string> OriginParser::findObjectByIndex(unsigned int index) const
+std::pair<ProjectNode::NodeType, std::string>
+OriginParser::findObjectByIndex(unsigned int index) const
 {
-    for (vector<SpreadSheet>::const_iterator it = spreadSheets.begin(); it != spreadSheets.end();
-         ++it) {
+    for (std::vector<SpreadSheet>::const_iterator it = spreadSheets.begin();
+         it != spreadSheets.end(); ++it) {
         if (it->objectID == (int)index)
             return make_pair(ProjectNode::SpreadSheet, it->name);
     }
 
-    for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
+    for (std::vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
         if (it->objectID == (int)index)
             return make_pair(ProjectNode::Matrix, it->name);
     }
 
-    for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
+    for (std::vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
         if (it->objectID == (int)index)
             return make_pair(ProjectNode::Excel, it->name);
     }
 
-    for (vector<Graph>::const_iterator it = graphs.begin(); it != graphs.end(); ++it) {
+    for (std::vector<Graph>::const_iterator it = graphs.begin(); it != graphs.end(); ++it) {
         if (it->objectID == (int)index) {
             if (it->is3D)
                 return make_pair(ProjectNode::Graph3D, it->name);
@@ -177,48 +183,48 @@ pair<ProjectNode::NodeType, string> OriginParser::findObjectByIndex(unsigned int
         }
     }
 
-    return pair<ProjectNode::NodeType, string>();
+    return std::pair<ProjectNode::NodeType, std::string>();
 }
 
-pair<ProjectNode::NodeType, Origin::Window>
+std::pair<ProjectNode::NodeType, Origin::Window>
 OriginParser::findWindowObjectByIndex(unsigned int index) const
 {
-    for (vector<SpreadSheet>::const_iterator it = spreadSheets.begin(); it != spreadSheets.end();
-         ++it) {
+    for (std::vector<SpreadSheet>::const_iterator it = spreadSheets.begin();
+         it != spreadSheets.end(); ++it) {
         if (it->objectID == (int)index)
-            return make_pair(ProjectNode::SpreadSheet, (Origin::Window)(*it));
+            return std::make_pair(ProjectNode::SpreadSheet, (Origin::Window)(*it));
     }
 
-    for (vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
+    for (std::vector<Matrix>::const_iterator it = matrixes.begin(); it != matrixes.end(); ++it) {
         if (it->objectID == (int)index)
-            return make_pair(ProjectNode::Matrix, (Origin::Window)(*it));
+            return std::make_pair(ProjectNode::Matrix, (Origin::Window)(*it));
     }
 
-    for (vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
+    for (std::vector<Excel>::const_iterator it = excels.begin(); it != excels.end(); ++it) {
         if (it->objectID == (int)index)
-            return make_pair(ProjectNode::Excel, (Origin::Window)(*it));
+            return std::make_pair(ProjectNode::Excel, (Origin::Window)(*it));
     }
 
-    for (vector<Graph>::const_iterator it = graphs.begin(); it != graphs.end(); ++it) {
+    for (std::vector<Graph>::const_iterator it = graphs.begin(); it != graphs.end(); ++it) {
         if (it->objectID == (int)index) {
             if (it->is3D)
-                return make_pair(ProjectNode::Graph3D, (Origin::Window)(*it));
+                return std::make_pair(ProjectNode::Graph3D, (Origin::Window)(*it));
             else
-                return make_pair(ProjectNode::Graph, (Origin::Window)(*it));
+                return std::make_pair(ProjectNode::Graph, (Origin::Window)(*it));
         }
     }
 
-    return pair<ProjectNode::NodeType, Origin::Window>();
+    return std::pair<ProjectNode::NodeType, Origin::Window>();
 }
 
-void OriginParser::convertSpreadToExcel(vector<Origin::SpreadSheet>::size_type spread)
+void OriginParser::convertSpreadToExcel(std::vector<Origin::SpreadSheet>::size_type spread)
 {
     // add new Excel sheet
     excels.push_back(Excel(spreadSheets[spread].name, spreadSheets[spread].label,
                            spreadSheets[spread].maxRows, spreadSheets[spread].hidden,
                            spreadSheets[spread].loose));
 
-    for (vector<SpreadColumn>::iterator it = spreadSheets[spread].columns.begin();
+    for (std::vector<SpreadColumn>::iterator it = spreadSheets[spread].columns.begin();
          it != spreadSheets[spread].columns.end(); ++it) {
         unsigned int index = 0;
         int pos = (int)(it->name.find_last_of("@"));
@@ -236,11 +242,11 @@ void OriginParser::convertSpreadToExcel(vector<Origin::SpreadSheet>::size_type s
     spreadSheets.erase(spreadSheets.begin() + spread);
 }
 
-int OriginParser::findColumnByName(int spread, const string &name)
+int OriginParser::findColumnByName(int spread, const std::string &name)
 {
     size_t columns = spreadSheets[spread].columns.size();
     for (unsigned int i = 0; i < columns; i++) {
-        string colName = spreadSheets[spread].columns[i].name;
+        std::string colName = spreadSheets[spread].columns[i].name;
         if (colName.size() >= 11)
             colName.resize(11);
 

@@ -33,11 +33,9 @@
 #include <fstream>
 #include <string>
 
-using namespace std;
-
-OriginFile::OriginFile(const string &fileName) : fileVersion(0), buildVersion(0), ioError(0)
+OriginFile::OriginFile(const std::string &fileName) : fileVersion(0), buildVersion(0), ioError(0)
 {
-    ifstream file(fileName.c_str(), ios_base::binary);
+    std::ifstream file(fileName.c_str(), std::ios_base::binary);
 
     if (!file.is_open()) {
         ioError = errno;
@@ -53,7 +51,7 @@ OriginFile::OriginFile(const string &fileName) : fileVersion(0), buildVersion(0)
     }
 #endif // GENERATE_CODE_FOR_LOG
 
-    string vers;
+    std::string vers;
     getline(file, vers);
     long majorVersion = strtol(vers.substr(5, 1).c_str(), nullptr, 10);
     // char locale_decpoint = vers[6];
@@ -196,87 +194,88 @@ const tree<Origin::ProjectNode> *OriginFile::project() const
     return &parser->projectTree;
 }
 
-vector<Origin::SpreadColumn>::size_type OriginFile::datasetCount() const
+std::vector<Origin::SpreadColumn>::size_type OriginFile::datasetCount() const
 {
     return parser->datasets.size();
 }
 
-Origin::SpreadColumn &OriginFile::dataset(vector<Origin::SpreadColumn>::size_type ds) const
+Origin::SpreadColumn &OriginFile::dataset(std::vector<Origin::SpreadColumn>::size_type ds) const
 {
     return parser->datasets[ds];
 }
 
-vector<Origin::SpreadSheet>::size_type OriginFile::spreadCount() const
+std::vector<Origin::SpreadSheet>::size_type OriginFile::spreadCount() const
 {
     return parser->spreadSheets.size();
 }
 
-Origin::SpreadSheet &OriginFile::spread(vector<Origin::SpreadSheet>::size_type s) const
+Origin::SpreadSheet &OriginFile::spread(std::vector<Origin::SpreadSheet>::size_type s) const
 {
     return parser->spreadSheets[s];
 }
 
-vector<Origin::Matrix>::size_type OriginFile::matrixCount() const
+std::vector<Origin::Matrix>::size_type OriginFile::matrixCount() const
 {
     return parser->matrixes.size();
 }
 
-Origin::Matrix &OriginFile::matrix(vector<Origin::Matrix>::size_type m) const
+Origin::Matrix &OriginFile::matrix(std::vector<Origin::Matrix>::size_type m) const
 {
     return parser->matrixes[m];
 }
 
-vector<Origin::Function>::size_type OriginFile::functionCount() const
+std::vector<Origin::Function>::size_type OriginFile::functionCount() const
 {
     return parser->functions.size();
 }
 
-vector<Origin::Function>::difference_type OriginFile::functionIndex(const string &name) const
+std::vector<Origin::Function>::difference_type
+OriginFile::functionIndex(const std::string &name) const
 {
     return parser->findFunctionByName(name);
 }
 
-Origin::Function &OriginFile::function(vector<Origin::Function>::size_type f) const
+Origin::Function &OriginFile::function(std::vector<Origin::Function>::size_type f) const
 {
     return parser->functions[f];
 }
 
-vector<Origin::Graph>::size_type OriginFile::graphCount() const
+std::vector<Origin::Graph>::size_type OriginFile::graphCount() const
 {
     return parser->graphs.size();
 }
 
-Origin::Graph &OriginFile::graph(vector<Origin::Graph>::size_type g) const
+Origin::Graph &OriginFile::graph(std::vector<Origin::Graph>::size_type g) const
 {
     return parser->graphs[g];
 }
 
-vector<Origin::Note>::size_type OriginFile::noteCount() const
+std::vector<Origin::Note>::size_type OriginFile::noteCount() const
 {
     return parser->notes.size();
 }
 
-Origin::Note &OriginFile::note(vector<Origin::Note>::size_type n) const
+Origin::Note &OriginFile::note(std::vector<Origin::Note>::size_type n) const
 {
     return parser->notes[n];
 }
 
-vector<Origin::Excel>::size_type OriginFile::excelCount() const
+std::vector<Origin::Excel>::size_type OriginFile::excelCount() const
 {
     return parser->excels.size();
 }
 
-Origin::Excel &OriginFile::excel(vector<Origin::Excel>::size_type e) const
+Origin::Excel &OriginFile::excel(std::vector<Origin::Excel>::size_type e) const
 {
     return parser->excels[e];
 }
 
-string OriginFile::resultsLogString() const
+std::string OriginFile::resultsLogString() const
 {
     return parser->resultsLog;
 }
 
-string liboriginVersionString()
+std::string liboriginVersionString()
 {
     return LIBORIGIN_VERSION_STRING;
 }

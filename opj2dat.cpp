@@ -33,72 +33,71 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        cout << "Usage : ./opj2dat [--check-only] <file.opj>" << endl;
+        std::cout << "Usage : ./opj2dat [--check-only] <file.opj>" << std::endl;
         return -1;
     }
 
-    cout << "opj2dat " << liboriginVersionString()
-         << ", Copyright (C) 2008 Stefan Gerlach, 2017 Miquel Garriga" << endl;
+    std::cout << "opj2dat " << liboriginVersionString()
+              << ", Copyright (C) 2008 Stefan Gerlach, 2017 Miquel Garriga" << std::endl;
 
-    if (string(argv[1]) == "-v")
+    if (std::string(argv[1]) == "-v")
         return 0;
 
     bool write_spreads = true;
-    if ((argc > 2) && (string(argv[1]) == "--check-only"))
+    if ((argc > 2) && (std::string(argv[1]) == "--check-only"))
         write_spreads = false;
 
-    string inputfile = argv[argc - 1];
+    std::string inputfile = argv[argc - 1];
     OriginFile opj(inputfile);
     int status = opj.parse();
-    cout << "Parsing status = " << status << endl;
+    std::cout << "Parsing status = " << status << std::endl;
     if (!status)
         return -1;
-    cout << "OPJ PROJECT \"" << inputfile.c_str() << "\" VERSION = " << opj.version() << endl;
+    std::cout << "OPJ PROJECT \"" << inputfile.c_str() << "\" VERSION = " << opj.version()
+              << std::endl;
 
-    cout << "number of datasets     = " << opj.datasetCount() << endl;
-    cout << "number of spreadsheets = " << opj.spreadCount() << endl;
-    cout << "number of matrixes     = " << opj.matrixCount() << endl;
-    cout << "number of excels       = " << opj.excelCount() << endl;
-    cout << "number of functions    = " << opj.functionCount() << endl;
-    cout << "number of graphs       = " << opj.graphCount() << endl;
-    cout << "number of notes        = " << opj.noteCount() << endl;
+    std::cout << "number of datasets     = " << opj.datasetCount() << std::endl;
+    std::cout << "number of spreadsheets = " << opj.spreadCount() << std::endl;
+    std::cout << "number of matrixes     = " << opj.matrixCount() << std::endl;
+    std::cout << "number of excels       = " << opj.excelCount() << std::endl;
+    std::cout << "number of functions    = " << opj.functionCount() << std::endl;
+    std::cout << "number of graphs       = " << opj.graphCount() << std::endl;
+    std::cout << "number of notes        = " << opj.noteCount() << std::endl;
 
     for (unsigned int s = 0; s < opj.spreadCount(); s++) {
         Origin::SpreadSheet spread = opj.spread(s);
         size_t columnCount = spread.columns.size();
-        cout << "Spreadsheet " << (s + 1) << endl;
-        cout << " Name: " << spread.name.c_str() << endl;
-        cout << " Label: " << spread.label.c_str() << endl;
-        cout << "	Columns: " << columnCount << endl;
+        std::cout << "Spreadsheet " << (s + 1) << std::endl;
+        std::cout << " Name: " << spread.name.c_str() << std::endl;
+        std::cout << " Label: " << spread.label.c_str() << std::endl;
+        std::cout << "	Columns: " << columnCount << std::endl;
         for (size_t j = 0; j < columnCount; j++) {
             Origin::SpreadColumn column = spread.columns[j];
-            cout << "	Column " << (j + 1) << " : " << column.name.c_str()
-                 << " / type : " << column.type << ", rows : " << spread.maxRows << endl;
+            std::cout << "	Column " << (j + 1) << " : " << column.name.c_str()
+                      << " / type : " << column.type << ", rows : " << spread.maxRows << std::endl;
         }
 
         if (write_spreads) {
-            ostringstream sfilename;
+            std::ostringstream sfilename;
             sfilename << inputfile.c_str() << "." << (s + 1) << ".dat";
-            cout << "saved to " << sfilename.str() << endl;
+            std::cout << "saved to " << sfilename.str() << std::endl;
 
-            ofstream outf;
-            outf.open(sfilename.str().c_str(), ios_base::out);
+            std::ofstream outf;
+            outf.open(sfilename.str().c_str(), std::ios_base::out);
             if (!outf.good()) {
-                cout << "Could not open " << sfilename.str() << endl;
+                std::cout << "Could not open " << sfilename.str() << std::endl;
                 return -1;
             }
             // header
             for (size_t j = 0; j < columnCount; j++) {
                 outf << spread.columns[j].name.c_str() << "; ";
-                cout << spread.columns[j].name.c_str();
+                std::cout << spread.columns[j].name.c_str();
             }
-            outf << endl;
-            cout << endl << " Data: " << endl;
+            outf << std::endl;
+            std::cout << std::endl << " Data: " << std::endl;
             // data
             for (int i = 0; i < (int)spread.maxRows; i++) {
                 for (size_t j = 0; j < columnCount; j++) {
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
                         outf << "; ";
                     }
                 }
-                outf << endl;
+                outf << std::endl;
             }
             outf.close();
         }
