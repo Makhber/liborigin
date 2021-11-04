@@ -402,6 +402,7 @@ bool OriginAnyParser::readLayerElement() {
 	string lye_header = readObjectAsString(lye_header_size);
 
 	// get known info
+	LOG_PRINT(logfile, "   Reading Layer properties ...\n")
 	getLayerProperties(lye_header, lye_header_size);
 
 	// go to end of layer header
@@ -1563,6 +1564,18 @@ void OriginAnyParser::getAnnotationProperties(const string& anhd, unsigned int a
 		if (sec_name == "OR") glayer.yAxis.formatAxis[1].factor = andt1.c_str();
 		if (sec_name == "OB") glayer.xAxis.formatAxis[0].factor = andt1.c_str();
 		if (sec_name == "OT") glayer.xAxis.formatAxis[1].factor = andt1.c_str();
+		if (sec_name == "X1T") {
+			glayer.xAxis.anchor = stod(andt1);
+			LOG_PRINT(logfile, "     x axis anchor = %g\n", glayer.xAxis.anchor)
+		}
+		if (sec_name == "Y1T") {
+			glayer.yAxis.anchor = stod(andt1);
+			LOG_PRINT(logfile, "     y axis anchor = %g\n", glayer.yAxis.anchor)
+		}
+		if (sec_name == "Z1T") {
+			glayer.zAxis.anchor = stod(andt1);
+			LOG_PRINT(logfile, "     z axis anchor = %g\n", glayer.zAxis.anchor)
+		}
 
 		unsigned char type = andt1[0x00];
 		LineVertex begin, end;
@@ -1674,7 +1687,6 @@ void OriginAnyParser::getAnnotationProperties(const string& anhd, unsigned int a
 		double width = (double)w1/500.0;
 
 		Figure figure;
-		LOG_PRINT(logfile, " andt1 = %s (size = %" PRId64 ")\n", andt1.c_str(), andt1.size())
 		if (andt1.size() > 4) {
 			stmp.str(andt1.substr(0x05));
 			GET_SHORT(stmp, w1)
