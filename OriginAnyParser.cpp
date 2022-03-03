@@ -1477,9 +1477,8 @@ Origin::Color OriginAnyParser::getColor(const string& strbincolor) {
 				result.type = Origin::Color::None;
 			else if(sbincolor[0] == 0xF7)
 				result.type = Origin::Color::Automatic;
-			else {
+			else
 				result.regular = sbincolor[0];
-			}
 			break;
 		default:
 			result.regular = sbincolor[0];
