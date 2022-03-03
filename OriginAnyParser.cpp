@@ -1439,7 +1439,7 @@ void OriginAnyParser::getLayerProperties(const string& lye_header, unsigned int 
 
 Origin::Color OriginAnyParser::getColor(const string& strbincolor) {
 	/* decode a color value from a 4 byte binary string */
-	Origin::Color result;
+	Origin::Color result{Origin::Color::Regular, {Origin::Color::Black}};
 	unsigned char sbincolor[4];
 	for (int i=0; i < 4; i++) {
 		sbincolor[i] = strbincolor[i];
@@ -1447,7 +1447,6 @@ Origin::Color OriginAnyParser::getColor(const string& strbincolor) {
 	switch(sbincolor[3]) {
 		case 0:
 			if(sbincolor[0] < 0x64) {
-				result.type = Origin::Color::Regular;
 				result.regular = sbincolor[0];
 			} else {
 				switch(sbincolor[2]) {
@@ -1479,12 +1478,10 @@ Origin::Color OriginAnyParser::getColor(const string& strbincolor) {
 			else if(sbincolor[0] == 0xF7)
 				result.type = Origin::Color::Automatic;
 			else {
-				result.type = Origin::Color::Regular;
 				result.regular = sbincolor[0];
 			}
 			break;
 		default:
-			result.type = Origin::Color::Regular;
 			result.regular = sbincolor[0];
 			break;
 	}
