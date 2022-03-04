@@ -2939,7 +2939,7 @@ void OriginAnyParser::getZcolorsMap(ColorMap& colorMap, const string& cmapdata, 
 		GET_SHORT(stmp, val)
 	}
 
-	ColorMapLevel level;
+	ColorMapLevel level = {lowColor, 0, lowColor, 1., true, lowColor, 0, 1., true};
 	level.fillColor = lowColor;
 	colorMap.levels.push_back(make_pair(zmin, level));
 
