@@ -3,8 +3,8 @@
    $Id: tree.hh,v 1.147 2007/10/19 11:24:24 peekas Exp $
 
    STL-like templated tree class.
-   Copyright (C) 2001-2006  Kasper Peeters <kasper.peeters@aei.mpg.de>.
-
+   SPDX-FileCopyrightText: 2001-2006  Kasper Peeters <kasper.peeters@aei.mpg.de>.
+   SPDX-License-Identifier: GPL-2.0-only or GPL-3.0-only
 */
 
 /** \mainpage tree.hh
