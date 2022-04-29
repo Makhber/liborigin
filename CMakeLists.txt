@@ -13,6 +13,10 @@ set( CMAKE_CXX_EXTENSIONS OFF )
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_STATIC_LIBS "Build static library" ON)
 
+if( BUILD_SHARED_LIBS AND MSVC )
+  set( BUILD_STATIC_LIBS OFF CACHE BOOL "Build static library" FORCE )
+endif()
+
 if( MSVC )
     # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
@@ -65,8 +69,6 @@ include(GNUInstallDirs)
 if (BUILD_STATIC_LIBS)
     add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
     set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
-
-
     install( TARGETS origin_static
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -75,6 +77,12 @@ endif ()
 
 # Shared library
 if (BUILD_SHARED_LIBS)
+    if (WIN32)
+      target_compile_definitions( origin
+        PUBLIC ORIGIN_DLL
+        PRIVATE ORIGIN_DLL_EXPORT
+      )
+    endif()
     add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
     set_target_properties(origin_shared PROPERTIES
         OUTPUT_NAME "origin"
