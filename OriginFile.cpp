@@ -10,8 +10,11 @@
 
 #include "config.h"
 #include "OriginFile.h"
+
 #include <fstream>
 #include <string>
+
+using namespace std;
 
 OriginFile::OriginFile(const string &fileName) : fileVersion(0), buildVersion(0), ioError(0)
 {
