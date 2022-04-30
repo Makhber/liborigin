@@ -1,0 +1,62 @@
+name: CI Tests
+
+on: [pull_request,push]
+
+jobs:
+  Ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configuring
+        run: |
+          cmake -Bbuild
+
+      - name: Building
+        run: |
+          make -j$(nproc) -C build
+
+  MSVC:
+    name: MSVC SHARED=${{ matrix.shared }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [ON, OFF]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configuring
+        run: |
+          cmake `
+            -Bbuild `
+            -DBUILD_SHARED_LIBS=${{ matrix.shared }}
+
+      - name: Building
+        run: |
+          cmake --build build --config Debug -- -maxCpuCount
+
+  macos:
+    name: macos
+    runs-on: macos-${{ matrix.macos_ver }}
+    strategy:
+      fail-fast: false
+      matrix:
+        macos_ver: [13, 14]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configuring
+        run: |
+          cmake -Bbuild
+
+      - name: Building
+        run: |
+          make -j$(sysctl -n hw.logicalcpu) -C build
