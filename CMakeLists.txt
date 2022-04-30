@@ -10,6 +10,9 @@ set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
+# allow for installation of individual targets
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_STATIC_LIBS "Build static library" ON)
 
