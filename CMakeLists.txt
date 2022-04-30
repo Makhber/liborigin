@@ -14,7 +14,7 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_STATIC_LIBS "Build static library" ON)
 
 if( BUILD_SHARED_LIBS AND MSVC )
-  set( BUILD_STATIC_LIBS OFF CACHE BOOL "Build static library" FORCE )
+    set( BUILD_STATIC_LIBS OFF CACHE BOOL "Build static library" FORCE )
 endif()
 
 if( MSVC )
@@ -78,10 +78,10 @@ endif ()
 # Shared library
 if (BUILD_SHARED_LIBS)
     if (WIN32)
-      target_compile_definitions( origin
-        PUBLIC ORIGIN_DLL
-        PRIVATE ORIGIN_DLL_EXPORT
-      )
+        target_compile_definitions( origin
+            PUBLIC ORIGIN_DLL
+            PRIVATE ORIGIN_DLL_EXPORT
+        )
     endif()
     add_library( origin_shared SHARED $<TARGET_OBJECTS:origin>)
     set_target_properties(origin_shared PROPERTIES
@@ -90,6 +90,7 @@ if (BUILD_SHARED_LIBS)
         SOVERSION ${PROJECT_VERSION_MAJOR}
     )
     install( TARGETS origin_shared
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 endif ()
