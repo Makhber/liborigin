@@ -16,6 +16,10 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_STATIC_LIBS "Build static library" ON)
 
+if( NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS )
+    message( FATAL_ERROR "You must enable building shared or static library" )
+endif()
+
 if( BUILD_SHARED_LIBS AND MSVC )
     set( BUILD_STATIC_LIBS OFF CACHE BOOL "Build static library" FORCE )
 endif()
