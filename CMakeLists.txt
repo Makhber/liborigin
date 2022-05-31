@@ -6,16 +6,14 @@ project( liborigin
     LANGUAGES CXX
 )
 
-set( CMAKE_CXX_STANDARD 20 )
-set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
-set( CMAKE_CXX_EXTENSIONS OFF )
+if( CMAKE_VERSION VERSION_LESS "3.21" AND "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
+    set(PROJECT_IS_TOP_LEVEL TRUE)
+endif()
 
-if( CMAKE_VERSION VERSION_LESS "3.21" )
-    if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
-        set(PROJECT_IS_TOP_LEVEL TRUE)
-    else()
-        set(PROJECT_IS_TOP_LEVEL FALSE)
-    endif()
+if( PROJECT_IS_TOP_LEVEL )
+  set( CMAKE_CXX_STANDARD 20 )
+  set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
+  set( CMAKE_CXX_EXTENSIONS OFF )
 endif()
 
 # allow for installation of individual targets
@@ -34,19 +32,21 @@ if( BUILD_SHARED_LIBS AND (MSVC OR NOT PROJECT_IS_TOP_LEVEL) )
     set( BUILD_STATIC_LIBS OFF CACHE BOOL "Build static library" FORCE )
 endif()
 
-if( MSVC )
-    # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
-    add_compile_definitions( _CRT_SECURE_NO_WARNINGS
-        _SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING )
-    if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
-        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-include-path" )
+if( PROJECT_IS_TOP_LEVEL )
+    if( MSVC )
+        # /wd4456 /wd4458 Silent "declaration of %1 hides %2 ..."
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /W4 /permissive- /wd4456 /wd4458" )
+        add_compile_definitions( _CRT_SECURE_NO_WARNINGS
+            _SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING )
+        if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+            set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonportable-include-path" )
+        else()
+            add_compile_options( "/MP" )
+        endif()
     else()
-        add_compile_options( "/MP" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic -Wzero-as-null-pointer-constant" )
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
     endif()
-else()
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic -Wzero-as-null-pointer-constant" )
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
 endif()
 
 # compile-time configuration variables to be linked in
