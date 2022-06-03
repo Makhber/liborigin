@@ -79,6 +79,9 @@ OriginAnyParser::OriginAnyParser(const string &fileName)
       igraph(-1),
       ilayer(-1)
 {
+    windowsCount = 0;
+    fileVersion = 0;
+    buildVersion = 0;
 }
 
 bool OriginAnyParser::parse()
@@ -893,25 +896,24 @@ void OriginAnyParser::readProjectTree()
 unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent, unsigned int depth)
 {
     LOG_PRINT(logfile, "readFolderTree()\n")
-    unsigned int fle_header_size = 0, fle_eofh_size = 0, fle_name_size = 0, fle_prop_size = 0;
 
     // folder header size, data, end mark
-    fle_header_size = readObjectSize();
+    unsigned int fle_header_size = readObjectSize();
     string fle_header = readObjectAsString(fle_header_size);
-    fle_eofh_size = readObjectSize(); // (usually 0)
+    unsigned int fle_eofh_size = readObjectSize(); // (usually 0)
     if (fle_eofh_size != 0) {
         LOG_PRINT(logfile, "Wrong end of folder header mark")
     }
 
     // folder name size
-    fle_name_size = readObjectSize();
+    unsigned int fle_name_size = readObjectSize();
     curpos = file.tellg();
     string fle_name = readObjectAsString(fle_name_size);
     LOG_PRINT(logfile, "Folder name at %" PRId64 " [0x%" PRIx64 "]: %s\n", curpos, curpos,
               fle_name.c_str());
 
     // additional properties
-    fle_prop_size = readObjectSize();
+    unsigned int fle_prop_size = readObjectSize();
     for (unsigned int i = 0; i < fle_prop_size; i++) {
         unsigned int obj_size = readObjectSize();
         string obj_data = readObjectAsString(obj_size);
@@ -1253,7 +1255,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                 } else if (i == 5) {
                     LOG_PRINT(logfile, "... ")
                 }
-                spreadSheets[spread].columns[(current_col - 1)].data.push_back(value);
+                spreadSheets[spread].columns[(current_col - 1)].data.push_back(Variant(value));
             } else if ((data_type & 0x100) == 0x100) // Text&Numeric
             {
                 unsigned char c = col_data[i * valuesize];
@@ -1266,7 +1268,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                     } else if (i == 5) {
                         LOG_PRINT(logfile, "... ")
                     }
-                    spreadSheets[spread].columns[(current_col - 1)].data.push_back(value);
+                    spreadSheets[spread].columns[(current_col - 1)].data.push_back(Variant(value));
                 } else // text
                 {
                     string svaltmp = col_data.substr(i * valuesize + 2, valuesize - 2);
@@ -1281,7 +1283,8 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                     } else if (i == 5) {
                         LOG_PRINT(logfile, "... ")
                     }
-                    spreadSheets[spread].columns[(current_col - 1)].data.push_back(svaltmp);
+                    spreadSheets[spread].columns[(current_col - 1)].data.push_back(
+                            Variant(svaltmp));
                 }
             } else // text
             {
@@ -1297,7 +1300,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                 } else if (i == 5) {
                     LOG_PRINT(logfile, "... ")
                 }
-                spreadSheets[spread].columns[(current_col - 1)].data.push_back(svaltmp);
+                spreadSheets[spread].columns[(current_col - 1)].data.push_back(Variant(svaltmp));
             }
         }
         LOG_PRINT(logfile, "\n\n")
