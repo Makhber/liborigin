@@ -21,7 +21,7 @@ jobs:
           make -j$(nproc) -C build
 
   MSVC:
-    name: Windows MSVC
+    name: MSVC SHARED=${{ matrix.shared }}
     runs-on: windows-2022
     strategy:
       fail-fast: false
