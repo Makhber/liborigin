@@ -17,7 +17,8 @@ namespace endianfstream {
 class ORIGIN_EXPORT iendianfstream : public std::ifstream
 {
 public:
-    iendianfstream(const char *_Filename, std::ios_base::openmode _Mode = std::ios_base::in)
+    explicit iendianfstream(const char *_Filename,
+                            std::ios_base::openmode _Mode = std::ios_base::in)
         : std::ifstream(_Filename, _Mode)
     {
         short word = 0x4321;

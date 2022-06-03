@@ -277,8 +277,8 @@ public:
     const char *as_string() const { return m_string; }
 
     Variant() { }
-    Variant(const double d) : m_double(d) { }
-    Variant(const std::string &s) : m_type(V_STRING) { asgString(s.c_str()); }
+    explicit Variant(const double d) : m_double(d) { }
+    explicit Variant(const std::string &s) : m_type(V_STRING) { asgString(s.c_str()); }
 
     Variant(const Variant &v) : m_type(v.m_type)
     {
