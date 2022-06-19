@@ -45,7 +45,6 @@ if( PROJECT_IS_TOP_LEVEL )
         endif()
     else()
         set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic -Wzero-as-null-pointer-constant" )
-        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
     endif()
 endif()
 
