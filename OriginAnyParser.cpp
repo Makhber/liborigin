@@ -113,18 +113,24 @@ bool OriginAnyParser::parse()
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
 
     // get dataset list
+#ifdef GENERATE_CODE_FOR_LOG
     unsigned int dataset_list_size = 0;
+#endif
     objectIndex = 0; // use it to count DataSets
 
     LOG_PRINT(logfile, "Reading Data sets ...\n")
     while (true) {
         if (!readDataSetElement())
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         dataset_list_size++;
+#endif
     }
     if (parseError > 1)
         return false;
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, " ... done. Data sets: %d\n", dataset_list_size)
+#endif
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
@@ -138,31 +144,43 @@ bool OriginAnyParser::parse()
         }
     }
 
+#ifdef GENERATE_CODE_FOR_LOG
     // get window list
     unsigned int window_list_size = 0;
+#endif
     objectIndex = 0; // reset it to count Windows (except Notes)
 
     LOG_PRINT(logfile, "Reading Windows ...\n")
     while (true) {
         if (!readWindowElement())
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         window_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, " ... done. Windows: %d\n", window_list_size)
+#endif
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
 
+#ifdef GENERATE_CODE_FOR_LOG
     // get parameter list
     unsigned int parameter_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "Reading Parameters ...\n")
     while (true) {
         if (!readParameterElement())
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         parameter_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, " ... done. Parameters: %d\n", parameter_list_size)
+#endif
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
@@ -170,17 +188,22 @@ bool OriginAnyParser::parse()
     // Note windows were added between version >4.141 and 4.210,
     // i.e., with Release 5.0
     if (curpos < d_file_size) {
+#ifdef GENERATE_CODE_FOR_LOG
         // get note windows list
         unsigned int note_list_size = 0;
-
+#endif
         LOG_PRINT(logfile, "Reading Note windows ...\n")
         objectIndex = 0; // reset it to count Notes
         while (true) {
             if (!readNoteElement())
                 break;
+#ifdef GENERATE_CODE_FOR_LOG
             note_list_size++;
+#endif
         }
+#ifdef GENERATE_CODE_FOR_LOG
         LOG_PRINT(logfile, " ... done. Note windows: %d\n", note_list_size)
+#endif
         curpos = file.tellg();
         LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
                   curpos, d_file_size)
@@ -500,60 +523,82 @@ bool OriginAnyParser::readLayerElement()
         LOG_PRINT(logfile, "   ... done. Annotations: %d\n", annotation_list_size)
     }
 
+#ifdef GENERATE_CODE_FOR_LOG
     // get curve list
     unsigned int curve_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "   Reading Curves ...\n")
     while (true) {
         if (!readCurveElement())
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         curve_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, "   ... done. Curves: %d\n", curve_list_size)
 
     // get axisbreak list
     unsigned int axisbreak_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "   Reading Axis breaks ...\n")
     while (true) {
         if (!readAxisBreakElement())
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         axisbreak_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, "   ... done. Axis breaks: %d\n", axisbreak_list_size)
 
     // get x axisparameter list
     unsigned int axispar_x_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "   Reading x-Axis parameters ...\n")
     while (true) {
         if (!readAxisParameterElement(1))
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         axispar_x_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, "   ... done. x-Axis parameters: %d\n", axispar_x_list_size)
 
     // get y axisparameter list
     unsigned int axispar_y_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "   Reading y-Axis parameters ...\n")
     while (true) {
         if (!readAxisParameterElement(2))
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         axispar_y_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, "   ... done. y-Axis parameters: %d\n", axispar_y_list_size)
 
     // get z axisparameter list
     unsigned int axispar_z_list_size = 0;
+#endif
 
     LOG_PRINT(logfile, "   Reading z-Axis parameters ...\n")
     while (true) {
         if (!readAxisParameterElement(3))
             break;
+#ifdef GENERATE_CODE_FOR_LOG
         axispar_z_list_size++;
+#endif
     }
+#ifdef GENERATE_CODE_FOR_LOG
     LOG_PRINT(logfile, "   ... done. z-Axis parameters: %d\n", axispar_z_list_size)
+#endif
 
     curpos = file.tellg();
     LOG_PRINT(logfile, "  layer ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
