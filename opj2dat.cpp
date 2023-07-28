@@ -1,9 +1,8 @@
 /***************************************************************************
     File                 : opj2dat.cpp
     --------------------------------------------------------------------
-    Copyright            : (C) 2008 Stefan Gerlach
+    Copyright            : (C) 2008 Stefan Gerlach <stefan.gerlach@uni.kn>
                            (C) 2017 Miquel Garriga
-    Email (use @ for *)  : stefan.gerlach*uni-konstanz.de
     Description          : Origin project converter
 
  ***************************************************************************/
