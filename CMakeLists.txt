@@ -78,7 +78,7 @@ if (BUILD_STATIC_LIBS)
     add_library (origin_static STATIC $<TARGET_OBJECTS:origin>)
     set_target_properties(origin_static PROPERTIES OUTPUT_NAME "origin" )
     install( TARGETS origin_static
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 endif ()
@@ -100,6 +100,7 @@ if (BUILD_SHARED_LIBS)
     install( TARGETS origin_shared
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 endif ()
 
