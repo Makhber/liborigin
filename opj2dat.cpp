@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     cout << "number of datasets     = " << opj.datasetCount() << endl;
     cout << "number of spreadsheets = " << opj.spreadCount() << endl;
-    cout << "number of matrixes     = " << opj.matrixCount() << endl;
+    cout << "number of matrices     = " << opj.matrixCount() << endl;
     cout << "number of excels       = " << opj.excelCount() << endl;
     cout << "number of functions    = " << opj.functionCount() << endl;
     cout << "number of graphs       = " << opj.graphCount() << endl;
