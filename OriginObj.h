@@ -679,9 +679,9 @@ struct GraphCurve
         Pie = 225,
         Contour = 226,
         Unknown = 230,
-        ErrorBar = 231,
+        ErrorBar = 231, // yEr+-
         TextPlot = 232,
-        XErrorBar = 233,
+        XErrorBar = 233, // xEr+-
         SurfaceColorMap = 236,
         SurfaceColorFill = 237,
         SurfaceWireframe = 238,
