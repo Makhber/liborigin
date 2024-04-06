@@ -66,8 +66,8 @@ public:
     std::vector<Origin::Note> notes;
     tree<Origin::ProjectNode> projectTree;
     std::string resultsLog;
-    unsigned int windowsCount;
-    unsigned int fileVersion, buildVersion;
+    unsigned int windowsCount{ 0 };
+    unsigned int fileVersion{ 0 }, buildVersion{ 0 };
 };
 
 OriginParser *createOriginAnyParser(const std::string &fileName);

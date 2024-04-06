@@ -121,7 +121,7 @@ bool OriginAnyParser::parse()
     }
     if (parseError > 1)
         return false;
-    LOG_PRINT(logfile, " ... done. Data sets: %d\n", dataset_list_size)
+    LOG_PRINT(logfile, " ... done. Data sets: %u\n", dataset_list_size)
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
@@ -145,7 +145,7 @@ bool OriginAnyParser::parse()
             break;
         window_list_size++;
     }
-    LOG_PRINT(logfile, " ... done. Windows: %d\n", window_list_size)
+    LOG_PRINT(logfile, " ... done. Windows: %u\n", window_list_size)
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
@@ -159,7 +159,7 @@ bool OriginAnyParser::parse()
             break;
         parameter_list_size++;
     }
-    LOG_PRINT(logfile, " ... done. Parameters: %d\n", parameter_list_size)
+    LOG_PRINT(logfile, " ... done. Parameters: %u\n", parameter_list_size)
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
               curpos, d_file_size)
@@ -177,7 +177,7 @@ bool OriginAnyParser::parse()
                 break;
             note_list_size++;
         }
-        LOG_PRINT(logfile, " ... done. Note windows: %d\n", note_list_size)
+        LOG_PRINT(logfile, " ... done. Note windows: %u\n", note_list_size)
         curpos = file.tellg();
         LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "], file size %" PRId64 "\n", curpos,
                   curpos, d_file_size)
@@ -452,7 +452,7 @@ bool OriginAnyParser::readWindowElement()
             break;
         layer_list_size++;
     }
-    LOG_PRINT(logfile, " ... done. Layers: %d\n", layer_list_size)
+    LOG_PRINT(logfile, " ... done. Layers: %u\n", layer_list_size)
     curpos = file.tellg();
     LOG_PRINT(logfile, "window ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
 
@@ -494,7 +494,7 @@ bool OriginAnyParser::readLayerElement()
      */
     annotation_list_size = readAnnotationList();
     if (annotation_list_size > 0) {
-        LOG_PRINT(logfile, "   ... done. Annotations: %d\n", annotation_list_size)
+        LOG_PRINT(logfile, "   ... done. Annotations: %u\n", annotation_list_size)
     }
 
     // get curve list
@@ -506,7 +506,7 @@ bool OriginAnyParser::readLayerElement()
             break;
         curve_list_size++;
     }
-    LOG_PRINT(logfile, "   ... done. Curves: %d\n", curve_list_size)
+    LOG_PRINT(logfile, "   ... done. Curves: %u\n", curve_list_size)
 
     // get axisbreak list
     unsigned int axisbreak_list_size = 0;
@@ -517,7 +517,7 @@ bool OriginAnyParser::readLayerElement()
             break;
         axisbreak_list_size++;
     }
-    LOG_PRINT(logfile, "   ... done. Axis breaks: %d\n", axisbreak_list_size)
+    LOG_PRINT(logfile, "   ... done. Axis breaks: %u\n", axisbreak_list_size)
 
     // get x axisparameter list
     unsigned int axispar_x_list_size = 0;
@@ -528,7 +528,7 @@ bool OriginAnyParser::readLayerElement()
             break;
         axispar_x_list_size++;
     }
-    LOG_PRINT(logfile, "   ... done. x-Axis parameters: %d\n", axispar_x_list_size)
+    LOG_PRINT(logfile, "   ... done. x-Axis parameters: %u\n", axispar_x_list_size)
 
     // get y axisparameter list
     unsigned int axispar_y_list_size = 0;
@@ -539,7 +539,7 @@ bool OriginAnyParser::readLayerElement()
             break;
         axispar_y_list_size++;
     }
-    LOG_PRINT(logfile, "   ... done. y-Axis parameters: %d\n", axispar_y_list_size)
+    LOG_PRINT(logfile, "   ... done. y-Axis parameters: %u\n", axispar_y_list_size)
 
     // get z axisparameter list
     unsigned int axispar_z_list_size = 0;
@@ -550,7 +550,7 @@ bool OriginAnyParser::readLayerElement()
             break;
         axispar_z_list_size++;
     }
-    LOG_PRINT(logfile, "   ... done. z-Axis parameters: %d\n", axispar_z_list_size)
+    LOG_PRINT(logfile, "   ... done. z-Axis parameters: %u\n", axispar_z_list_size)
 
     curpos = file.tellg();
     LOG_PRINT(logfile, "  layer ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
@@ -873,7 +873,7 @@ void OriginAnyParser::readProjectTree()
             projectTree.insert(projectTree.begin(), ProjectNode("", ProjectNode::Folder)),
             pte_depth);
     if (rootfolder > 0) {
-        LOG_PRINT(logfile, "Number of files at root: %d\n", rootfolder)
+        LOG_PRINT(logfile, "Number of files at root: %u\n", rootfolder)
     }
 
     // epilogue (should be zero)
@@ -934,7 +934,7 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     stmp.str(fle_nfiles);
     unsigned int number_of_files = 0;
     GET_INT(stmp, number_of_files)
-    LOG_PRINT(logfile, "%d\n", number_of_files)
+    LOG_PRINT(logfile, "%u\n", number_of_files)
 
     for (unsigned int i = 0; i < number_of_files; i++) {
         readProjectLeaf(current_folder);
@@ -951,13 +951,13 @@ unsigned int OriginAnyParser::readFolderTree(tree<ProjectNode>::iterator parent,
     stmp.str(fle_nfolders);
     unsigned int number_of_folders = 0;
     GET_INT(stmp, number_of_folders)
-    LOG_PRINT(logfile, "%d\n", number_of_folders)
+    LOG_PRINT(logfile, "%u\n", number_of_folders)
 
     for (unsigned int i = 0; i < number_of_folders; i++) {
         depth++;
         unsigned int files_in_subfolder = readFolderTree(current_folder, depth);
         if (files_in_subfolder > 0) {
-            LOG_PRINT(logfile, "Number of files in subfolder: %d\n", files_in_subfolder)
+            LOG_PRINT(logfile, "Number of files in subfolder: %u\n", files_in_subfolder)
         }
         depth--;
     }
@@ -1023,7 +1023,7 @@ void OriginAnyParser::readAttachmentList()
         unsigned int att_mark = 0, number_of_atts = 0, iattno = 0, att_data_size = 0;
         GET_INT(stmp, att_mark) // should be 4096
         GET_INT(stmp, number_of_atts)
-        LOG_PRINT(logfile, " with %d attachments.\n", number_of_atts)
+        LOG_PRINT(logfile, " with %u attachments.\n", number_of_atts)
 
         for (unsigned int i = 0; i < number_of_atts; i++) {
             /* Header is a group of 7 integers followed by \n
@@ -1151,7 +1151,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
         LOG_PRINT(logfile, "  NOTE: alternative signature determination\n")
         signature = col_header[0x18];
     }
-    LOG_PRINT(logfile, "  signature %d [0x%X], valuesize %d size %d ", signature, signature,
+    LOG_PRINT(logfile, "  signature %d [0x%X], valuesize %d size %u ", signature, signature,
               valuesize, col_data_size)
 
     vector<Origin::SpreadSheet>::difference_type spread = 0;
@@ -1238,10 +1238,10 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                     spreadSheets[spread].sheets = sheet;
             }
         }
-        LOG_PRINT(logfile, "  data index %d, valuesize %d, ", objectIndex, valuesize)
+        LOG_PRINT(logfile, "  data index %u, valuesize %d, ", objectIndex, valuesize)
 
         unsigned int nr = col_data_size / valuesize;
-        LOG_PRINT(logfile, "n. of rows = %d\n\n", nr)
+        LOG_PRINT(logfile, "n. of rows = %u\n\n", nr)
 
         spreadSheets[spread].maxRows < nr ? spreadSheets[spread].maxRows = nr : 0;
         stmp.str(col_data);
@@ -1276,7 +1276,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                     if (svaltmp.find(0x0E)
                         != string::npos) { // try find non-printable symbol - garbage test
                         svaltmp = string();
-                        LOG_PRINT(logfile, "Non printable symbol found, place 1 for i=%d\n", i)
+                        LOG_PRINT(logfile, "Non printable symbol found, place 1 for i=%u\n", i)
                     }
                     if ((i < 5) || (i > (nr - 5))) {
                         LOG_PRINT(logfile, "\"%s\" ", svaltmp.c_str())
@@ -1292,7 +1292,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
                 if (svaltmp.find(0x0E)
                     != string::npos) { // try find non-printable symbol - garbage test
                     svaltmp = string();
-                    LOG_PRINT(logfile, "Non printable symbol found, place 2 for i=%d\n", i)
+                    LOG_PRINT(logfile, "Non printable symbol found, place 2 for i=%u\n", i)
                 }
                 if ((i < 5) || (i > (nr - 5))) {
                     LOG_PRINT(logfile, "\"%s\" ", svaltmp.c_str())
@@ -1447,10 +1447,10 @@ void OriginAnyParser::getWindowProperties(Origin::Window &window, const string &
 
     window.hidden = ((c & 0x08) != 0);
     if (window.hidden) {
-        LOG_PRINT(logfile, "			WINDOW %d NAME : %s	is hidden\n", objectIndex,
+        LOG_PRINT(logfile, "			WINDOW %u NAME : %s	is hidden\n", objectIndex,
                   window.name.c_str());
     } else {
-        LOG_PRINT(logfile, "			WINDOW %d NAME : %s	is not hidden\n",
+        LOG_PRINT(logfile, "			WINDOW %u NAME : %s	is not hidden\n",
                   objectIndex, window.name.c_str());
     }
 
@@ -1473,7 +1473,7 @@ void OriginAnyParser::getWindowProperties(Origin::Window &window, const string &
     if (wde_header_size > 0xC3) {
         window.label = wde_header.substr(0xC3).c_str();
         window.label = window.label.substr(0, window.label.find("@${"));
-        LOG_PRINT(logfile, "			WINDOW %d LABEL: %s\n", objectIndex,
+        LOG_PRINT(logfile, "			WINDOW %u LABEL: %s\n", objectIndex,
                   window.label.c_str());
     }
 
@@ -3089,8 +3089,8 @@ void OriginAnyParser::getColorMap(ColorMap &cmap, const string &cmapdata, unsign
     unsigned int minDataSize = cmoffset + 0x114 + (colorMapSize + 2) * 0x38;
     if (minDataSize > cmapdatasz) {
         LOG_PRINT(logfile,
-                  "WARNING: Too few data while getting ColorMap. Needed: at least %d bytes. Have: "
-                  "%d bytes.\n",
+                  "WARNING: Too few data while getting ColorMap. Needed: at least %u bytes. Have: "
+                  "%u bytes.\n",
                   minDataSize, cmapdatasz)
         return;
     }
@@ -3216,7 +3216,7 @@ void OriginAnyParser::getProjectLeafProperties(tree<ProjectNode>::iterator curre
     GET_INT(stmp, file_type);
     GET_INT(stmp, file_object_id);
 
-    LOG_PRINT(logfile, "file_type=%d file_object_id=%d\n", file_type, file_object_id);
+    LOG_PRINT(logfile, "file_type=%u file_object_id=%u\n", file_type, file_object_id);
     if (file_type == 0x100000) { // Note window
         LOG_PRINT(logfile, "notes.size()=%d\n", (int)notes.size());
         if ((file_object_id < notes.size()) && (notes.size() > 0)) {
