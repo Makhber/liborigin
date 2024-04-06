@@ -243,9 +243,9 @@ unsigned int OriginAnyParser::readObjectSize()
 
 string OriginAnyParser::readObjectAsString(unsigned int size)
 {
-    char c;
     // read a size-byte blob of data followed by '\n'
     if (size > 0) {
+        char c;
         // get a string large enough to hold the result, initialize it to all 0's
         string blob = string(size, '\0');
         // read data into that string
@@ -1154,9 +1154,6 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
     LOG_PRINT(logfile, "  signature %d [0x%X], valuesize %d size %d ", signature, signature,
               valuesize, col_data_size)
 
-    size_t current_col = 1; //, nr = 0, nbytes = 0;
-    static unsigned int col_index = 0;
-    unsigned int current_sheet = 0;
     vector<Origin::SpreadSheet>::difference_type spread = 0;
 
     if (column_name.empty()) { // Matrix or function
@@ -1203,6 +1200,10 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
             getMatrixValues(col_data, col_data_size, data_type, data_type_u, valuesize, mIndex);
         }
     } else {
+        size_t current_col = 1; //, nr = 0, nbytes = 0;
+        static unsigned int col_index = 0;
+        unsigned int current_sheet = 0;
+
         if (spreadSheets.size() == 0 || findSpreadByName(name) == -1) {
             LOG_PRINT(logfile, "\n  NEW SPREADSHEET\n");
             current_col = 1;
@@ -1230,8 +1231,7 @@ bool OriginAnyParser::getColumnInfoAndData(const string &col_header, unsigned in
             if (sheet > 1) {
                 spreadSheets[spread].columns.back().name = column_name;
 
-                if (current_sheet != (sheet - 1))
-                    current_sheet = sheet - 1;
+                current_sheet = sheet - 1;
 
                 spreadSheets[spread].columns.back().sheet = current_sheet;
                 if (spreadSheets[spread].sheets < sheet)
@@ -1490,8 +1490,8 @@ void OriginAnyParser::getWindowProperties(Origin::Window &window, const string &
         GET_SHORT(stmp, graphs[igraph].width)
         GET_SHORT(stmp, graphs[igraph].height)
 
-        unsigned char c = wde_header[0x38];
-        graphs[igraph].connectMissingData = ((c & 0x40) != 0);
+        unsigned char co = wde_header[0x38];
+        graphs[igraph].connectMissingData = ((co & 0x40) != 0);
 
         string templateName = wde_header.substr(0x45, 20).c_str();
         graphs[igraph].templateName = templateName;
@@ -1835,9 +1835,8 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
                 end.y = (y1 == y2) ? r.top + 0.5 * r.height()
                                    : r.top + (y2 - miny) / dy * r.height();
             }
-            unsigned char arrows = 0;
             if (andt1sz > 0x11) {
-                arrows = andt1[0x11];
+                unsigned char arrows = andt1[0x11];
                 switch (arrows) {
                 case 0:
                     begin.shapeType = 0;
@@ -2021,18 +2020,18 @@ void OriginAnyParser::getAnnotationProperties(const string &anhd, unsigned int a
             double start;
             GET_DOUBLE(stmp, start)
             stmp.str(andt1.substr(0x1A));
-            double width;
-            GET_DOUBLE(stmp, width)
-            glayer.vLine = start + 0.5 * width;
+            double vLineWidth;
+            GET_DOUBLE(stmp, vLineWidth)
+            glayer.vLine = start + 0.5 * vLineWidth;
             glayer.imageProfileTool = 2;
         } else if (sec_name == "HLine") {
             stmp.str(andt1.substr(0x12));
             double start;
             GET_DOUBLE(stmp, start)
             stmp.str(andt1.substr(0x22));
-            double width;
-            GET_DOUBLE(stmp, width)
-            glayer.hLine = start + 0.5 * width;
+            double hLineWidth;
+            GET_DOUBLE(stmp, hLineWidth)
+            glayer.hLine = start + 0.5 * hLineWidth;
             glayer.imageProfileTool = 2;
         } else if (sec_name == "vline") {
             stmp.str(andt1.substr(0x20));
@@ -2169,8 +2168,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
         }
         int col_index = findColumnByName((int)ispread, name);
         if (col_index != -1) {
-            if (spreadSheets[ispread].columns[col_index].name != name)
-                spreadSheets[ispread].columns[col_index].name = name;
+            spreadSheets[ispread].columns[col_index].name = name;
 
             SpreadColumn::ColumnType type;
             switch (c) {
@@ -2705,7 +2703,7 @@ void OriginAnyParser::getCurveProperties(const string &cvehd, unsigned int cvehd
             h = cvehd[0x136];
             curve.symbolThickness = (h == 255 ? 1 : h);
             curve.pointOffset = cvehd[0x137];
-            h = cvehd[0x138];
+            // h = cvehd[0x138];
             curve.symbolFillTransparency = cvehd[0x139];
 
             h = cvehd[0x143];
@@ -2763,9 +2761,9 @@ void OriginAnyParser::getAxisParameterProperties(const string &apdata, unsigned 
 {
     LOG_PRINT(logfile, "getAxisParameterProperties()\n")
     istringstream stmp;
-    static int iaxispar = 0;
 
     if (igraph != -1) {
+        static int iaxispar = 0;
         unsigned char h = 0;
         unsigned short w = 0;
 
@@ -3097,9 +3095,8 @@ void OriginAnyParser::getColorMap(ColorMap &cmap, const string &cmapdata, unsign
         return;
     }
 
-    unsigned int lvl_offset = 0;
     for (unsigned int i = 0; i < colorMapSize + 3; ++i) {
-        lvl_offset = cmoffset + 0x114 + i * 0x38;
+        unsigned int lvl_offset = cmoffset + 0x114 + i * 0x38;
         ColorMapLevel level;
 
         level.fillPattern = cmapdata[lvl_offset];

@@ -103,9 +103,8 @@ int main(int argc, char *argv[])
                 for (size_t j = 0; j < columnCount; j++) {
                     if (i < (int)spread.columns[j].data.size()) {
                         Origin::variant value(spread.columns[j].data[i]);
-                        double v = 0.;
                         if (value.type() == Origin::variant::V_DOUBLE) {
-                            v = value.as_double();
+                            double v = value.as_double();
                             if (v != _ONAN) {
                                 outf << v << "; ";
                             } else {
