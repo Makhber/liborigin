@@ -3,7 +3,7 @@
     OriginAnyParser.cpp
 
     SPDX-FileCopyrightText: 2017 Miquel Garriga <gbmiquel@gmail.com>
-    SPDX-FileCopyrightText: 2021 Stefan Gerlach <stefan.gerlach@uni.kn>
+    SPDX-FileCopyrightText: 2021-2024 Stefan Gerlach <stefan.gerlach@uni.kn>
 
     SPDX-License-Identifier: GPL-3.0-or-later
 
