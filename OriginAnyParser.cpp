@@ -111,7 +111,7 @@ bool OriginAnyParser::parse()
         return false;
     curpos = file.tellg();
     LOG_PRINT(logfile, "Now at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
-
+#ifdef GENERATE_CODE_FOR_LOG
     // get dataset list
     unsigned int dataset_list_size = 0;
     objectIndex = 0; // use it to count DataSets
@@ -208,7 +208,6 @@ bool OriginAnyParser::parse()
     if (curpos >= d_file_size)
         LOG_PRINT(logfile, "Now at end of file\n")
 
-#ifdef GENERATE_CODE_FOR_LOG
     fclose(logfile);
 #endif // GENERATE_CODE_FOR_LOG
 
@@ -499,7 +498,7 @@ bool OriginAnyParser::readLayerElement()
     if (annotation_list_size > 0) {
         LOG_PRINT(logfile, "   ... done. Annotations: %u\n", annotation_list_size)
     }
-
+#ifdef GENERATE_CODE_FOR_LOG
     // get curve list
     unsigned int curve_list_size = 0;
 
@@ -557,6 +556,7 @@ bool OriginAnyParser::readLayerElement()
 
     curpos = file.tellg();
     LOG_PRINT(logfile, "  layer ends at %" PRId64 " [0x%" PRIx64 "]\n", curpos, curpos)
+#endif
 
     return true;
 }
