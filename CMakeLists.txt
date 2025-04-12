@@ -1,5 +1,5 @@
 # CMakeLists.txt for liborigin
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.22)
 
 project( liborigin
     VERSION 3.0.3
